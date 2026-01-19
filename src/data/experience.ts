@@ -40,5 +40,20 @@ export const experience = [
         tags: ["Accenture", "Oracle Documaker", "Insurance Domain"],
         year: "Jan 2013 – Jun 2016",
         technologies: ["Oracle Documaker", "SQL", "XML", "Mainframe", "C++"]
+    },
+    {
+        title: "Interactive Resume & Portfolio",
+        slug: "resume-project",
+        description: "This portfolio site itself. A modern, accessible, and performant web application built with Astro and React. Features dynamic routing, clean architecture, and Cloudflare deployment.",
+        details: [
+            "Built with Astro for zero-JavaScript default performance and efficient static site generation.",
+            "Integrated React for interactive components where necessary (e.g., this workflow visualization).",
+            "Deployed via Cloudflare Pages for global edge delivery.",
+            "Implemented a clean, maintainable component architecture."
+        ],
+        tags: ["Astro", "React", "Cloudflare", "Tailwind"],
+        link: "https://github.com/kiranprasad2001/resume",
+        year: "2024",
+        technologies: ["Astro", "React", "TypeScript", "Tailwind CSS"]
     }
 ];
