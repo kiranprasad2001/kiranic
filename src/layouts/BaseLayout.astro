@@ -2,9 +2,10 @@
 interface Props {
 	title: string;
     description?: string;
+    keywords?: string;
 }
 
-const { title, description = "Architecting Documents & Cloud Systems." } = Astro.props;
+const { title, description = "Architecting Documents & Cloud Systems.", keywords } = Astro.props;
 ---
 
 <!doctype html>
@@ -12,6 +13,7 @@ const { title, description = "Architecting Documents & Cloud Systems." } = Astro
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
+        {keywords && <meta name="keywords" content={keywords} />}
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />

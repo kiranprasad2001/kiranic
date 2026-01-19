@@ -2,99 +2,154 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-import { Cloud, Server, Box, Terminal, Database, Code, GitBranch } from 'lucide-react';
+import ProjectCard from '../components/ProjectCard.astro';
+import { Cloud, Server, Box, Terminal, Database, Code, GitBranch, ArrowRight, User } from 'lucide-react';
+import { experience } from '../data/experience';
 
-const title = "Home";
+const title = "Digital Transformation & Cloud Strategy";
+const description = "Expert in Digital Transformation, CCM (Customer Communication Management), ECM (Enterprise Content Management), and CXM strategies. Modernizing legacy systems for banking and insurance.";
+const keywords = "Digital Transformation, CCM, ECM, CXM, Cloud Migration, SmartComms, Quadient, AWS, DevOps";
+
+// Select specific work items for the featured section
+const featuredWork = experience.filter(item => 
+    item.slug === 'digital-transformation-lead' || 
+    item.slug === 'technical-lead-cognizant'
+);
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} description={description} keywords={keywords}>
     <Navbar />
     
-    <main class="flex-grow">
-        <!-- Hero Section -->
-        <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-            <div class="max-w-3xl">
-                <h1 class="text-4xl md:text-6xl font-bold tracking-tight text-slate-900 dark:text-white mb-6">
-                    Digital Transformation <br class="hidden md:block"/>& Product Strategy.
+    <main class="flex-grow overflow-hidden">
+        
+        {/* HERO SECTION */}
+        <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+            {/* Background Blobs - synchronized with AI Slop page style */}
+            <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+                <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-100/40 dark:bg-blue-900/20 rounded-full blur-[100px] animate-pulse"></div>
+                <div class="absolute bottom-[10%] left-[-10%] w-[400px] h-[400px] bg-purple-100/40 dark:bg-purple-900/10 rounded-full blur-[100px]"></div>
+            </div>
+
+            <div class="max-w-4xl relative z-10">
+                <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800">
+                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400 tracking-wide uppercase">
+                        ECM • CCM • CXM • Cloud
+                    </span>
+                </div>
+
+                <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-8 leading-tight">
+                    Architecting the Future of <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Digital Experience.</span>
                 </h1>
-                <p class="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
-                    13+ years experience. Modernizing legacy infrastructure and orchestrating cloud migration initiatives. 
-                    I bridge the gap between complex regulatory requirements and modern cloud architecture.
+                
+                <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mb-10">
+                    13+ years transforming complex legacy infrastructure into agile, cloud-native ecosystems. 
+                    Specializing in regulatory communications and enterprise content strategies.
                 </p>
-                <div class="flex gap-4">
+
+                <div class="flex flex-wrap gap-4">
                     <a 
                         href="/work" 
-                        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                        class="px-8 py-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-lg transition-all shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 group"
                     >
-                        View Work
+                        View Case Studies
+                        <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </a>
                     <a 
                         href="/lab" 
-                        class="inline-flex items-center justify-center px-6 py-3 border border-slate-300 dark:border-slate-700 text-base font-medium rounded-md text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+                        class="px-8 py-4 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
                     >
-                        Explore Lab
+                        Visit the Lab
                     </a>
                 </div>
             </div>
         </section>
 
-        <!-- Tech Grid Section -->
-        <section class="bg-slate-50 dark:bg-slate-800/50 py-20">
+        {/* SELECTED WORK SECTION */}
+        <section class="py-20 bg-white dark:bg-slate-900/50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-12">Technical Stack</h2>
+                <div class="flex justify-between items-end mb-12">
+                     <div>
+                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Selected Work</h2>
+                        <p class="text-slate-500 dark:text-slate-400">Key enterprise initiatives and transformations.</p>
+                    </div>
+                    <a href="/work" class="hidden md:flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium hover:underline">
+                        View all <ArrowRight class="w-4 h-4" />
+                    </a>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                     {featuredWork.map(item => (
+                        <ProjectCard {...item} />
+                    ))}
+                </div>
+                 
+                 <div class="mt-8 text-center md:hidden">
+                    <a href="/work" class="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center gap-1">
+                        View all projects <ArrowRight class="w-4 h-4" />
+                    </a>
+                 </div>
+            </div>
+        </section>
+
+        {/* TECH STACK SECTION */}
+        <section class="py-20 bg-slate-50 dark:bg-slate-800/50 border-y border-slate-200/50 dark:border-slate-700/50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-12 text-center">Enterprise Technology Stack</h2>
                 
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-                    {/* AWS */}
-                    <div class="flex flex-col items-center gap-4 p-4 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                        <div class="p-3 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform">
-                            <Cloud className="h-8 w-8" />
+                    {[
+                        { icon: Cloud, label: "AWS", color: "text-orange-500", bg: "bg-orange-50 dark:bg-orange-900/20" },
+                        { icon: GitBranch, label: "Jenkins", color: "text-red-500", bg: "bg-red-50 dark:bg-red-900/20" },
+                        { icon: Server, label: "Quadient", color: "text-green-500", bg: "bg-green-50 dark:bg-green-900/20" },
+                        { icon: Database, label: "SmartComms", color: "text-purple-500", bg: "bg-purple-50 dark:bg-purple-900/20" },
+                        { icon: Box, label: "Docker", color: "text-sky-500", bg: "bg-sky-50 dark:bg-sky-900/20" },
+                        { icon: Terminal, label: "Python", color: "text-yellow-500", bg: "bg-yellow-50 dark:bg-yellow-900/20" }
+                    ].map(tech => (
+                        <div class="flex flex-col items-center gap-4 p-4 rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-all hover:scale-105 group cursor-default">
+                            <div class={`p-3 rounded-full ${tech.bg} ${tech.color} group-hover:scale-110 transition-transform`}>
+                                <tech.icon class="h-8 w-8" />
+                            </div>
+                            <span class="font-medium text-slate-700 dark:text-slate-300">{tech.label}</span>
                         </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">AWS</span>
-                    </div>
+                    ))}
+                </div>
+            </div>
+        </section>
 
-                    {/* Jenkins (replaced CDK) */}
-                    <div class="flex flex-col items-center gap-4 p-4 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                        <div class="p-3 rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform">
-                            <GitBranch className="h-8 w-8" />
-                        </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">Jenkins</span>
-                    </div>
+        {/* ABOUT ME SECTION */}
+        <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-blue-600 dark:bg-blue-900 rounded-3xl p-8 md:p-16 relative overflow-hidden text-center md:text-left">
+                {/* Decorative background */}
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
 
-                    {/* Quadient */}
-                    <div class="flex flex-col items-center gap-4 p-4 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                        <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform">
-                            <Server className="h-8 w-8" />
+                <div class="relative z-10 flex flex-col md:flex-row items-center gap-12">
+                    <div class="flex-shrink-0">
+                         <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/20 backdrop-blur-sm p-2">
+                            <div class="w-full h-full rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
+                                <User class="w-16 h-16 text-slate-400" />
+                                {/* TODO: Replace with actual image <img src="/kiran-profile.jpg" alt="Kiran Prasad" class="w-full h-full object-cover" /> */}
+                            </div>
                         </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">Quadient</span>
                     </div>
-
-                    {/* SmartComms */}
-                    <div class="flex flex-col items-center gap-4 p-4 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                        <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
-                            <Database className="h-8 w-8" />
-                        </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">SmartComms</span>
-                    </div>
-
-                    {/* Docker */}
-                    <div class="flex flex-col items-center gap-4 p-4 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                        <div class="p-3 rounded-full bg-sky-100 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 group-hover:scale-110 transition-transform">
-                            <Box className="h-8 w-8" />
-                        </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">Docker</span>
-                    </div>
-
-                    {/* Python */}
-                    <div class="flex flex-col items-center gap-4 p-4 rounded-lg hover:bg-white dark:hover:bg-slate-800 transition-colors group">
-                        <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 group-hover:scale-110 transition-transform">
-                            <Terminal className="h-8 w-8" />
-                        </div>
-                        <span class="font-medium text-slate-700 dark:text-slate-300">Python</span>
+                    
+                    <div class="flex-grow">
+                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">About Me</h2>
+                        <p class="text-blue-100 text-lg leading-relaxed mb-6 max-w-2xl">
+                            I am a technologist who speaks the language of business. My passion lies in untangling the knots of legacy systems and weaving them into modern, efficient digital fabrics.
+                        </p>
+                        <p class="text-blue-100 text-lg leading-relaxed max-w-2xl">
+                            When I'm not architecting cloud solutions or optimizing CCM workflows, you can find me experimenting with local LLMs or building useful tools for the community.
+                        </p>
                     </div>
                 </div>
             </div>
         </section>
+
     </main>
 
     <Footer />
 </BaseLayout>
+
+{/* Helper component for Tech Stack */}
+{/* Using an inline component or mapping is fine in Astro */}
