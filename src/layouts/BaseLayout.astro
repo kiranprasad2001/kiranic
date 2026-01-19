@@ -1,0 +1,28 @@
+---
+interface Props {
+	title: string;
+    description?: string;
+}
+
+const { title, description = "Architecting Documents & Cloud Systems." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content={description} />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title} | Kiranic</title>
+        <!-- Preload fonts or use system fonts. Using Inter from Google Fonts for 'technical' look if needed, but tailwind 'sans' stack is good enough usually. -->
+        <!-- Adding Inter via Google Fonts for specific requirement consistency -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+	</head>
+	<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-blue-500 selection:text-white">
+		<slot />
+	</body>
+</html>

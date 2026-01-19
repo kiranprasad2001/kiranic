@@ -1,0 +1,46 @@
+---
+import { ArrowUpRight } from 'lucide-react';
+
+interface Props {
+    title: string;
+    description: string;
+    tags?: string[];
+    link?: string;
+    year?: string;
+}
+
+const { title, description, tags = [], link = '#', year } = Astro.props;
+---
+
+<a 
+    href={link}
+    class="group relative block p-6 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-blue-500 dark:hover:border-blue-400 transition-all shadow-sm hover:shadow-md"
+>
+    <div class="flex justify-between items-start mb-4">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {title}
+        </h3>
+        {link !== '#' && (
+            <ArrowUpRight className="h-5 w-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+        )}
+    </div>
+
+    <p class="text-slate-600 dark:text-slate-300 mb-6 line-clamp-3">
+        {description}
+    </p>
+
+    <div class="flex items-center justify-between mt-auto">
+        <div class="flex flex-wrap gap-2">
+            {tags.map((tag) => (
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-200">
+                    {tag}
+                </span>
+            ))}
+        </div>
+        {year && (
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-mono">
+                {year}
+            </span>
+        )}
+    </div>
+</a>

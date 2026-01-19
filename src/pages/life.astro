@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const title = "Life";
+
+const lifeItems = [
+    {
+        title: "Photography",
+        description: "A gallery of moments captured with my mirrorless camera setup. Focusing on street photography and landscapes.",
+        tags: ["Fujifilm", "Sony Alpha", "Lightroom"],
+        year: "Hobby"
+    },
+    {
+        title: "French Learning",
+        description: "My journey to learning French, currently documenting my progress towards A2 level proficiency.",
+        tags: ["Language", "A2", "Journal"],
+        year: "Active"
+    },
+    {
+        title: "Cycling",
+        description: "Exploring trails and tracks on two wheels. Check out my routes and stats.",
+        tags: ["Cycling", "Strava", "Outdoors"],
+        link: "https://links.spotrot.com/",
+        year: "Active"
+    },
+    {
+        title: "HomeLab",
+        description: "Self-hosting infrastructure at home. Managing an Immich server for photo aggregation and backup.",
+        tags: ["Docker", "Immich", "Self-hosting", "Unraid"],
+        year: "Active"
+    }
+];
+---
+
+<BaseLayout title={title}>
+    <Navbar />
+    
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Life & Hobbies</h1>
+            <p class="text-slate-600 dark:text-slate-300 max-w-2xl">
+                Beyond the code: photography, languages, and tinkering with hardware.
+            </p>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {lifeItems.map(item => (
+                <ProjectCard {...item} />
+            ))}
+        </div>
+    </main>
+
+    <Footer />
+</BaseLayout>

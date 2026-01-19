@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const title = "Lab";
+
+const experiments = [
+    {
+        title: "SaaS ECM Tool (Agentic Workflow)",
+        description: "Experimental Enterprise Content Management tool powered by agentic AI workflows to semantic search and organize documents.",
+        tags: ["AI", "ECM", "Python", "LLMs"],
+        year: "In Progress"
+    },
+    {
+        title: "GTA Transit App Unified Data",
+        description: "Aggregating transit data from across the Greater Toronto Area into a unified API for real-time tracking and analytics.",
+        tags: ["Transit API", "Data Engineering", "Real-time"],
+        year: "2023"
+    },
+    {
+        title: "Local LLM Experiments",
+        description: "Researching fine-tuning and deployment optimizations for running open-weights LLMs on consumer hardware for privacy-focused tasks.",
+        tags: ["LLM", "Fine-tuning", "Privacy", "Local Inference"],
+        year: "Ongoing"
+    }
+];
+---
+
+<BaseLayout title={title}>
+    <Navbar />
+    
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+        <div class="mb-12">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">The Lab</h1>
+            <p class="text-slate-600 dark:text-slate-300 max-w-2xl">
+                My playground for side projects, research, and experiments.
+            </p>
+        </div>
+
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {experiments.map(item => (
+                <ProjectCard {...item} />
+            ))}
+        </div>
+    </main>
+
+    <Footer />
+</BaseLayout>
