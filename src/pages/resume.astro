@@ -4,11 +4,15 @@ import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 import ProjectCard from "../components/ProjectCard.astro";
 import ResumeSection from "../components/ResumeSection.astro";
-import { experience } from "../data/experience";
-import { skillData, educationData } from "../data/resume";
+import { getEntry } from 'astro:content';
 
+const resumeEntry = await getEntry('resume', 'kiran');
+const { data, render } = resumeEntry;
+const { Content } = await render();
+
+const { name, title: roleTitle, email, location, linkedin, skills, experience, education } = data;
 const title = "Resume";
-const description = "Digital Transformation & Product Strategy Leader";
+const description = roleTitle;
 ---
 
 <BaseLayout title={title} description={description}>
@@ -20,22 +24,22 @@ const description = "Digital Transformation & Product Strategy Leader";
       <h1
         class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4"
       >
-        Kiran Prasad
+        {name}
       </h1>
       <p class="text-xl text-slate-600 dark:text-slate-300">
-        Digital Transformation & Product Strategy Leader
+        {roleTitle}
       </p>
       <div
         class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-slate-500"
       >
-        <span>Toronto, Canada</span>
+        <span>{location}</span>
         <span class="hidden sm:inline">•</span>
-        <a href="mailto:kiranprasad2001@gmail.com" class="hover:text-blue-500"
-          >kiranprasad2001@gmail.com</a
+        <a href={`mailto:${email}`} class="hover:text-blue-500"
+          >{email}</a
         >
         <span class="hidden sm:inline">•</span>
         <a
-          href="https://linkedin.com/in/kiranprasad"
+          href={linkedin}
           target="_blank"
           class="hover:text-blue-500">LinkedIn</a
         >
@@ -49,22 +53,15 @@ const description = "Digital Transformation & Product Strategy Leader";
       >
         Professional Summary
       </h2>
-      <p class="text-slate-700 dark:text-slate-300 leading-relaxed">
-        Digital Transformation & Product Strategy Leader with over 13 years of
-        experience orchestrating large-scale legacy modernization and cloud
-        migration initiatives. Expert in bridging the gap between complex legacy
-        infrastructure and modern cloud architecture to drive operational
-        efficiency within Enterprise content management. Proven track record of
-        leading cross-functional teams, managing enterprise roadmaps, and
-        securing significant business value through strategic technical
-        consulting.
-      </p>
+      <div class="text-slate-700 dark:text-slate-300 leading-relaxed prose dark:prose-invert max-w-none">
+        <Content />
+      </div>
     </div>
 
     {/* Skills Section */}
-    <ResumeSection title={skillData.title}>
+    <ResumeSection title="Core Competencies & Skills">
       {
-        skillData.skills.map((group) => (
+        skills.map((group) => (
           <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
             <h3 class="font-semibold text-lg mb-3 text-blue-600 dark:text-blue-400">
               {group.category}
@@ -96,7 +93,7 @@ const description = "Digital Transformation & Product Strategy Leader";
     {/* Education Section */}
     <ResumeSection title="Education & Certifications">
       {
-        educationData.map((edu) => (
+        education.map((edu) => (
           <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
             <h3 class="font-bold text-slate-900 dark:text-white">
               {edu.institution}

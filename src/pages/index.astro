@@ -5,19 +5,19 @@ import Footer from '../components/Footer.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import TechStack from '../components/TechStack.astro';
 import { ArrowRight } from 'lucide-react';
-import { experience } from '../data/experience';
+import { getEntry, getCollection } from 'astro:content';
 
 const title = "Digital Transformation & Cloud Strategy";
 const description = "Expert in Digital Transformation, CCM (Customer Communication Management), ECM (Enterprise Content Management), and CXM strategies. Modernizing legacy systems for banking and insurance.";
 const keywords = "Digital Transformation, CCM, ECM, CXM, Cloud Migration, SmartComms, Quadient, AWS, DevOps";
 
 // Select specific work items for the featured section
-const featuredWork = experience.filter(item => 
+const resumeEntry = await getEntry('resume', 'kiran');
+const featuredWork = resumeEntry.data.experience.filter(item => 
     item.slug === 'digital-transformation-lead'
 );
 
 // Freshness Strategy: Get the latest AI Slop article
-import { getCollection } from 'astro:content';
 const allSlop = await getCollection('slop');
 const latestSlop = allSlop.length > 0 
     ? allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0] 

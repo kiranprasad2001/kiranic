@@ -4,9 +4,11 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import DocumentWorkflow from '../components/DocumentWorkflow';
-import { experience } from '../data/experience';
+import { getEntry } from 'astro:content';
 import { FileText } from 'lucide-react';
 
+const resumeEntry = await getEntry('resume', 'kiran');
+const { experience } = resumeEntry.data;
 const title = "Work";
 ---
 
