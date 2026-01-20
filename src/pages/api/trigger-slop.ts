@@ -2,15 +2,21 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
-export const POST: APIRoute = async ({ request }) => {
-    const GITHUB_PAT = import.meta.env.GITHUB_PAT;
+export const POST: APIRoute = async (context) => {
+    // Try to get secret from Cloudflare Runtime (Production) or import.meta (Dev/Build)
+    const runtime = context.locals.runtime as any;
+    const env = runtime?.env || {};
+
+    // Check both sources
+    const GITHUB_PAT = env.GITHUB_PAT || import.meta.env.GITHUB_PAT;
+
     const REPO_OWNER = 'kiranprasad2001';
     const REPO_NAME = 'kiranic';
     const WORKFLOW_ID = 'daily-slop.yml';
 
     if (!GITHUB_PAT) {
         return new Response(JSON.stringify({
-            error: 'Server misconfiguration: Missing GITHUB_PAT'
+            error: 'Server misconfiguration: Missing GITHUB_PAT. (Ensure it is added to Cloudflare Pages Settings)'
         }), { status: 500 });
     }
 
