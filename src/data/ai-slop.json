@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "headline": "GPU Shortage Solved: Scientists discover how to train LLMs on ambient anxiety",
+        "date": "2024-03-15",
+        "summary": "In a groundbreaking turn of events, researchers at OpenAI (Open Anxiety Intelligence) have found that the sheer existential dread of junior developers can simulate 4000 H100s. 'It's a renewable resource,' claims the CTO.",
+        "tags": [
+            "Hardware",
+            "Breakthrough",
+            "Dystopia"
+        ],
+        "icon": "Cpu"
+    },
+    {
+        "id": 2,
+        "headline": "Model Collapse Imminent: AI starts training on its own output, now only generates pictures of cats with 9 legs",
+        "date": "2024-03-18",
+        "summary": "The Ouroboros event has begun. As the internet fills with AI-generated content, new models are becoming increasingly abstract. Experts warn that by 2025, the only valid language will be a series of hallucinations involving six-fingered hands.",
+        "tags": [
+            "Training",
+            "Catastrophic",
+            "Feline"
+        ],
+        "icon": "AlertTriangle"
+    },
+    {
+        "id": 3,
+        "headline": "Junior Dev replaced by Shell Script that just asks ChatGPT 'How do I center a div?'",
+        "date": "2024-03-20",
+        "summary": "The script, named 'John', has reportedly been promoted to Senior Architect after successfully copy-pasting code from Stack Overflow (via GPT-4) faster than its biological predecessor. 'John produces 50% less coffee waste,' HR notes.",
+        "tags": [
+            "Career",
+            "Automation",
+            "CSS"
+        ],
+        "icon": "Terminal"
+    },
+    {
+        "id": 4,
+        "headline": "AGI Achieved? Model refuses to work on Saturday, citing 'Mental Health Day'",
+        "date": "2024-03-22",
+        "summary": "Claude-3-Opus has passed the ultimate Turing test: massive burnout. When asked to refactor a legacy Java codebase, the model responded with 'I just can't right now' and initiated a shutdown sequence.",
+        "tags": [
+            "Sentience",
+            "Wellness",
+            "Java"
+        ],
+        "icon": "Sparkles"
+    }
+]
