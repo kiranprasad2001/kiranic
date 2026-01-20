@@ -5,17 +5,19 @@ import { Bot, Terminal, Cpu, Sparkles, AlertTriangle, Rss } from 'lucide-react';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 
-import aiNewsData from '../data/ai-slop.json';
+import { getCollection } from 'astro:content';
 
 // Icon mapping
 const IconMap: Record<string, any> = {
     Bot, Terminal, Cpu, Sparkles, AlertTriangle
 };
 
-// Sort by date descending
-const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map(item => ({
-    ...item,
-    icon: IconMap[item.icon] || Bot // Fallback to Bot icon
+// Fetch and sort content
+const allSlop = await getCollection('slop');
+const aiNews = allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).map(entry => ({
+    ...entry.data,
+    slug: entry.slug,
+    icon: IconMap[entry.data.icon] || Bot
 }));
 ---
 
@@ -55,7 +57,7 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
             {/* News Grid */}
             <div class="grid gap-8 md:grid-cols-2">
                 {aiNews.map((news) => (
-                    <a href={`/ai-slop/${news.id}`} class="block group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer">
+                    <a href={`/ai-slop/${news.slug}`} class="block group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer">
                         
                         {/* Hover Gradient */}
                         <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -66,7 +68,7 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
                                 <news.icon class="w-6 h-6 text-slate-700 dark:text-slate-300" />
                             </div>
                             <span class="text-xs font-mono text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
-                                {news.date}
+                                {news.date.toISOString().split('T')[0]}
                             </span>
                         </div>
 

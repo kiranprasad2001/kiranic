@@ -17,8 +17,11 @@ const featuredWork = experience.filter(item =>
 );
 
 // Freshness Strategy: Get the latest AI Slop article
-import aiNewsData from '../data/ai-slop.json';
-const latestSlop = aiNewsData.length > 0 ? aiNewsData[aiNewsData.length - 1] : null;
+import { getCollection } from 'astro:content';
+const allSlop = await getCollection('slop');
+const latestSlop = allSlop.length > 0 
+    ? allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0] 
+    : null;
 
 ---
 
@@ -69,13 +72,13 @@ const latestSlop = aiNewsData.length > 0 ? aiNewsData[aiNewsData.length - 1] : n
 
                 {/* Freshness Signal: Latest AI Slop Article */}
                 {latestSlop && (
-                    <a href={`/ai-slop/${latestSlop.id}`} class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-purple-500/50 transition-colors group">
+                    <a href={`/ai-slop/${latestSlop.slug}`} class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-purple-500/50 transition-colors group">
                         <span class="flex h-2 w-2 relative">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
                         </span>
                         <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 truncate max-w-xs md:max-w-md">
-                            Latest from the Lab: {latestSlop.headline}
+                            Latest from the Lab: {latestSlop.data.headline}
                         </span>
                         <ArrowRight class="w-3 h-3 text-slate-400 group-hover:text-purple-500" />
                     </a>

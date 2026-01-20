@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { Bot, Terminal, Cpu, Sparkles, AlertTriangle, ArrowLeft, Calendar, Share2, Tag } from 'lucide-react';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+    const slopEntries = await getCollection('slop');
+    return slopEntries.map(entry => ({
+        params: { slug: entry.slug }, props: { entry },
+    }));
+}
+
+const { entry } = Astro.props;
+const { headline, summary, date, tags, icon } = entry.data;
+const { Content } = await entry.render();
+
+const IconMap: Record<string, any> = {
+    Bot, Terminal, Cpu, Sparkles, AlertTriangle
+};
+
+const Icon = IconMap[icon] || Bot;
+---
+
+<BaseLayout title={headline} description={summary}>
+    <Navbar />
+    
+    <main class="flex-grow pt-32 pb-20 bg-slate-50 dark:bg-slate-950 min-h-screen">
+        <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            {/* Back Link */}
+            <a href="/ai-slop" class="inline-flex items-center gap-2 text-slate-500 hover:text-purple-600 mb-8 transition-colors group">
+                <ArrowLeft class="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> 
+                Back to the Feed
+            </a>
+
+            {/* Header */}
+            <div class="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-12 shadow-xl border border-slate-100 dark:border-slate-800 mb-8 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+
+                <div class="relative z-10">
+                    <div class="flex flex-wrap items-center gap-4 mb-6 text-sm text-slate-500 dark:text-slate-400">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800">
+                            <Calendar class="w-3.5 h-3.5" />
+                            {date.toISOString().split('T')[0]}
+                        </span>
+                        <div class="flex items-center gap-2">
+                             {tags.map((tag: string) => (
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+                                    <Tag class="w-3 h-3" /> {tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    <h1 class="text-3xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6 leading-tight">
+                        {headline}
+                    </h1>
+
+                    <p class="text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-serif border-l-4 border-purple-500 pl-6 hidden md:block">
+                        {summary}
+                    </p>
+                </div>
+            </div>
+
+            {/* Content */}
+            <div class="prose prose-lg dark:prose-invert prose-slate max-w-none bg-white dark:bg-slate-900/50 p-8 md:p-12 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                <Content />
+            </div>
+
+            {/* Share / Footer */}
+            <div class="mt-12 flex justify-center">
+                 <button class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:scale-105 transition-transform shadow-lg">
+                    <Share2 class="w-4 h-4" /> Share this hallucination
+                 </button>
+            </div>
+
+        </article>
+    </main>
+
+    <Footer />
+</BaseLayout>
