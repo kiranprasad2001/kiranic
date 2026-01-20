@@ -117,7 +117,7 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
                 const data = await res.json();
 
                 if (res.ok) {
-                    status.innerText = "Success! A fresh hallucination is being baked. Check back in 2 minutes.";
+                    status.innerHTML = `Success! <a href="${data.url}" target="_blank" class="underline hover:text-blue-400">Track progress on GitHub</a>.`;
                     status.classList.add('text-green-500');
                     btn.innerText = "Generation Queued";
                 } else {

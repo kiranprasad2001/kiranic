@@ -44,7 +44,9 @@ export const POST: APIRoute = async (context) => {
 
         return new Response(JSON.stringify({
             message: 'Workflow triggered successfully',
-            status: 'success'
+            status: 'success',
+            // Return link to the generic actions tab since we can't easily get the specific ID without polling
+            url: `https://github.com/${REPO_OWNER}/${REPO_NAME}/actions`
         }), { status: 200 });
 
     } catch (error: any) {

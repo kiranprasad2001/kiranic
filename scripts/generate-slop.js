@@ -1,9 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import https from 'https';
 import { fileURLToPath } from 'url';
+import { newsSchema } from './schema.js';
 
-// Helper for __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -17,53 +16,46 @@ if (!GEMINI_API_KEY) {
     process.exit(1);
 }
 
-// Helper to make API calls using native Node.js https module (zero dependencies)
-function callGeminiAPI(prompt) {
-    return new Promise((resolve, reject) => {
-        const data = JSON.stringify({
-            contents: [{
-                parts: [{ text: prompt }]
-            }],
-            generationConfig: {
-                temperature: 0.9,
-                topK: 40,
-                topP: 0.95,
-                maxOutputTokens: 4096,
-            }
-        });
+async function callGeminiAPI(prompt, recentHeadlines) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        const options = {
-            hostname: 'generativelanguage.googleapis.com',
-            path: `/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`,
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': data.length
-            }
-        };
+    // Using fetch (Node 18+)
+    const requestBody = {
+        contents: [{
+            parts: [{
+                text: `${prompt}\n\nRecent headlines to avoid:\n${recentHeadlines}`
+            }]
+        }],
+        generationConfig: {
+            temperature: 0.9,
+            topK: 40,
+            topP: 0.95,
+            maxOutputTokens: 4096,
+            // Force JSON output
+            response_mime_type: "application/json",
+            response_schema: newsSchema
+        }
+    };
 
-        const req = https.request(options, (res) => {
-            let responseBody = '';
-            res.on('data', (chunk) => responseBody += chunk);
-            res.on('end', () => {
-                if (res.statusCode >= 200 && res.statusCode < 300) {
-                    try {
-                        const parsed = JSON.parse(responseBody);
-                        const text = parsed.candidates[0].content.parts[0].text;
-                        resolve(text);
-                    } catch (e) {
-                        reject(new Error(`Failed to parse API response: ${e.message}`));
-                    }
-                } else {
-                    reject(new Error(`API Error: ${res.statusCode} - ${responseBody}`));
-                }
-            });
-        });
-
-        req.on('error', (error) => reject(error));
-        req.write(data);
-        req.end();
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
     });
+
+    if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    try {
+        const text = data.candidates[0].content.parts[0].text;
+        return JSON.parse(text); // Guaranteed to be valid JSON by the API
+    } catch (e) {
+        console.error("Full API Response:", JSON.stringify(data, null, 2));
+        throw new Error("Failed to parse response");
+    }
 }
 
 async function main() {
@@ -71,62 +63,31 @@ async function main() {
         console.log("Reading existing data...");
         const rawData = fs.readFileSync(DATA_FILE, 'utf8');
         const currentNews = JSON.parse(rawData);
-
-        // Get the last few headlines to provide context/avoid duplicates
         const recentHeadlines = currentNews.slice(0, 5).map(n => n.headline).join("\n");
 
         console.log("Generating new content...");
         const prompt = `
             You are a satirical tech news generator for a blog called "News from the Latent Space". 
-            Generate a single JSON object representing a funny, fictional news story about AI, LLMs, or Silicon Valley engineering culture.
+            Generate a funny, fictional news story about AI, LLMs, or Silicon Valley engineering culture.
             The tone should be cynical, witty, and absurdist but rooted in real tech terminology.
-            
-            Format:
-            {
-                "headline": "Title of the story",
-                "summary": "2-3 sentences max. Punchy and funny.",
-                "content": "A full news article body (3 paragraphs). Use markdown formatting (e.g. **bold**, *italics*) where appropriate. No # headings.",
-                "tags": ["Tag1", "Tag2"],
-                "icon": "One of: Bot, Terminal, Cpu, Sparkles, AlertTriangle, Cloud, Server, Database, Code"
-            }
-
-            Recent stories (do not repeat themes too closely):
-            ${recentHeadlines}
-
-            IMPORTANT: Return ONLY the raw JSON object. No markdown formatting blocks around the JSON itself.
+            The content should be a full 3-paragraph news article using markdown formatting.
         `;
 
-        const generatedText = await callGeminiAPI(prompt);
-        console.log("DEBUG: Raw generated text from LLM:\n", generatedText);
-
-        // Robust JSON extraction: find the first '{' and the last '}'
-        const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
-
-        if (!jsonMatch) {
-            throw new Error("Failed to extract JSON from LLM response");
-        }
-
-        const cleanJson = jsonMatch[0];
-        const newItem = JSON.parse(cleanJson);
+        const newItem = await callGeminiAPI(prompt, recentHeadlines);
 
         // Add metadata
         newItem.id = currentNews.length + 1;
         newItem.date = new Date().toISOString().split('T')[0];
 
-        // Validate icon
+        // Validate icon fallback
         if (!ICONS.includes(newItem.icon)) {
-            newItem.icon = "Bot"; // Fallback
+            newItem.icon = "Bot";
         }
 
         console.log("New Item Generated:", newItem.headline);
 
-        // Prepend to list (or append depending on sort logic, my component sorts by date so order in file doesn't strictly matter)
-        // Let's just push to end
         currentNews.push(newItem);
-
-        console.log("Writing to file...");
         fs.writeFileSync(DATA_FILE, JSON.stringify(currentNews, null, 4));
-
         console.log("Success! Slop generated.");
 
     } catch (error) {
