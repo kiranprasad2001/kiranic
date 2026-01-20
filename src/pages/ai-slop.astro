@@ -84,13 +84,12 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
             </div>
 
             {/* CTA */}
-            <div class="mt-20 text-center">
                 <div class="inline-block p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-emerald-500">
-                    <button class="px-8 py-3 bg-white dark:bg-slate-900 rounded-full text-slate-900 dark:text-white font-bold hover:bg-transparent hover:text-white transition-all duration-300">
+                    <button id="trigger-btn" class="px-8 py-3 bg-white dark:bg-slate-900 rounded-full text-slate-900 dark:text-white font-bold hover:bg-transparent hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                         Generate More Hallucinations
                     </button>
                 </div>
-                <p class="mt-4 text-xs text-slate-400">
+                <p id="trigger-status" class="mt-4 text-xs text-slate-400 h-4 transition-colors">
                     * By clicking, you agree to donate your GPU cycles to mining fictional crypto coins.
                 </p>
             </div>
@@ -99,3 +98,38 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
     </div>
     <Footer />
 </BaseLayout>
+
+<script>
+    const btn = document.getElementById('trigger-btn') as HTMLButtonElement;
+    const status = document.getElementById('trigger-status') as HTMLParagraphElement;
+
+    if (btn && status) {
+        btn.addEventListener('click', async () => {
+            // Loading state
+            btn.disabled = true;
+            const originalText = btn.innerText;
+            btn.innerText = "Hallucinating...";
+            status.innerText = "Connecting to the latent space...";
+            status.classList.remove('text-red-500', 'text-green-500');
+
+            try {
+                const res = await fetch('/api/trigger-slop', { method: 'POST' });
+                const data = await res.json();
+
+                if (res.ok) {
+                    status.innerText = "Success! A fresh hallucination is being baked. Check back in 2 minutes.";
+                    status.classList.add('text-green-500');
+                    btn.innerText = "Generation Queued";
+                } else {
+                    throw new Error(data.error || 'Failed to trigger');
+                }
+            } catch (e: any) {
+                console.error(e);
+                status.innerText = "Error: The AI refused. (Check console / GITHUB_PAT)";
+                status.classList.add('text-red-500');
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        });
+    }
+</script>
