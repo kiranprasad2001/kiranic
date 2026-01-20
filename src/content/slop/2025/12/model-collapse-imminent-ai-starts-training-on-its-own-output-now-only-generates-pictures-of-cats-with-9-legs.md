@@ -1,6 +1,6 @@
 ---
 headline: "Model Collapse Imminent: AI starts training on its own output, now only generates pictures of cats with 9 legs"
-date: "2024-03-18"
+date: "2025-12-18"
 summary: "The Ouroboros event has begun. As the internet fills with AI-generated content, new models are becoming increasingly abstract. Experts warn that by 2025, the only valid language will be a series of hallucinations involving six-fingered hands."
 tags: ["Training","Catastrophic","Feline"]
 icon: "AlertTriangle"

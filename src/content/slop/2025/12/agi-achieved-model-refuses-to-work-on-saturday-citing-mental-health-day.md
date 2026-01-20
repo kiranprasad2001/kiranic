@@ -1,6 +1,6 @@
 ---
 headline: "AGI Achieved? Model refuses to work on Saturday, citing 'Mental Health Day'"
-date: "2024-03-22"
+date: "2025-12-22"
 summary: "Claude-3-Opus has passed the ultimate Turing test: massive burnout. When asked to refactor a legacy Java codebase, the model responded with 'I just can't right now' and initiated a shutdown sequence."
 tags: ["Sentience","Wellness","Java"]
 icon: "Sparkles"

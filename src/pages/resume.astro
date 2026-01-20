@@ -1,0 +1,127 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import ProjectCard from "../components/ProjectCard.astro";
+import ResumeSection from "../components/ResumeSection.astro";
+import { experience } from "../data/experience";
+import { skillData, educationData } from "../data/resume";
+
+const title = "Resume";
+const description = "Digital Transformation & Product Strategy Leader";
+---
+
+<BaseLayout title={title} description={description}>
+  <Navbar />
+
+  <main class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+    {/* Header Section */}
+    <header class="mb-16 text-center">
+      <h1
+        class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4"
+      >
+        Kiran Prasad
+      </h1>
+      <p class="text-xl text-slate-600 dark:text-slate-300">
+        Digital Transformation & Product Strategy Leader
+      </p>
+      <div
+        class="mt-4 flex flex-wrap justify-center gap-4 text-sm text-slate-500"
+      >
+        <span>Toronto, Canada</span>
+        <span class="hidden sm:inline">•</span>
+        <a href="mailto:kiranprasad2001@gmail.com" class="hover:text-blue-500"
+          >kiranprasad2001@gmail.com</a
+        >
+        <span class="hidden sm:inline">•</span>
+        <a
+          href="https://linkedin.com/in/kiranprasad"
+          target="_blank"
+          class="hover:text-blue-500">LinkedIn</a
+        >
+      </div>
+    </header>
+
+    {/* About Summary */}
+    <div class="mb-12">
+      <h2
+        class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-4 border-b border-slate-200 dark:border-slate-700 pb-2"
+      >
+        Professional Summary
+      </h2>
+      <p class="text-slate-700 dark:text-slate-300 leading-relaxed">
+        Digital Transformation & Product Strategy Leader with over 13 years of
+        experience orchestrating large-scale legacy modernization and cloud
+        migration initiatives. Expert in bridging the gap between complex legacy
+        infrastructure and modern cloud architecture to drive operational
+        efficiency within Enterprise content management. Proven track record of
+        leading cross-functional teams, managing enterprise roadmaps, and
+        securing significant business value through strategic technical
+        consulting.
+      </p>
+    </div>
+
+    {/* Skills Section */}
+    <ResumeSection title={skillData.title}>
+      {
+        skillData.skills.map((group) => (
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+            <h3 class="font-semibold text-lg mb-3 text-blue-600 dark:text-blue-400">
+              {group.category}
+            </h3>
+            <div class="flex flex-wrap gap-2">
+              {group.items.map((skill) => (
+                <span class="px-2 py-1 bg-slate-100 dark:bg-slate-700 text-sm rounded text-slate-700 dark:text-slate-300">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))
+      }
+    </ResumeSection>
+
+    {/* Experience Section */}
+    <div class="mb-12">
+      <h2
+        class="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6 border-b border-slate-200 dark:border-slate-700 pb-2"
+      >
+        Experience
+      </h2>
+      <div class="flex flex-col gap-6">
+        {experience.map((item) => <ProjectCard {...item} />)}
+      </div>
+    </div>
+
+    {/* Education Section */}
+    <ResumeSection title="Education & Certifications">
+      {
+        educationData.map((edu) => (
+          <div class="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-slate-200 dark:border-slate-700">
+            <h3 class="font-bold text-slate-900 dark:text-white">
+              {edu.institution}
+            </h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {edu.year}
+            </p>
+            <p class="mt-2 text-slate-700 dark:text-slate-300">
+              {edu.degree}
+            </p>
+          </div>
+        ))
+      }
+    </ResumeSection>
+
+    {/* Download Button */}
+    <div class="text-center mt-16 pb-8">
+      <a
+        href="/resume.pdf"
+        class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+      >
+        Download PDF Version
+      </a>
+    </div>
+  </main>
+
+  <Footer />
+</BaseLayout>

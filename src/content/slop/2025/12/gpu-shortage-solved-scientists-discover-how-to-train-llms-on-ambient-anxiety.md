@@ -1,6 +1,6 @@
 ---
 headline: "GPU Shortage Solved: Scientists discover how to train LLMs on ambient anxiety"
-date: "2024-03-15"
+date: "2025-12-15"
 summary: "In a groundbreaking turn of events, researchers at OpenAI (Open Anxiety Intelligence) have found that the sheer existential dread of junior developers can simulate 4000 H100s. 'It's a renewable resource,' claims the CTO."
 tags: ["Hardware","Breakthrough","Dystopia"]
 icon: "Cpu"

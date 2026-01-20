@@ -1,6 +1,6 @@
 ---
 headline: "Junior Dev replaced by Shell Script that just asks ChatGPT 'How do I center a div?'"
-date: "2024-03-20"
+date: "2025-12-20"
 summary: "The script, named 'John', has reportedly been promoted to Senior Architect after successfully copy-pasting code from Stack Overflow (via GPT-4) faster than its biological predecessor. 'John produces 50% less coffee waste,' HR notes."
 tags: ["Career","Automation","CSS"]
 icon: "Terminal"
