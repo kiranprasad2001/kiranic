@@ -7,6 +7,7 @@ import ProjectCard from '../components/ProjectCard.astro';
 const title = "Lab";
 
 // GitHub Data Fetching
+// GitHub Data Fetching
 const GITHUB_USERNAME = "kiranprasad2001";
 const GITHUB_TOKEN = import.meta.env.GITHUB_PAT || process.env.GITHUB_PAT;
 
@@ -19,7 +20,6 @@ interface Repo {
     language: string;
     pushed_at: string;
     archived: boolean;
-    readmeContent?: string;
 }
 
 // Fallback data in case API fails
@@ -65,32 +65,6 @@ const FALLBACK_EXPERIMENTS = [
     }
 ];
 
-// Helper: Clean Markdown to get a summary
-function extractSummary(markdown: string): string | null {
-    if (!markdown) return null;
-    
-    // Remove badges/images
-    let text = markdown.replace(/\[!\[.*?\]\(.*?\)\]\(.*?\)/g, '')
-                       .replace(/!\[.*?\]\(.*?\)/g, '');
-    
-    // Remove headers
-    text = text.replace(/^#+\s+.*$/gm, '');
-    
-    // Remove HTML tags
-    text = text.replace(/<[^>]*>/g, '');
-    
-    // Find first meaningful paragraph
-    const paragraphs = text.split(/\n\n+/);
-    for (const p of paragraphs) {
-        const cleanP = p.replace(/\r/g, '').trim();
-        if (cleanP.length > 20 && !cleanP.startsWith('[')) { 
-             // Strip links [text](url) -> text
-             return cleanP.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').slice(0, 160) + (cleanP.length > 160 ? '...' : '');
-        }
-    }
-    return null;
-}
-
 let experiments = [];
 
 try {
@@ -108,9 +82,6 @@ try {
                         isArchived
                         languages(first: 1) { nodes { name } }
                         repositoryTopics(first: 5) { nodes { topic { name } } }
-                        readme: object(expression: "HEAD:README.md") {
-                            ... on Blob { text }
-                        }
                     }
                 }
             }
@@ -132,7 +103,6 @@ try {
         experiments = data.user.repositories.nodes
             .filter((repo: any) => !repo.isArchived)
             .map((repo: any) => {
-                const readmeSummary = repo.readme ? extractSummary(repo.readme.text) : null;
                 const lastActive = new Date(repo.pushedAt);
                 const now = new Date();
                 const monthsSinceActive = (now.getFullYear() - lastActive.getFullYear()) * 12 + (now.getMonth() - lastActive.getMonth());
@@ -144,7 +114,7 @@ try {
 
                 return {
                     title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l:string) => l.toUpperCase()),
-                    description: readmeSummary || repo.description || "No description provided.",
+                    description: repo.description || "No description provided.",
                     tags: tags.slice(0, 4),
                     link: repo.homepageUrl,
                     github: repo.url,
