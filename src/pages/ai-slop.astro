@@ -125,7 +125,12 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
                 }
             } catch (e: any) {
                 console.error(e);
-                status.innerText = "Error: The AI refused. (Check console / GITHUB_PAT)";
+                // Extract clean error message
+                let msg = e.message || "Unknown error";
+                if (msg.includes("GitHub API failed")) {
+                    msg = msg.split("GitHub API failed:")[1].trim(); // Show just the status/reason
+                }
+                status.innerText = `Error: ${msg}`;
                 status.classList.add('text-red-500');
                 btn.disabled = false;
                 btn.innerText = originalText;
