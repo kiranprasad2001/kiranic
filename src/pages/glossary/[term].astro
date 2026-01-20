@@ -8,7 +8,11 @@ import glossaryData from '../../data/glossary.json';
 // Generate paths for all terms
 export async function getStaticPaths() {
   return glossaryData.map((entry) => ({
-    params: { term: entry.term.toLowerCase().replace(/\s+/g, '-') },
+    params: { 
+        term: entry.term.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphen
+            .replace(/(^-|-$)/g, '')     // Remove leading/trailing hyphens
+    },
     props: { entry },
   }));
 }
