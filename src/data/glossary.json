@@ -1,26 +1,206 @@
 [
     {
+        "term": "Accessibility Module",
+        "definition": "A component or feature (e.g., in Inspire or SmartComms) designed to ensure generated digital documents (PDFs, HTML) comply with regulatory standards such as WCAG (Web Content Accessibility Guidelines) and PDF/UA for visually impaired users."
+    },
+    {
+        "term": "API Economy",
+        "definition": "An economic model centered on the exchange of services and data through Application Programming Interfaces (APIs), enabling rapid integration, partnership creation, and the monetization of core enterprise capabilities, including CCM functionality."
+    },
+    {
+        "term": "Application Programming Interface (API)",
+        "definition": "A set of protocols and tools for building software applications, allowing CCM systems to programmatically request data, trigger communication generation, or integrate with other enterprise systems like CRM or core policy administration."
+    },
+    {
+        "term": "AWS Lambda",
+        "definition": "A serverless, event-driven computing service provided by Amazon Web Services that executes code in response to events (like data changes or API calls) without the need for provisioning or managing underlying servers, ideal for burst processing or lightweight integration tasks."
+    },
+    {
+        "term": "Azure Functions",
+        "definition": "Microsoft Azure's serverless compute service that enables developers to run event-triggered code snippets without managing infrastructure, often used for integrating Azure-hosted applications with on-premise CCM systems or data sources."
+    },
+    {
         "term": "CCM",
         "definition": "Customer Communication Management. A strategy and software category for creating, delivering, and managing outbound customer communications."
     },
     {
-        "term": "Headless CCM",
-        "definition": "Decoupling the content creation and logic layer of CCM from the delivery channel, allowing communications to be served via API to any frontend."
+        "term": "CI/CD Pipeline",
+        "definition": "Continuous Integration/Continuous Delivery—an automated sequence of steps and tools used to build, test, and deploy code changes (including CCM template updates and application logic) reliably and frequently into production environments."
     },
     {
-        "term": "Quadient Inspire",
-        "definition": "An enterprise-grade CCM platform used by banks and insurers to generate high-volume, personalized documents."
+        "term": "Containerization",
+        "definition": "The packaging of software code, configuration files, and dependencies into a standardized unit called a container (e.g., Docker image), ensuring that the application runs quickly and reliably across different computing environments (development, staging, production)."
     },
     {
-        "term": "SmartComms",
-        "definition": "SmartCommunications. A cloud-native CCM platform known for its interactive drafting and Salesforce integration capabilities."
+        "term": "Content Services Platform (CSP)",
+        "definition": "A modern evolution of ECM that focuses on modular, API-driven services for content capture, storage, management, and integration, enabling organizations to leverage content across multiple business applications and digital channels."
+    },
+    {
+        "term": "Correspondence Management",
+        "definition": "The specialized function within CCM focused on handling ad-hoc, on-demand, and personalized letters, emails, and documents, typically initiated by customer service representatives (CSRs) or triggered by specific operational events."
+    },
+    {
+        "term": "Customer Journey Mapping (CJM)",
+        "definition": "A strategic exercise that visually represents the entire sequence of steps, interactions, and emotions a customer experiences when engaging with a company, used to identify critical communication touchpoints for CCM optimization."
+    },
+    {
+        "term": "Data Mapping",
+        "definition": "The process of defining relationships between data elements from source systems (e.g., CRM, Policy Admin) and the target fields required within a CCM template, ensuring accurate ingestion and utilization of customer data for personalization."
+    },
+    {
+        "term": "Data Residency",
+        "definition": "A regulatory requirement mandating that certain types of data, particularly personally identifiable information (PII) used in CCM, must be stored and processed within the physical borders of a specific country or jurisdiction."
+    },
+    {
+        "term": "DevOps",
+        "definition": "A set of practices that combines software development (Dev) and IT operations (Ops) to shorten the systems development life cycle and provide continuous delivery with high software quality, essential for agile CCM development."
+    },
+    {
+        "term": "Digital Asset Management (DAM)",
+        "definition": "A system used to organize, store, and retrieve rich media assets (images, logos, videos, brand guidelines) required for inclusion in customer communications and DXP interfaces, ensuring brand consistency across all channels."
+    },
+    {
+        "term": "Digital Experience Platform (DXP)",
+        "definition": "An integrated set of core technologies supporting the composition, management, delivery, and optimization of personalized, consistent digital experiences across all customer touchpoints, often integrating heavily with CCM solutions."
+    },
+    {
+        "term": "Digital Transformation",
+        "definition": "The fundamental shift in how organizations use technology, data, processes, and culture to create new business models, value propositions, and customer experiences, often driven by modernizing legacy CCM and DXP systems."
+    },
+    {
+        "term": "Document Repository",
+        "definition": "A centralized, secure storage system designed for managing the lifecycle of digital documents, typically integrated with CCM platforms for archival, retrieval, and compliance auditing of generated customer communications."
+    },
+    {
+        "term": "Dynamic Content Orchestration (DCO)",
+        "definition": "A methodology and technical capability used to assemble personalized communications by dynamically selecting and combining content fragments, variables, and legal clauses based on real-time customer data, business rules, and journey stage."
     },
     {
         "term": "ECM",
         "definition": "Enterprise Content Management. The methodology for managing the lifecycle of an organization's documents and unstructured content."
     },
     {
+        "term": "Headless CCM",
+        "definition": "Decoupling the content creation and logic layer of CCM from the delivery channel, allowing communications to be served via API to any frontend."
+    },
+    {
+        "term": "Hybrid Cloud",
+        "definition": "A computing environment that connects an organization's on-premises infrastructure (private cloud) with public cloud resources (e.g., AWS or Azure), enabling organizations to run core CCM batch processing locally while utilizing public cloud for burst capacity or digital delivery."
+    },
+    {
+        "term": "Information Governance",
+        "definition": "The overarching framework of policies, standards, and metrics that controls how information, particularly sensitive customer data and generated communications, is created, stored, secured, and disposed of within the enterprise."
+    },
+    {
+        "term": "Infrastructure as Code (IaC)",
+        "definition": "The practice of managing and provisioning computing infrastructure (networks, virtual machines, load balancers, etc.) using machine-readable definition files (e.g., Terraform or CloudFormation) rather than manual processes or interactive configuration tools."
+    },
+    {
+        "term": "Inspire Automation",
+        "definition": "The workflow and orchestration component of the Quadient suite responsible for managing input channels, scheduling batch jobs, routing communications, and integrating business processes across the enterprise communication lifecycle."
+    },
+    {
+        "term": "Inspire Content Manager (ICM)",
+        "definition": "A centralized repository and governance tool integrated with Quadient Inspire, utilized for version control, approval workflows, localization, and management of communication fragments, text assets, and business logic rules."
+    },
+    {
+        "term": "Inspire Designer",
+        "definition": "The primary development environment and graphical user interface (GUI) used by technical developers to create, maintain, and manage reusable templates, business logic, data mapping, and resource assets for the Quadient Inspire platform."
+    },
+    {
+        "term": "Inspire Layout",
+        "definition": "The proprietary file format and design component used within Quadient Inspire Designer to define the visual structure, formatting rules, and dynamic placement logic for customer communications, supporting complex multi-channel output requirements."
+    },
+    {
+        "term": "Inspire Scaler",
+        "definition": "A high-performance, distributed processing engine within the Quadient Inspire platform designed specifically for high-volume, batch communication generation and post-composition processing, ensuring linear scalability and throughput efficiency for millions of documents."
+    },
+    {
+        "term": "Inspire Scripting Language (ISL)",
+        "definition": "The proprietary scripting language utilized within Quadient Inspire Designer for implementing complex business logic, data manipulation, conditional formatting, and custom functions within communication templates."
+    },
+    {
         "term": "Interactive Document",
         "definition": "A document (like a policy or contract) that allows a human agent to modify specific data fields or clauses within pre-defined compliance guardrails."
+    },
+    {
+        "term": "Kubernetes (K8s)",
+        "definition": "An open-source system for automating deployment, scaling, and management of containerized applications, widely used in cloud migrations to manage highly available, fault-tolerant CCM and DXP services."
+    },
+    {
+        "term": "Load Balancer",
+        "definition": "A device or service that distributes network traffic efficiently across multiple servers (e.g., Inspire Scaler nodes or SmartComms APIs) to ensure maximum availability, reliability, and performance of the communication platform."
+    },
+    {
+        "term": "Microservices Architecture",
+        "definition": "A software development approach where a complex application is composed of small, independent services, each running in its own process and communicating via lightweight mechanisms like HTTP APIs, facilitating rapid deployment and technological diversity."
+    },
+    {
+        "term": "Multi-Region Deployment",
+        "definition": "The architectural strategy of deploying critical enterprise applications, including CCM systems, across multiple geographical cloud regions to enhance disaster recovery capabilities, increase fault tolerance, and comply with data residency regulations."
+    },
+    {
+        "term": "Omnichannel Delivery",
+        "definition": "A unified communication strategy ensuring that customer interactions, regardless of the channel (print, email, web, mobile, SMS), are consistent, context-aware, and seamlessly integrated across the customer journey."
+    },
+    {
+        "term": "Personalization Engine",
+        "definition": "A software component or service utilizing data, machine learning, and business rules to dynamically tailor content, offers, and communication experiences for individual customers in real-time or near real-time."
+    },
+    {
+        "term": "Post Composition Processing (PCP)",
+        "definition": "The final stage in high-volume CCM batch runs, where generated documents undergo finishing processes such as indexing, barcode insertion, postal sorting, print stream optimization (e.g., AFP, PCL), and archival preparation before physical or digital delivery."
+    },
+    {
+        "term": "Print Stream Optimization",
+        "definition": "Technical processes applied to high-volume print files (such as AFP, Metacode, or PostScript) to consolidate resources, optimize sorting, and reduce file size, minimizing print production costs and maximizing postal discounts."
+    },
+    {
+        "term": "Quadient Inspire",
+        "definition": "An enterprise-grade CCM platform used by banks and insurers to generate high-volume, personalized documents."
+    },
+    {
+        "term": "Quality Assurance (QA) Environment",
+        "definition": "A dedicated, non-production environment used for rigorous testing of CCM templates, data integration, and output quality before deployment to production, ensuring compliance and functional accuracy."
+    },
+    {
+        "term": "Records Management",
+        "definition": "The systematic process of controlling the creation, receipt, use, maintenance, and disposition of records, ensuring that legally required communications are retained for mandated periods and defensibly destroyed thereafter."
+    },
+    {
+        "term": "Serverless Computing",
+        "definition": "A cloud execution model where the cloud provider dynamically manages the allocation and scaling of servers, allowing developers to focus solely on writing and deploying code, optimizing costs based purely on execution time."
+    },
+    {
+        "term": "Single Customer View (SCV)",
+        "definition": "A centralized, aggregated, and consistent representation of all data related to a specific customer, critical for fueling highly personalized and contextually relevant communications across CCM platforms."
+    },
+    {
+        "term": "SmartComms",
+        "definition": "SmartCommunications. A cloud-native CCM platform known for its interactive drafting and Salesforce integration capabilities."
+    },
+    {
+        "term": "SmartComms Cloud",
+        "definition": "The SaaS (Software as a Service) deployment model for the SmartCommunications platform, offering managed infrastructure, automatic scaling, high availability, and rapid deployment for customer correspondence generation."
+    },
+    {
+        "term": "SmartComms Data Model (SCDM)",
+        "definition": "The structured data schema employed by SmartCommunications to define the necessary input variables, hierarchical relationships, and data structures required by templates to generate accurate and personalized correspondence."
+    },
+    {
+        "term": "SmartComms Template Editor (SCE)",
+        "definition": "The browser-based interface within the SmartCommunications platform allowing business users and subject matter experts to modify pre-approved content, manage conditional text, and customize templates without requiring developer intervention."
+    },
+    {
+        "term": "Template Governance",
+        "definition": "The set of policies, processes, and tools used to control the creation, approval, versioning, deployment, and eventual retirement of standardized communication templates, ensuring legal compliance and brand consistency."
+    },
+    {
+        "term": "Virtual Private Cloud (VPC)",
+        "definition": "A logically isolated virtual network within a public cloud (like AWS or Azure) where an enterprise can provision resources and define its own network topology, IP ranges, subnets, and security configurations to host sensitive CCM applications."
+    },
+    {
+        "term": "Workflow Automation",
+        "definition": "The use of software to define, execute, and automate a series of tasks or processes (e.g., document review, approval routing, data validation) without manual intervention, often critical for managing complex CCM production cycles."
     }
 ]

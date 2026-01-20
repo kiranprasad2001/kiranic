@@ -15,3 +15,21 @@ export const newsSchema = {
     },
     required: ["headline", "summary", "content", "tags", "icon"]
 };
+
+export const glossarySchema = {
+    type: "OBJECT",
+    properties: {
+        terms: {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    term: { type: "STRING" },
+                    definition: { type: "STRING" }
+                },
+                required: ["term", "definition"]
+            }
+        }
+    },
+    required: ["terms"]
+};
