@@ -29,6 +29,7 @@ const FALLBACK_EXPERIMENTS = [
         description: "Experimental Enterprise Content Management tool powered by agentic AI workflows to semantic search and organize documents.",
         tags: ["AI", "ECM", "Python", "LLMs"],
         link: "https://kiran-ccm-tool.kiranic.com",
+        github: "https://github.com/kiranprasad2001/saas-ecm-tool",
         year: "In Progress"
     },
     {
@@ -36,6 +37,7 @@ const FALLBACK_EXPERIMENTS = [
         description: "Real-time transit tracking app for the Greater Toronto Area. Aggregates data from multiple agencies into a unified, interactive map interface.",
         tags: ["Transit API", "React", "Real-time", "Leaflet"],
         link: "https://ttc.kiranic.com",
+        github: "https://github.com/kiranprasad2001/ttc-super-tracker",
         year: "2024"
     },
     {
@@ -43,12 +45,14 @@ const FALLBACK_EXPERIMENTS = [
         description: "Personal experimental project for tracking my kids progress",
         tags: ["Experimental", "Web"],
         link: "https://shashi.kiranic.com",
+        github: "https://github.com/kiranprasad2001/shashi",
         year: "2024"
     },
     {
         title: "Local LLM Experiments",
         description: "Researching fine-tuning and deployment optimizations for running open-weights LLMs on consumer hardware for privacy-focused tasks.",
         tags: ["LLM", "Fine-tuning", "Privacy", "Local Inference"],
+        github: "https://github.com/kiranprasad2001/local-llm-experiments",
         year: "Ongoing"
     },
     {
@@ -56,6 +60,7 @@ const FALLBACK_EXPERIMENTS = [
         description: "A modern, accessible, and performant web application built with Ruby theme. Features dynamic routing, clean architecture, and Cloudflare deployment.",
         tags: ["Ruby", "Cloudflare"],
         link: "https://resume.kiranic.com",
+        github: "https://github.com/kiranprasad2001/resume",
         year: "2024"
     }
 ];
@@ -141,7 +146,8 @@ try {
                     title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l:string) => l.toUpperCase()),
                     description: readmeSummary || repo.description || "No description provided.",
                     tags: tags.slice(0, 4),
-                    link: repo.homepageUrl || repo.url,
+                    link: repo.homepageUrl,
+                    github: repo.url,
                     year: year
                 };
             });
@@ -165,8 +171,9 @@ try {
             return {
                 title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l:string) => l.toUpperCase()),
                 description: repo.description || "No description provided.",
-                tags: tags.slice(0, 4),
-                link: repo.homepage || repo.html_url,
+                tags: tags.slice(0, 4), // Limit tags
+                link: repo.homepage, // Live URL
+                github: repo.html_url, // GitHub URL
                 year: year
             };
         });
