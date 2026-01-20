@@ -85,6 +85,7 @@ async function main() {
             {
                 "headline": "Title of the story",
                 "summary": "2-3 sentences max. Punchy and funny.",
+                "content": "A full news article body (3 paragraphs). Use markdown formatting (e.g. **bold**, *italics*) where appropriate. No # headings.",
                 "tags": ["Tag1", "Tag2"],
                 "icon": "One of: Bot, Terminal, Cpu, Sparkles, AlertTriangle, Cloud, Server, Database, Code"
             }
@@ -92,7 +93,7 @@ async function main() {
             Recent stories (do not repeat themes too closely):
             ${recentHeadlines}
 
-            IMPORTANT: Return ONLY the raw JSON object. No markdown formatting, no code blocks.
+            IMPORTANT: Return ONLY the raw JSON object. No markdown formatting blocks around the JSON itself.
         `;
 
         const generatedText = await callGeminiAPI(prompt);

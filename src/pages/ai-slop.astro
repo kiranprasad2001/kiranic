@@ -46,7 +46,7 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
             {/* News Grid */}
             <div class="grid gap-8 md:grid-cols-2">
                 {aiNews.map((news) => (
-                    <article class="group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                    <a href={`/ai-slop/${news.id}`} class="block group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer">
                         
                         {/* Hover Gradient */}
                         <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -79,7 +79,7 @@ const aiNews = aiNewsData.sort((a, b) => new Date(b.date).getTime() - new Date(a
                                 ))}
                             </div>
                         </div>
-                    </article>
+                    </a>
                 ))}
             </div>
 
