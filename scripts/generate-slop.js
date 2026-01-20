@@ -97,9 +97,16 @@ async function main() {
         `;
 
         const generatedText = await callGeminiAPI(prompt);
+        console.log("DEBUG: Raw generated text from LLM:\n", generatedText);
 
-        // Clean up potential markdown formatting from the LLM
-        const cleanJson = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
+        // Robust JSON extraction: find the first '{' and the last '}'
+        const jsonMatch = generatedText.match(/\{[\s\S]*\}/);
+
+        if (!jsonMatch) {
+            throw new Error("Failed to extract JSON from LLM response");
+        }
+
+        const cleanJson = jsonMatch[0];
         const newItem = JSON.parse(cleanJson);
 
         // Add metadata
