@@ -6,7 +6,23 @@ import ProjectCard from '../components/ProjectCard.astro';
 
 const title = "Lab";
 
-const experiments = [
+// GitHub Data Fetching
+const GITHUB_USERNAME = "kiranprasad2001";
+const GITHUB_TOKEN = import.meta.env.GITHUB_PAT || process.env.GITHUB_PAT;
+
+interface Repo {
+    name: string;
+    description: string;
+    html_url: string;
+    homepage: string;
+    topics: string[];
+    language: string;
+    pushed_at: string;
+    archived: boolean;
+}
+
+// Fallback data in case API fails
+const FALLBACK_EXPERIMENTS = [
     {
         title: "SaaS ECM Tool (Agentic Workflow)",
         description: "Experimental Enterprise Content Management tool powered by agentic AI workflows to semantic search and organize documents.",
@@ -42,6 +58,56 @@ const experiments = [
         year: "2024"
     }
 ];
+
+let experiments = [];
+
+try {
+    const headers: Record<string, string> = {
+        "User-Agent": "Kiranic-Portfolio",
+        "Accept": "application/vnd.github.v3+json"
+    };
+
+    if (GITHUB_TOKEN) {
+        headers["Authorization"] = `token ${GITHUB_TOKEN}`;
+    }
+
+    const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=pushed&per_page=100&type=owner`, { headers });
+    
+    if (!response.ok) {
+        throw new Error(`GitHub API Error: ${response.statusText}`);
+    }
+
+    const repos: Repo[] = await response.json();
+
+    experiments = repos
+        .filter(repo => !repo.archived) // Optional: Hide archived?
+        .map(repo => {
+            const lastActive = new Date(repo.pushed_at);
+            const now = new Date();
+            const monthsSinceActive = (now.getFullYear() - lastActive.getFullYear()) * 12 + (now.getMonth() - lastActive.getMonth());
+            
+            // Status Logic
+            const year = monthsSinceActive < 6 ? "In Progress" : lastActive.getFullYear().toString();
+
+            // Tags Logic
+            const tags = repo.topics || [];
+            if (repo.language && !tags.includes(repo.language)) {
+                tags.unshift(repo.language);
+            }
+
+            return {
+                title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()), // Title Case
+                description: repo.description || "No description provided.",
+                tags: tags.slice(0, 4), // Limit tags
+                link: repo.homepage || repo.html_url,
+                year: year
+            };
+        });
+
+} catch (error) {
+    console.error("Failed to fetch GitHub repos:", error);
+    experiments = FALLBACK_EXPERIMENTS;
+}
 ---
 
 <BaseLayout title={title}>
