@@ -17,9 +17,27 @@ const { title, description = "Architecting Documents & Cloud Systems.", keywords
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
+        
+        {/* Canonical URL */}
+        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+
 		<title>{title} | Kiran Prasad</title>
-        <!-- Preload fonts or use system fonts. Using Inter from Google Fonts for 'technical' look if needed, but tailwind 'sans' stack is good enough usually. -->
-        <!-- Adding Inter via Google Fonts for specific requirement consistency -->
+
+        {/* JSON-LD Structured Data */}
+        <script type="application/ld+json" set:html={JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "name": "Kiran Prasad",
+            "url": "https://kiranic.pages.dev",
+            "jobTitle": "Enterprise CCM Architect",
+            "knowsAbout": ["Quadient Inspire", "SmartComms", "Digital Transformation", "Cloud Strategy", "AWS"],
+            "sameAs": [
+                "https://github.com/kiranprasad2001",
+                "https://linkedin.com/in/kiranprasad" // TODO: Update with real link if available
+            ]
+        })} />
+
+        {/* Fonts */}
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">

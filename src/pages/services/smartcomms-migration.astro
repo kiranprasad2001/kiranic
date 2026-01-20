@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { Database, Zap, RefreshCw, ArrowRight } from 'lucide-react';
+
+const title = "SmartComms Migration Specialist | Enterprise Architect";
+const description = "Expert in SmartComms implementation, template migration, and optimizing complex appliance architectures.";
+const keywords = "SmartComms, SC Migrator, Thunderhead, SmartCommunications, CCM, Enterprise Architecture";
+---
+
+<BaseLayout title={title} description={description} keywords={keywords}>
+    <Navbar />
+    
+    <main class="flex-grow">
+        {/* HERO */}
+        <section class="pt-32 pb-20 bg-emerald-950 text-white relative overflow-hidden">
+             {/* Background Effects */}
+             <div class="absolute inset-0 bg-gradient-to-br from-emerald-900 via-slate-900 to-black opacity-80"></div>
+             <div class="absolute right-0 top-0 w-1/2 h-full bg-emerald-500/10 blur-3xl rounded-full translate-x-1/2"></div>
+             
+             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="max-w-3xl">
+                    <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-emerald-900/50 border border-emerald-700">
+                         <span class="text-sm font-semibold text-emerald-300 tracking-wide uppercase">SmartCommunications Expert</span>
+                    </div>
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                        Seamless <span class="text-emerald-400">SmartComms</span> Integrations.
+                    </h1>
+                    <p class="text-xl text-slate-300 mb-8 leading-relaxed">
+                        I help regulated enterprises maximize their investment in SmartCommunications.
+                        From complex draft editor implementations to high-volume batch generation.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="#contact" class="px-8 py-4 rounded-full bg-emerald-500 text-white font-bold hover:bg-emerald-600 transition-colors shadow-lg shadow-emerald-500/20">
+                            Discuss Strategy
+                        </a>
+                    </div>
+                </div>
+             </div>
+        </section>
+
+        {/* FEATURE GRID */}
+        <section class="py-24 bg-white dark:bg-slate-900">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
+                    
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                            <RefreshCw class="w-8 h-8" />
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Migration Strategy</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Moving from Thunderhead/NOW to SmartComms Cloud? I architect safe, phased migration strategies that ensure zero data loss and compliance continuity.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-xl bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                            <Database class="w-8 h-8" />
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Data Integration</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Connecting SmartComms to Salesforce, Guidewire, or custom internal APIs. I build robust data models and Appliances that scale.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="w-14 h-14 rounded-xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600 dark:text-sky-400">
+                            <Zap class="w-8 h-8" />
+                        </div>
+                        <h3 class="text-2xl font-bold text-slate-900 dark:text-white">Interactive Documents</h3>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Building complex Draft Editor experiences. Enable your business users to customize communications safely within compliance guardrails.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        {/* CTA */}
+        <section class="py-20 border-t border-slate-200 dark:border-slate-800">
+            <div class="max-w-4xl mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold mb-6 text-slate-900 dark:text-white">Ready to modernize your CCM stack?</h2>
+                <a href="mailto:hello@kiranic.com" class="inline-flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-bold hover:underline text-lg">
+                    Get in touch <ArrowRight class="w-5 h-5" />
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <Footer />
+</BaseLayout>

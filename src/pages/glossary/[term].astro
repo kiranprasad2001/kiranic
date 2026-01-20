@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Footer from '../../components/Footer.astro';
+import { BookOpen, ArrowLeft } from 'lucide-react';
+import glossaryData from '../../data/glossary.json';
+
+// Generate paths for all terms
+export async function getStaticPaths() {
+  return glossaryData.map((entry) => ({
+    params: { term: entry.term.toLowerCase().replace(/\s+/g, '-') },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { term, definition } = entry;
+
+const title = `What is ${term}? | Enterprise CCM Glossary`;
+const description = `Definition of ${term}: ${definition} Learn how it applies to modern enterprise architecture.`;
+const keywords = `${term}, ${term} definition, CCM glossary, Enterprise Architecture`;
+---
+
+<BaseLayout title={title} description={description} keywords={keywords}>
+    <Navbar />
+    
+    <main class="flex-grow pt-32 pb-20 bg-slate-50 dark:bg-slate-900 min-h-screen">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <a href="/" class="inline-flex items-center gap-2 text-slate-500 hover:text-blue-600 mb-8 transition-colors">
+                <ArrowLeft class="w-4 h-4" /> Back to Home
+            </a>
+
+            <article class="bg-white dark:bg-slate-800 rounded-3xl p-8 md:p-12 shadow-xl border border-slate-100 dark:border-slate-700">
+                <div class="flex items-center gap-4 mb-6">
+                    <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400">
+                        <BookOpen class="w-8 h-8" />
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">
+                        {term}
+                    </h1>
+                </div>
+
+                <div class="prose dark:prose-invert max-w-none">
+                    <p class="text-xl md:text-2xl font-serif leading-relaxed text-slate-700 dark:text-slate-300 border-l-4 border-blue-500 pl-6 my-8">
+                        {definition}
+                    </p>
+
+                    <h2 class="text-2xl font-bold mt-12 mb-4">Why this matters for Enterprise Architecture</h2>
+                    <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                        In the context of modern Digital Experience Platforms (DXP), understanding <strong>{term}</strong> is critical for architects migrating from legacy monoliths. 
+                        Effective implementation of {term} strategies can significantly reduce technical debt and improve time-to-market for regulated communications.
+                    </p>
+
+                    <div class="bg-slate-50 dark:bg-slate-900/50 p-6 rounded-xl mt-12 border border-slate-200 dark:border-slate-800">
+                        <h3 class="font-bold text-slate-900 dark:text-white mb-2">Related Services</h3>
+                        <ul class="space-y-2">
+                            <li><a href="/services/quadient-development" class="text-blue-600 hover:underline">Quadient Inspire Development</a></li>
+                            <li><a href="/services/smartcomms-migration" class="text-blue-600 hover:underline">SmartComms Migration</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <Footer />
+</BaseLayout>

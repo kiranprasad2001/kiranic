@@ -1,0 +1,26 @@
+[
+    {
+        "term": "CCM",
+        "definition": "Customer Communication Management. A strategy and software category for creating, delivering, and managing outbound customer communications."
+    },
+    {
+        "term": "Headless CCM",
+        "definition": "Decoupling the content creation and logic layer of CCM from the delivery channel, allowing communications to be served via API to any frontend."
+    },
+    {
+        "term": "Quadient Inspire",
+        "definition": "An enterprise-grade CCM platform used by banks and insurers to generate high-volume, personalized documents."
+    },
+    {
+        "term": "SmartComms",
+        "definition": "SmartCommunications. A cloud-native CCM platform known for its interactive drafting and Salesforce integration capabilities."
+    },
+    {
+        "term": "ECM",
+        "definition": "Enterprise Content Management. The methodology for managing the lifecycle of an organization's documents and unstructured content."
+    },
+    {
+        "term": "Interactive Document",
+        "definition": "A document (like a policy or contract) that allows a human agent to modify specific data fields or clauses within pre-defined compliance guardrails."
+    }
+]
