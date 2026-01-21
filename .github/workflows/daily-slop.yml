@@ -17,20 +17,25 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
+      - name: Install Dependencies
+        run: npm ci
 
       - name: Generate New Slop
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: node scripts/generate-slop.js
 
+      - name: Publish to Substack
+        env:
+          SUBSTACK_COOKIE: ${{ secrets.SUBSTACK_COOKIE }}
+          SUBSTACK_DOMAIN: ${{ secrets.SUBSTACK_DOMAIN }}
+        run: node scripts/publish-to-substack.js
+        continue-on-error: true # Don't fail the workflow if Substack fails
+
       - name: Commit and Push
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "chore(bot): generate daily ai slop"
-          file_pattern: "src/data/ai-slop.json"
+          file_pattern: "src/content/slop/**/*.md"
           commit_user_name: "AI Slop Bot"
           commit_user_email: "bot@kiranic.com"
