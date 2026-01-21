@@ -71,7 +71,7 @@ const Icon = IconMap[icon] || Bot;
 
             {/* Share / Footer */}
             <div class="mt-12 flex justify-center">
-                 <button class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:scale-105 transition-transform shadow-lg">
+                 <button id="share-btn" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:scale-105 transition-transform shadow-lg cursor-pointer">
                     <Share2 class="w-4 h-4" /> Share this hallucination
                  </button>
             </div>
@@ -81,3 +81,38 @@ const Icon = IconMap[icon] || Bot;
 
     <Footer />
 </BaseLayout>
+
+<script>
+    const shareBtn = document.getElementById('share-btn');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const shareData = {
+                title: document.title,
+                text: document.querySelector('meta[name="description"]')?.getAttribute('content') || "Check out this generated article!",
+                url: window.location.href,
+            };
+
+            if (navigator.share) {
+                try {
+                    await navigator.share(shareData);
+                } catch (err) {
+                    console.error('Error sharing:', err);
+                }
+            } else {
+                // Fallback: Copy to clipboard
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    const originalText = shareBtn.innerHTML;
+                    shareBtn.innerHTML = '<span>Link Copied!</span>';
+                    setTimeout(() => {
+                        shareBtn.innerHTML = originalText;
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                    alert('Copied to clipboard!');
+                }
+            }
+        });
+    }
+</script>
