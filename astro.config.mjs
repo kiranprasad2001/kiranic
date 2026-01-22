@@ -7,7 +7,7 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://kiranic.pages.dev',
+  site: 'https://kiranic.com',
   integrations: [tailwind(), react(), sitemap()],
   output: 'static',
   adapter: cloudflare()
