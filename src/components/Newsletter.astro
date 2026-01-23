@@ -38,13 +38,13 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            const formData = new FormData(form);
+            
             // Disable form
             submitBtn.disabled = true;
             emailInput.disabled = true;
             submitBtn.innerHTML = 'Subscribing...';
             message.textContent = '';
-
-            const formData = new FormData(form);
 
             try {
                 const response = await fetch('/api/subscribe', {
