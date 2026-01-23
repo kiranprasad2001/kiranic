@@ -10,5 +10,9 @@ export default defineConfig({
   site: 'https://kiranic.com',
   integrations: [tailwind(), react(), sitemap()],
   output: 'static',
-  adapter: cloudflare()
+  adapter: cloudflare({
+    platformProxy: {
+      enabled: true,
+    },
+  })
 });

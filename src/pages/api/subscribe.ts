@@ -6,9 +6,12 @@ import type { APIRoute } from 'astro';
 export const POST: APIRoute = async ({ request, locals }) => {
     try {
         const formData = await request.formData();
-        const email = formData.get('email')?.toString();
+        const email = formData.get('email')?.toString().trim();
+
+        console.log('Subscribe attempt:', email); // Debug logging
 
         if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            console.error('Invalid email format:', email);
             return new Response(JSON.stringify({ message: "Invalid email address" }), { status: 400 });
         }
 
