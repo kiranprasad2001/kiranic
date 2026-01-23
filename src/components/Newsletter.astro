@@ -59,7 +59,7 @@
                     message.textContent = data.message;
                     form.reset();
                 } else {
-                    message.className = 'text-sm mt-4 text-red-600 dark:text-red-400 font-medium';
+                    message.className = 'text-sm mt-4 text-red-600 dark:text-red-400 font-medium break-words';
                     message.textContent = data.message || 'Something went wrong. Try again.';
                 }
             } catch (error) {

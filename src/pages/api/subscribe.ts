@@ -10,9 +10,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
         console.log('Subscribe attempt:', email); // Debug logging
 
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            console.error('Invalid email format:', email);
-            return new Response(JSON.stringify({ message: "Invalid email address" }), { status: 400 });
+        if (!email) {
+            return new Response(JSON.stringify({ message: "Email is missing from request" }), { status: 400 });
+        }
+
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            return new Response(JSON.stringify({
+                message: `Invalid email format. Server received: '${email}' (Length: ${email.length})`
+            }), { status: 400 });
         }
 
         // Generate a secure unsubscribe token
