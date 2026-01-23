@@ -10,8 +10,14 @@ let message = 'Processing your request...';
 
 if (Astro.request.method === 'GET' && token) {
     try {
+        // Safe runtime access
         // @ts-ignore
-        const db = Astro.locals.runtime.env.DB;
+        const runtime = Astro.locals.runtime;
+        const db = runtime?.env?.DB;
+
+        if (!db) {
+            throw new Error(`Database binding 'DB' is missing. Available keys: ${Object.keys(runtime?.env || {}).join(', ')}`);
+        }
         
         // Check if token exists
         const { results } = await db.prepare("SELECT email FROM subscribers WHERE token = ?").bind(token).all();
@@ -23,12 +29,12 @@ if (Astro.request.method === 'GET' && token) {
             message = 'You have been successfully unsubscribed. No more slop for you.';
         } else {
             status = 'error';
-            message = 'Invalid or expired unsubscribe token.';
+            message = `Invalid or expired unsubscribe token. (Token received: ${token.substring(0, 8)}...)`;
         }
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
         status = 'error';
-        message = 'Server error processing your request.';
+        message = `Server error: ${e.message || e.toString()}`;
     }
 } else if (!token) {
     status = 'error';
