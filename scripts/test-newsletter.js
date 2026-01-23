@@ -46,11 +46,16 @@ function getLatestArticles() {
                     const summaryMatch = content.match(/summary:\s*["']?([^"'\n]+)["']?/);
                     const slug = path.basename(filePath, '.md');
 
+                    // Extract Year and Month
+                    const dirParts = filePath.split(path.sep);
+                    const month = dirParts[dirParts.length - 2];
+                    const year = dirParts[dirParts.length - 3];
+
                     recentArticles.push({
                         title: headlineMatch ? headlineMatch[1] : 'Test Article Title',
                         summary: summaryMatch ? summaryMatch[1] : 'This is a summary of the article.',
                         date: new Date(), // Just use now for test
-                        url: `https://kiranic.com/ai-slop/${slug}`
+                        url: `https://kiranic.com/ai-slop/${year}/${month}/${slug}/`
                     });
                 }
             });

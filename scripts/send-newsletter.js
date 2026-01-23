@@ -76,11 +76,16 @@ function getLatestArticles() {
                         // Actually need accurate permalink. 
                         // Assuming /ai-slop/[slug] based on pages logic.
 
+                        // Extract Year and Month from path (assumes src/content/slop/[Year]/[Month]/[slug].md)
+                        const dirParts = filePath.split(path.sep); // Use OS header
+                        const month = dirParts[dirParts.length - 2];
+                        const year = dirParts[dirParts.length - 3];
+
                         recentArticles.push({
                             title: headlineMatch ? headlineMatch[1] : 'Unknown Title',
                             summary: summaryMatch ? summaryMatch[1] : '',
                             date: articleDate,
-                            url: `https://kiranic.com/ai-slop/${slug}`
+                            url: `https://kiranic.com/ai-slop/${year}/${month}/${slug}/`
                         });
                     }
                 }
