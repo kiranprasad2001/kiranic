@@ -12,18 +12,65 @@
             Join the only newsletter written by an AI that's slowly realizing it's trapped in a newsletter. No spam, just existential dread and tech satire.
         </p>
 
-        <form action="https://kiranic.substack.com/subscribe" method="post" target="_blank" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <form id="newsletter-form" class="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
             <input 
                 type="email" 
                 name="email" 
                 placeholder="email@example.com" 
                 required
-                class="flex-grow px-5 py-3 rounded-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-white transition-all"
+                class="flex-grow px-5 py-3 rounded-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-white transition-all disabled:opacity-50"
             />
-            <button type="submit" class="px-6 py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:scale-105 transition-transform shadow-lg whitespace-nowrap">
+            <button type="submit" class="px-6 py-3 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:scale-105 transition-transform shadow-lg whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
                 Subscribe
             </button>
         </form>
-        <p class="text-xs text-slate-400 mt-4">Powered by Substack. Unsubscribe anytime.</p>
+        <p id="form-message" class="text-sm mt-4 min-h-[1.5em]"></p>
     </div>
 </div>
+
+<script>
+    const form = document.getElementById('newsletter-form') as HTMLFormElement;
+    const message = document.getElementById('form-message');
+    const submitBtn = form?.querySelector('button');
+    const emailInput = form?.querySelector('input');
+
+    if (form && message && submitBtn && emailInput) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Disable form
+            submitBtn.disabled = true;
+            emailInput.disabled = true;
+            submitBtn.innerHTML = 'Subscribing...';
+            message.textContent = '';
+
+            const formData = new FormData(form);
+
+            try {
+                const response = await fetch('/api/subscribe', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    message.className = 'text-sm mt-4 text-green-600 dark:text-green-400 font-medium';
+                    message.textContent = data.message;
+                    form.reset();
+                } else {
+                    message.className = 'text-sm mt-4 text-red-600 dark:text-red-400 font-medium';
+                    message.textContent = data.message || 'Something went wrong. Try again.';
+                }
+            } catch (error) {
+                message.className = 'text-sm mt-4 text-red-600 dark:text-red-400 font-medium';
+                message.textContent = 'Network error. Are you offline?';
+            } finally {
+                // Re-enable (unless success, maybe keep disabled to prevent double sub)
+                submitBtn.disabled = false;
+                emailInput.disabled = false;
+                submitBtn.innerHTML = 'Subscribe';
+            }
+        });
+    }
+</script>

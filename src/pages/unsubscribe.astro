@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Newspaper, CheckCircle, XCircle } from 'lucide-react';
+
+export const prerender = false;
+
+const token = Astro.url.searchParams.get('token');
+let status = 'loading';
+let message = 'Processing your request...';
+
+if (Astro.request.method === 'GET' && token) {
+    try {
+        // @ts-ignore
+        const db = Astro.locals.runtime.env.DB;
+        
+        // Check if token exists
+        const { results } = await db.prepare("SELECT email FROM subscribers WHERE token = ?").bind(token).all();
+
+        if (results.length > 0) {
+            // Delete subscriber
+            await db.prepare("DELETE FROM subscribers WHERE token = ?").bind(token).run();
+            status = 'success';
+            message = 'You have been successfully unsubscribed. No more slop for you.';
+        } else {
+            status = 'error';
+            message = 'Invalid or expired unsubscribe token.';
+        }
+    } catch (e) {
+        console.error(e);
+        status = 'error';
+        message = 'Server error processing your request.';
+    }
+} else if (!token) {
+    status = 'error';
+    message = 'Missing unsubscribe token.';
+}
+---
+
+<BaseLayout title="Unsubscribe" description="Unsubscribe from the AI Slop newsletter">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex justify-center">
+        <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
+            
+            {status === 'success' ? (
+                <div class="flex flex-col items-center gap-4">
+                    <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center text-green-600 dark:text-green-400">
+                        <CheckCircle class="w-8 h-8" />
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Unsubscribed</h1>
+                    <p class="text-slate-600 dark:text-slate-300">
+                        {message}
+                    </p>
+                    <a href="/" class="mt-4 text-blue-600 dark:text-blue-400 hover:underline">Return Home</a>
+                </div>
+            ) : status === 'error' ? (
+                <div class="flex flex-col items-center gap-4">
+                    <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+                        <XCircle class="w-8 h-8" />
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Error</h1>
+                    <p class="text-slate-600 dark:text-slate-300">
+                        {message}
+                    </p>
+                    <a href="/" class="mt-4 text-blue-600 dark:text-blue-400 hover:underline">Return Home</a>
+                </div>
+            ) : (
+                <div class="flex flex-col items-center gap-4">
+                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 animate-pulse">
+                        <Newspaper class="w-8 h-8" />
+                    </div>
+                    <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Processing...</h1>
+                </div>
+            )}
+
+        </div>
+    </div>
+</BaseLayout>

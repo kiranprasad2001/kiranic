@@ -1,7 +1,14 @@
 {
-    "name": "kiranic",
-    "compatibility_date": "2025-01-19",
-    "assets": {
-        "directory": "./dist"
-    }
+	"name": "kiranic",
+	"compatibility_date": "2024-01-23",
+	"assets": {
+		"directory": "./dist"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "kiranic-db",
+			"database_id": "be6946fb-dd0b-46c1-825c-784932a6e9bd"
+		}
+	]
 }
