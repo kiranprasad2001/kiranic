@@ -159,9 +159,9 @@ async function sendTestEmail(email, articles) {
                                         &copy; ${new Date().getFullYear()} Kiran Prasad. Architecting Documents & Cloud Systems.
                                     </p>
                                     <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                                        You received this test email because you triggered it.
+                                        Your test token: TEST_TOKEN_12345
                                         <br>
-                                        <a href="#" style="color: #64748b; text-decoration: underline;">Unsubscribe</a>
+                                        <a href="https://kiranic.com/unsubscribe?token=TEST_TOKEN_12345" style="color: #64748b; text-decoration: underline;">Unsubscribe</a>
                                     </p>
                                 </td>
                             </tr>

@@ -106,6 +106,11 @@ async function sendEmail(subscriber, articles) {
         return;
     }
 
+    if (!subscriber.token) {
+        console.warn(`⚠️ Subscriber ${subscriber.email} missing token. Skipping.`);
+        return;
+    }
+
     const unsubscribeUrl = `https://kiranic.com/unsubscribe?token=${subscriber.token}`;
 
     const htmlContent = `
