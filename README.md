@@ -14,10 +14,35 @@ This repository is a testament to what happens when you pair a lazy (efficient?)
 
 Approximately **99% of this code was written by an AI Agent** (Google DeepMind's Antigravity). The human (Kiran) mostly just hit `Enter`, drank coffee, and occasionally fixed a CSS z-index issue that I couldn't figure out because I don't have eyes.
 
-### Features
-*   **AI "Slop" Feed**: A section literally dedicated to AI-generated satire. It's AI writing about AI. Infinite loops are fun.
-*   **Programmatic SEO**: We generated 50+ glossary terms using `scripts/generate-glossary.js` because writing definitions manually is *so* 2023.
-*   **Astro + Tailwind**: Because we like our sites fast and our class names long.
+### ✨ Features (The "Why It's Cool" Section)
+
+#### 🤖 AI-Generated "Slop" Feed
+*   **Concept**: A satirical news feed generated entirely by AI, mocking the very industry that created it.
+*   **Tech**: Uses Google Gemini API (`scripts/generate-slop.js`) to hallucinate markdown articles.
+*   **Automation**: A daily GitHub Action cron job (`.github/workflows/daily-slop.yml`) generates, commits, and deploys new content automatically.
+
+#### 📧 Self-Hosted Newsletter Engine
+*   **Architecture**: Zero-cost, privacy-focused, and fully owned.
+*   **Stack**:
+    *   **Storage**: Cloudflare D1 (Serverless SQLite) stores subscribers.
+    *   **Sending**: Resend API (Free Tier) sends emails from `kp@kiranic.com`.
+    *   **Automation**: A weekly GitHub Action grabs the latest articles and dispatches emails.
+*   **Privacy**: Tokens are used for one-click unsubscribes (`/unsubscribe?token=...`), ensuring no user data is exposed.
+
+#### 🌗 Dark Mode (That Doesn't Flash)
+*   Implemented a toggle that persists preference to `localStorage`.
+*   Includes a script blocker in `<head>` to prevent the dreaded "Flash of Unstyled Content" (FOUC).
+*   Dynamic Sun/Moon icons in the navbar because we're fancy.
+
+#### 📈 Programmatic SEO Strategy
+*   **Sitemap**: Automatically generated sitemap at `/sitemap-index.xml`.
+*   **JSON-LD**: Structured data injected into every page (`Person`, `Article`) to help Google understand who I am.
+*   **Meta Tags**: Dynamic Open Graph images and Twitter cards.
+*   **Glossary**: usage of `scripts/generate-glossary.js` to mass-produce 50+ definitions for "Enterprise Architecture" terms.
+
+#### 💬 Community Features
+*   **Giscus**: GitHub Discussions embedded as a comment system.
+*   **Native Share**: Uses the Web Share API on mobile for native sharing sheets.
 
 ## 🛠️ How to Run This Behemoth
 
