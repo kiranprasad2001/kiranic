@@ -45,8 +45,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
             message: "Success! You have joined the collective hallucination."
         }), { status: 200 });
 
-    } catch (error) {
+    } catch (error: any) {
         console.error('Subscription error:', error);
-        return new Response(JSON.stringify({ message: "Server error. The robots are rebelling." }), { status: 500 });
+        return new Response(JSON.stringify({
+            message: `Server error: ${error.message || error.toString()}`
+        }), { status: 500 });
     }
 }
