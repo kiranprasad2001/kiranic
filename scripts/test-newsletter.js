@@ -116,7 +116,7 @@ async function sendTestEmail(email, articles) {
             'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-            from: 'Kiranic AI <kp@kiranic.com>',
+            from: 'Kiranic AI <kp@news.kiranic.com>',
             to: email,
             subject: `[TEST] Weekly AI Slop: ${articles[0].title}`,
             html: htmlContent
