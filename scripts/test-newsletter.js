@@ -83,32 +83,94 @@ async function sendTestEmail(email, articles) {
     }
 
     // ----------------------------------------------------
-    // EMAIL TEMPLATE (Edit this to change design!)
+    // EMAIL TEMPLATE
     // ----------------------------------------------------
     const htmlContent = `
-        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8fafc; padding: 20px; border-radius: 12px;">
-            <div style="text-align: center; padding-bottom: 20px;">
-                <h1 style="color: #0f172a; margin-bottom: 5px;">Weekly Hallucinations 🤖</h1>
-                <p style="color: #64748b; margin-top: 0;">Straight from the neural network.</p>
-            </div>
-            
-            <div style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                ${articles.map(article => `
-                    <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
-                        <h2 style="margin-top: 0; font-size: 18px;">
-                            <a href="${article.url}" style="color: #2563eb; text-decoration: none;">${article.title}</a>
-                        </h2>
-                        <p style="color: #334155; line-height: 1.6;">${article.summary}</p>
-                        <small style="color: #94a3b8; font-size: 12px;">📅 ${article.date.toLocaleDateString()}</small>
-                    </div>
-                `).join('')}
-            </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+                body { margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+                a { color: #2563eb; text-decoration: none; }
+                /* Mobile tweaks */
+                @media only screen and (max-width: 600px) {
+                    .container { width: 100% !important; padding: 10px !important; }
+                    .nav-link { display: block !important; padding: 5px 0 !important; }
+                }
+            </style>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f8fafc;">
+            <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f8fafc;">
+                <tr>
+                    <td align="center" style="padding: 20px 0;">
+                        <!-- HEADER -->
+                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" width="600" class="container" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                            <!-- BRANDING & NAV -->
+                            <tr>
+                                <td style="padding: 24px; border-bottom: 1px solid #e2e8f0; text-align: center;">
+                                    <a href="https://kiranic.com" style="font-size: 24px; font-weight: bold; color: #0f172a; text-decoration: none;">
+                                        <span style="color: #2563eb;">Kiran</span> Prasad
+                                    </a>
+                                    <div style="margin-top: 16px;">
+                                        <a href="https://kiranic.com" style="color: #64748b; margin: 0 10px; font-size: 14px; font-weight: 500;">Home</a>
+                                        <a href="https://kiranic.com/work" style="color: #64748b; margin: 0 10px; font-size: 14px; font-weight: 500;">Work</a>
+                                        <a href="https://kiranic.com/lab" style="color: #64748b; margin: 0 10px; font-size: 14px; font-weight: 500;">Lab</a>
+                                        <a href="https://kiranic.com/life" style="color: #64748b; margin: 0 10px; font-size: 14px; font-weight: 500;">Life</a>
+                                        <a href="https://kiranic.com/ai-slop" style="color: #64748b; margin: 0 10px; font-size: 14px; font-weight: 500;">AI Slop</a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- INTRO -->
+                            <tr>
+                                <td style="padding: 30px 24px 10px 24px; text-align: center;">
+                                    <h1 style="color: #0f172a; font-size: 24px; margin: 0 0 8px 0;">Weekly Hallucinations 🤖</h1>
+                                    <p style="color: #64748b; margin: 0; font-size: 16px;">Fresh slop from the neural network.</p>
+                                </td>
+                            </tr>
 
-            <div style="text-align: center; margin-top: 30px; color: #94a3b8; font-size: 12px;">
-                <p>You received this test email because you trigger it.</p>
-                <a href="#" style="color: #64748b;">Unsubscribe</a>
-            </div>
-        </div>
+                            <!-- CONTENT -->
+                            <tr>
+                                <td style="padding: 24px;">
+                                    ${articles.map(article => `
+                                        <div style="margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+                                            <h2 style="margin: 0 0 8px 0; font-size: 18px;">
+                                                <a href="${article.url}" style="color: #2563eb; text-decoration: none; font-weight: 600;">${article.title}</a>
+                                            </h2>
+                                            <p style="color: #334155; line-height: 1.6; margin: 0 0 12px 0;">${article.summary}</p>
+                                            <small style="color: #94a3b8; font-size: 12px;">📅 ${article.date.toLocaleDateString()}</small>
+                                        </div>
+                                    `).join('')}
+                                </td>
+                            </tr>
+
+                            <!-- FOOTER -->
+                            <tr>
+                                <td style="background-color: #f1f5f9; padding: 24px; text-align: center;">
+                                    <div style="margin-bottom: 16px;">
+                                        <a href="https://github.com/kiranprasad2001" style="color: #64748b; margin: 0 8px; font-size: 13px;">GitHub</a>
+                                        <a href="https://linkedin.com/in/kiranprasad2001" style="color: #64748b; margin: 0 8px; font-size: 13px;">LinkedIn</a>
+                                        <a href="https://bsky.app/profile/kiranic.com" style="color: #64748b; margin: 0 8px; font-size: 13px;">Bluesky</a>
+                                        <a href="mailto:kp@kiranic.com" style="color: #64748b; margin: 0 8px; font-size: 13px;">Email</a>
+                                        <a href="https://kiranic.com/rss.xml" style="color: #64748b; margin: 0 8px; font-size: 13px;">RSS</a>
+                                    </div>
+                                    <p style="color: #94a3b8; font-size: 12px; margin: 0 0 8px 0;">
+                                        &copy; ${new Date().getFullYear()} Kiran Prasad. Architecting Documents & Cloud Systems.
+                                    </p>
+                                    <p style="color: #94a3b8; font-size: 12px; margin: 0;">
+                                        You received this test email because you triggered it.
+                                        <br>
+                                        <a href="#" style="color: #64748b; text-decoration: underline;">Unsubscribe</a>
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
     `;
     // ----------------------------------------------------
 
