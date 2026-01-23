@@ -24,8 +24,17 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const token = crypto.randomUUID();
 
         // Access D1 database from Cloudflare runtime
-        // @ts-ignore - DB type definition is in env.d.ts but sometimes editor lags
-        const db = locals.runtime.env.DB;
+        // @ts-ignore
+        const runtime = locals.runtime;
+
+        console.log('Runtime keys:', Object.keys(runtime || {}));
+        console.log('Env keys:', Object.keys(runtime?.env || {}));
+
+        const db = runtime?.env?.DB;
+
+        if (!db) {
+            throw new Error(`Database binding 'DB' is missing. Available keys: ${Object.keys(runtime?.env || {}).join(', ')}`);
+        }
 
         // Check if exists
         const { results } = await db.prepare("SELECT email FROM subscribers WHERE email = ?").bind(email).all();
