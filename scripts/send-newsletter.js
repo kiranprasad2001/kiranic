@@ -153,8 +153,8 @@ async function sendEmail(subscriber, articles) {
                             <!-- INTRO -->
                             <tr>
                                 <td style="padding: 30px 24px 10px 24px; text-align: center;">
-                                    <h1 style="color: #0f172a; font-size: 24px; margin: 0 0 8px 0;">Weekly Hallucinations 🤖</h1>
-                                    <p style="color: #64748b; margin: 0; font-size: 16px;">Fresh slop from the neural network.</p>
+                                    <h1 style="color: #0f172a; font-size: 24px; margin: 0 0 8px 0;">This Week in AI & Tech 📡</h1>
+                                    <p style="color: #64748b; margin: 0; font-size: 16px;">Signals from the Latent Space — your weekly digest.</p>
                                 </td>
                             </tr>
 
@@ -187,7 +187,7 @@ async function sendEmail(subscriber, articles) {
                                         &copy; ${new Date().getFullYear()} Kiran Prasad. Architecting Documents & Cloud Systems.
                                     </p>
                                     <p style="color: #94a3b8; font-size: 12px; margin: 0;">
-                                        <a href="${unsubscribeUrl}" style="color: #64748b; text-decoration: underline;">Unsubscribe</a> from these hallucinations.
+                                        <a href="${unsubscribeUrl}" style="color: #64748b; text-decoration: underline;">Unsubscribe</a> from these signals.
                                     </p>
                                 </td>
                             </tr>
@@ -208,7 +208,7 @@ async function sendEmail(subscriber, articles) {
         body: JSON.stringify({
             from: 'Kiranic AI <kp@news.kiranic.com>',
             to: subscriber.email,
-            subject: `Weekly AI Slop: ${articles[0].title}`,
+            subject: `Weekly Signals: ${articles[0].title}`,
             html: htmlContent
         })
     });

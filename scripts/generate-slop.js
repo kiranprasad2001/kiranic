@@ -17,7 +17,7 @@ if (!GEMINI_API_KEY) {
     process.exit(1);
 }
 
-// Recursively find recent markdown files
+// Recursively find recent headlines to avoid duplicates
 function getRecentHeadlines(dir) {
     let results = [];
     if (!fs.existsSync(dir)) return [];
@@ -43,29 +43,32 @@ function slugify(text) {
         .replace(/[^\w\-]+/g, '')
         .replace(/\-\-+/g, '-')
         .replace(/^-+/, '')
-        .replace(/-+$/, '');
+        .replace(/-+$/, '')
+        .substring(0, 80); // Cap slug length for sanity
 }
 
 async function callGeminiAPI(prompt, recentHeadlines) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-    // Ensure we send a string, not an array
-    const recentHeadlinesText = Array.isArray(recentHeadlines) ? recentHeadlines.slice(-10).join("\n") : "";
+    const recentHeadlinesText = Array.isArray(recentHeadlines) ? recentHeadlines.slice(-15).join("\n") : "";
 
     const requestBody = {
         contents: [{
             parts: [{
-                text: `${prompt}\n\nRecent headlines to avoid:\n${recentHeadlinesText}`
+                text: `${prompt}\n\nRecent headlines already covered (DO NOT repeat these topics):\n${recentHeadlinesText}`
             }]
         }],
         generationConfig: {
-            temperature: 0.9,
+            temperature: 0.7,
             topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 8192, // Increased for longer articles
+            topP: 0.9,
+            maxOutputTokens: 8192,
             response_mime_type: "application/json",
             response_schema: newsSchema
-        }
+        },
+        tools: [{
+            google_search: {}
+        }]
     };
 
     const response = await fetch(url, {
@@ -75,7 +78,8 @@ async function callGeminiAPI(prompt, recentHeadlines) {
     });
 
     if (!response.ok) {
-        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+        const errorText = await response.text();
+        throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
@@ -91,26 +95,59 @@ async function callGeminiAPI(prompt, recentHeadlines) {
 
 async function main() {
     try {
-        console.log("Reading existing content...");
+        console.log("Reading existing content to avoid duplicates...");
         const recentHeadlines = getRecentHeadlines(CONTENT_DIR);
+        console.log(`Found ${recentHeadlines.length} existing articles.`);
 
-        console.log("Generating new long-form content...");
+        console.log("Generating today's AI & Tech digest...");
         const prompt = `
-            You are a satirical tech news generator for a blog called "News from the Latent Space". 
-            Generate a funny, fictional news story about AI, LLMs, or Silicon Valley engineering culture.
-            The tone should be cynical, witty, and absurdist but rooted in real tech terminology.
-            
-            CRITICAL REQUIREMENT: The content MUST be a long-form article (at least 800 words).
-            It should include:
-            - A catchy, clickbait headline.
-            - A detailed summary.
-            - Markdown formatted body text with:
-                - Subheadings (##)
-                - Fake quotes from industry experts.
-                - Bullet points of "key takeaways" or "features".
-                - A "Conclusion" or "Market Reaction" section.
-            
-            Make it sound like a deep investigative piece or a major product launch announcement.
+            You are a tech journalist writing a daily digest called "Signals from the Latent Space" 
+            for a developer-focused audience. Your job is to research and summarize the most important 
+            AI, machine learning, and tech developments from today or the past 24 hours.
+
+            Use web search to find REAL, current stories. Do NOT fabricate or invent news.
+
+            Generate a single digest article that covers 3-5 of the most significant stories. 
+            The article should be:
+
+            FORMAT:
+            - A compelling headline that captures the day's theme (e.g., "OpenAI Ships GPT-5, 
+              Google Responds with Gemini Ultra 2" or "Open Source LLMs Hit New Benchmarks 
+              as Regulation Debate Heats Up")
+            - A concise summary (2-3 sentences) for the email digest preview
+            - Markdown-formatted body with:
+                - Each story as a ## subheading
+                - 2-3 paragraph summary per story explaining what happened and why it matters
+                - A "**Why it matters:**" callout for each story
+                - A final "## The Bottom Line" section with a 2-3 sentence synthesis
+
+            TONE:
+            - Professional but approachable — like a smart colleague explaining the news
+            - Opinionated where appropriate — don't just summarize, analyze
+            - Concise — respect the reader's time, aim for 600-900 words total
+            - Use concrete details: numbers, names, dates
+
+            CONTENT SCOPE:
+            - Primary: AI/ML, LLMs, foundation models, AI regulation, AI products
+            - Secondary: Cloud infrastructure, developer tools, open source, startups
+            - Avoid: Crypto, gaming, consumer electronics (unless AI-related)
+
+            TAGS: Use 3-5 specific topic tags (e.g., "LLMs", "OpenAI", "Open Source", "Regulation")
+
+            SOURCES: Include the title and URL for each story's primary source. These should be 
+            real, working URLs from reputable tech publications (TechCrunch, The Verge, Ars Technica, 
+            VentureBeat, Hacker News, official blog posts, arXiv papers, etc.).
+
+            ICON: Choose the most fitting icon for the digest's primary theme:
+            - Bot: AI/chatbot news
+            - Cpu: Hardware/chips/compute
+            - Cloud: Cloud/infrastructure
+            - Database: Data/training data
+            - Terminal: Developer tools/coding
+            - Code: Open source/programming
+            - Sparkles: Product launches/new features
+            - AlertTriangle: Security/regulation/warnings
+            - Server: Infrastructure/scaling
         `;
 
         const newItem = await callGeminiAPI(prompt, recentHeadlines);
@@ -121,12 +158,19 @@ async function main() {
         const year = date.getFullYear().toString();
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
 
-        // Allow overriding icon
+        // Validate icon
         if (!ICONS.includes(newItem.icon)) {
-            newItem.icon = "Bot";
+            newItem.icon = "Sparkles";
         }
 
-        console.log("New Item Generated:", newItem.headline);
+        // Ensure sources array exists
+        if (!Array.isArray(newItem.sources)) {
+            newItem.sources = [];
+        }
+
+        console.log("Digest Generated:", newItem.headline);
+        console.log(`  Stories: ${newItem.tags?.join(', ')}`);
+        console.log(`  Sources: ${newItem.sources.length} linked`);
 
         // Directory Structure: src/content/slop/[Year]/[Month]/
         const targetDir = path.join(CONTENT_DIR, year, month);
@@ -141,6 +185,13 @@ async function main() {
         const safeHeadline = newItem.headline.replace(/"/g, '\\"');
         const safeSummary = newItem.summary.replace(/"/g, '\\"');
 
+        // Build sources section to append to content
+        let sourcesSection = '';
+        if (newItem.sources.length > 0) {
+            sourcesSection = '\n\n---\n\n## 📎 Sources\n\n';
+            sourcesSection += newItem.sources.map(s => `- [${s.title}](${s.url})`).join('\n');
+        }
+
         const fileContent = `---
 headline: "${safeHeadline}"
 date: "${dateStr}"
@@ -149,14 +200,14 @@ tags: ${JSON.stringify(newItem.tags)}
 icon: "${newItem.icon}"
 ---
 
-${newItem.content}
+${newItem.content}${sourcesSection}
 `;
 
         fs.writeFileSync(filePath, fileContent);
-        console.log(`Success! Slop generated at: ${filePath}`);
+        console.log(`Success! Digest generated at: ${filePath}`);
 
     } catch (error) {
-        console.error("Failed to generate slop:", error);
+        console.error("Failed to generate digest:", error);
         process.exit(1);
     }
 }

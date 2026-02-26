@@ -11,9 +11,20 @@ export const newsSchema = {
         icon: {
             type: "STRING",
             enum: ["Bot", "Terminal", "Cpu", "Sparkles", "AlertTriangle", "Cloud", "Server", "Database", "Code"]
+        },
+        sources: {
+            type: "ARRAY",
+            items: {
+                type: "OBJECT",
+                properties: {
+                    title: { type: "STRING" },
+                    url: { type: "STRING" }
+                },
+                required: ["title", "url"]
+            }
         }
     },
-    required: ["headline", "summary", "content", "tags", "icon"]
+    required: ["headline", "summary", "content", "tags", "icon", "sources"]
 };
 
 export const glossarySchema = {
