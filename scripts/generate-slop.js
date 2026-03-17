@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename);
 
 // Configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const CONTENT_DIR = path.join(__dirname, '../src/content/slop');
 const ICONS = ["Bot", "Terminal", "Cpu", "Sparkles", "AlertTriangle", "Cloud", "Server", "Database", "Code"];
 
@@ -48,7 +49,7 @@ function slugify(text) {
 }
 
 async function callGeminiAPI(prompt, recentHeadlines) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
     const recentHeadlinesText = Array.isArray(recentHeadlines) ? recentHeadlines.slice(-15).join("\n") : "";
 

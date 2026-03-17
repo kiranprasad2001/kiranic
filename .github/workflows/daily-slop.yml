@@ -23,6 +23,7 @@ jobs:
       - name: Generate New Slop
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
         run: node scripts/generate-slop.js
 
       - name: Publish to Substack
