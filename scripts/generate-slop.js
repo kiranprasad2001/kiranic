@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { newsSchema } from './schema.js';
 import 'dotenv/config';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -63,9 +62,7 @@ async function callGeminiAPI(prompt, recentHeadlines) {
             temperature: 0.7,
             topK: 40,
             topP: 0.9,
-            maxOutputTokens: 8192,
-            response_mime_type: "application/json",
-            response_schema: newsSchema
+            maxOutputTokens: 8192
         },
         tools: [{
             google_search: {}
@@ -86,11 +83,20 @@ async function callGeminiAPI(prompt, recentHeadlines) {
     const data = await response.json();
 
     try {
-        const text = data.candidates[0].content.parts[0].text;
+        // Find the text part in the response (may be among multiple parts with grounding data)
+        const parts = data.candidates[0].content.parts;
+        const textPart = parts.find(p => p.text);
+        if (!textPart) throw new Error("No text part in response");
+
+        let text = textPart.text.trim();
+        // Strip markdown code fences if the model wraps JSON in ```json ... ```
+        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+        if (jsonMatch) text = jsonMatch[1].trim();
+
         return JSON.parse(text);
     } catch (e) {
         console.error("Full API Response:", JSON.stringify(data, null, 2));
-        throw new Error("Failed to parse response");
+        throw new Error(`Failed to parse response: ${e.message}`);
     }
 }
 
@@ -149,6 +155,17 @@ async function main() {
             - Sparkles: Product launches/new features
             - AlertTriangle: Security/regulation/warnings
             - Server: Infrastructure/scaling
+
+            IMPORTANT: You MUST respond with ONLY a valid JSON object (no extra text, no markdown fences).
+            Use this exact structure:
+            {
+                "headline": "Your headline here",
+                "summary": "2-3 sentence summary",
+                "content": "Full markdown body",
+                "tags": ["Tag1", "Tag2"],
+                "icon": "Bot",
+                "sources": [{"title": "Source Title", "url": "https://..."}]
+            }
         `;
 
         const newItem = await callGeminiAPI(prompt, recentHeadlines);
