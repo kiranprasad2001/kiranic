@@ -186,6 +186,11 @@ async function main() {
             newItem.icon = "Sparkles";
         }
 
+        // Ensure tags is always a string array (JSON.stringify(undefined) writes literal "undefined")
+        if (!Array.isArray(newItem.tags)) {
+            newItem.tags = newItem.tags ? [String(newItem.tags)] : [];
+        }
+
         // Ensure sources array exists
         if (!Array.isArray(newItem.sources)) {
             newItem.sources = [];
