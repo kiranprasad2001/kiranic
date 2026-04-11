@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 
 // Configuration
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const CONTENT_DIR = path.join(__dirname, '../src/content/slop');
 const ICONS = ["Bot", "Terminal", "Cpu", "Sparkles", "AlertTriangle", "Cloud", "Server", "Database", "Code"];
 
@@ -48,8 +47,51 @@ function slugify(text) {
         .substring(0, 80); // Cap slug length for sanity
 }
 
-async function callGeminiAPI(prompt, recentHeadlines) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+// Resolve the best available Gemini model at runtime.
+// Respects GEMINI_MODEL env override; otherwise queries the models API and picks
+// the highest-versioned stable flash model, falling back gracefully if unreachable.
+async function resolveModel() {
+    if (process.env.GEMINI_MODEL) return process.env.GEMINI_MODEL;
+    const FALLBACK = 'gemini-2.5-flash';
+
+    try {
+        const res = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models?key=${GEMINI_API_KEY}`
+        );
+        if (!res.ok) return FALLBACK;
+
+        const { models = [] } = await res.json();
+
+        // Score a model: higher = better. Prefers stable > preview, flash > pro, newer > older.
+        function scoreModel(name) {
+            const v = name.match(/gemini-(\d+)\.(\d+)/);
+            if (!v) return -1;
+            const version = parseInt(v[1]) * 100 + parseInt(v[2]); // e.g. "2.5" → 205
+            const isFlash = name.includes('-flash');
+            const isStable = !/-(preview|exp|experimental|it)\b/.test(name);
+            return version * 10000 + (isStable ? 2000 : 0) + (isFlash ? 1000 : 0);
+        }
+
+        const best = models
+            .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
+            .map(m => m.name.replace('models/', ''))
+            .filter(n => n.startsWith('gemini-'))
+            .sort((a, b) => scoreModel(b) - scoreModel(a))[0];
+
+        if (best) {
+            console.log(`Resolved model: ${best}`);
+            return best;
+        }
+    } catch {
+        // Models API unreachable — proceed with fallback
+    }
+
+    console.log(`Using fallback model: ${FALLBACK}`);
+    return FALLBACK;
+}
+
+async function callGeminiAPI(prompt, recentHeadlines, model) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
     const recentHeadlinesText = Array.isArray(recentHeadlines) ? recentHeadlines.slice(-15).join("\n") : "";
 
@@ -118,6 +160,8 @@ async function main() {
         const recentHeadlines = getRecentHeadlines(CONTENT_DIR);
         console.log(`Found ${recentHeadlines.length} existing articles.`);
 
+        const model = await resolveModel();
+
         console.log("Generating today's AI & Tech digest...");
         const prompt = `
             You are a tech journalist writing a daily digest called "Signals from the Latent Space" 
@@ -180,7 +224,7 @@ async function main() {
             }
         `;
 
-        const newItem = await callGeminiAPI(prompt, recentHeadlines);
+        const newItem = await callGeminiAPI(prompt, recentHeadlines, model);
 
         // Metadata
         const date = new Date();
