@@ -2,7 +2,7 @@
 headline: "Agentic AI Accelerates: NVIDIA's Hardware Evolution, OpenAI's Security Focus, and Regulatory Friction Define the Week"
 date: "2026-03-19"
 summary: "This week in AI saw NVIDIA pushing the boundaries of inference with its Vera Rubin platform, signaling a clear shift towards agentic AI and physical computing. OpenAI bolstered its enterprise offerings by acquiring Promptfoo and releasing efficient GPT-5.4 mini models, while Anthropic's ethical stance led to a Pentagon standoff, yet paradoxically fueled its rapid enterprise market growth. Meanwhile, the regulatory landscape remains a hotbed of activity, with Colorado reworking its AI Act amidst federal efforts to establish national standards."
-tags: undefined
+tags: ["Agentic AI", "NVIDIA", "OpenAI", "Regulation"]
 icon: "Sparkles"
 ---
 
