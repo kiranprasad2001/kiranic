@@ -6,7 +6,7 @@ const slopCollection = defineCollection({
         headline: z.string(),
         summary: z.string(),
         date: z.coerce.date(),
-        tags: z.array(z.string()),
+        tags: z.union([z.array(z.string()), z.string()]).transform(v => Array.isArray(v) ? v : (v === 'undefined' ? [] : [v])),
         icon: z.string().optional(),
     })
 });

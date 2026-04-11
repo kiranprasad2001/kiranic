@@ -2,7 +2,7 @@
 headline: "Compute Demand Skyrockets, Inference Costs Plummet, and 'Vibe Coding' Goes Mainstream as AI Regulation Adapts"
 date: "2026-04-07"
 summary: "The AI landscape is witnessing a dual trend of massive infrastructure investment and dramatic efficiency gains, with Anthropic securing gigawatts of compute and Gartner predicting a a 90% drop in LLM inference costs by 2030. Simultaneously, 'vibe coding' is reshaping developer workflows, and US states, alongside California, are actively legislating AI use to ensure safety and transparency."
-tags: undefined
+tags: ["AI Infrastructure", "Inference", "Vibe Coding", "AI Regulation"]
 icon: "Sparkles"
 ---
 
