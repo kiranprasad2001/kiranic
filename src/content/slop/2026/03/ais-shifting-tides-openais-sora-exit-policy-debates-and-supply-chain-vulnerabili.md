@@ -2,7 +2,7 @@
 headline: "AI's Shifting Tides: OpenAI's Sora Exit, Policy Debates, and Supply Chain Vulnerabilities"
 date: "2026-03-25"
 summary: "This week, the AI landscape saw a significant product retraction as OpenAI unexpectedly shut down its Sora video generation app. Meanwhile, the U.S. government intensified its push for a unified national AI policy, while facing a legal challenge from Anthropic over ethical AI use in defense. Developers were also reminded of critical security risks following a sophisticated supply chain attack on the popular LiteLLM proxy."
-tags: undefined
+tags: ["OpenAI", "AI Policy", "Supply Chain Security", "Sora"]
 icon: "Sparkles"
 ---
 
