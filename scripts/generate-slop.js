@@ -90,8 +90,13 @@ async function callGeminiAPI(prompt, recentHeadlines) {
 
         let text = textPart.text.trim();
         // Strip markdown code fences if the model wraps JSON in ```json ... ```
-        const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-        if (jsonMatch) text = jsonMatch[1].trim();
+        // Use greedy match so content containing backticks doesn't break the outer fence match
+        const fenceMatch = text.match(/^```(?:json)?\s*([\s\S]*)```\s*$/);
+        if (fenceMatch) text = fenceMatch[1].trim();
+        // Extract the JSON object by finding the outermost braces, handles any surrounding text
+        const jsonStart = text.indexOf('{');
+        const jsonEnd = text.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd > jsonStart) text = text.slice(jsonStart, jsonEnd + 1);
 
         return JSON.parse(text);
     } catch (e) {
