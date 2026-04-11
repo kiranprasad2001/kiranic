@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import 'dotenv/config';
+import { jsonrepair } from 'jsonrepair';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -98,7 +99,13 @@ async function callGeminiAPI(prompt, recentHeadlines) {
         const jsonEnd = text.lastIndexOf('}');
         if (jsonStart !== -1 && jsonEnd > jsonStart) text = text.slice(jsonStart, jsonEnd + 1);
 
-        return JSON.parse(text);
+        try {
+            return JSON.parse(text);
+        } catch {
+            // Gemini sometimes returns JSON with unescaped quotes or other LLM artifacts;
+            // jsonrepair fixes the most common cases before we try again.
+            return JSON.parse(jsonrepair(text));
+        }
     } catch (e) {
         console.error("Full API Response:", JSON.stringify(data, null, 2));
         throw new Error(`Failed to parse response: ${e.message}`);
