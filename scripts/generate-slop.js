@@ -112,13 +112,24 @@ async function callGeminiAPI(prompt, recentHeadlines, model) {
         }]
     };
 
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody)
-    });
+    const MAX_RETRIES = 5;
+    let response;
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
 
-    if (!response.ok) {
+        if (response.ok) break;
+
+        if (response.status === 503 && attempt < MAX_RETRIES) {
+            const delay = Math.min(2 ** attempt * 1000, 30000); // 2s, 4s, 8s, 16s, 30s
+            console.warn(`Attempt ${attempt}/${MAX_RETRIES} got 503. Retrying in ${delay / 1000}s...`);
+            await new Promise(r => setTimeout(r, delay));
+            continue;
+        }
+
         const errorText = await response.text();
         throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
     }
