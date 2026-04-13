@@ -89,8 +89,9 @@ async function main() {
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
+    let page;
     try {
-        const page = await browser.newPage();
+        page = await browser.newPage();
 
         // 1. Set Cookie
         await page.setCookie({
@@ -211,8 +212,9 @@ async function main() {
 
     } catch (e) {
         console.error("Puppeteer Error:", e);
-        // Save screenshot
-        await page.screenshot({ path: 'substack-error.png' });
+        if (page) {
+            await page.screenshot({ path: 'substack-error.png' }).catch(() => {});
+        }
         process.exit(1);
     } finally {
         await browser.close();
