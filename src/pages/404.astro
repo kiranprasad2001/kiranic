@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { ArrowLeft, Search } from 'lucide-react';
+---
+
+<BaseLayout title="Page Not Found" description="The page you're looking for doesn't exist.">
+    <Navbar />
+
+    <main class="flex-grow flex items-center justify-center min-h-[60vh] px-4">
+        <div class="text-center max-w-md">
+            <p class="text-8xl font-bold text-slate-200 dark:text-slate-800 mb-4">404</p>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Page not found</h1>
+            <p class="text-slate-600 dark:text-slate-400 mb-8">
+                The page you're looking for doesn't exist or has been moved.
+            </p>
+            <a
+                href="/"
+                class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium transition-colors"
+            >
+                <ArrowLeft class="w-4 h-4" />
+                Back to Home
+            </a>
+        </div>
+    </main>
+
+    <Footer />
+</BaseLayout>

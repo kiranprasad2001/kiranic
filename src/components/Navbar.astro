@@ -8,6 +8,8 @@ const links = [
     { name: 'Life', href: '/life' },
     { name: 'AI Slop', href: '/ai-slop' },
 ];
+
+const currentPath = Astro.url.pathname;
 ---
 
 <header class="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur supports-[backdrop-filter]:bg-slate-50/60 transition-colors">
@@ -32,9 +34,10 @@ const links = [
             {/* Desktop Navigation */}
             <nav class="hidden md:flex items-center space-x-8">
                 {links.map((link) => (
-                    <a 
+                    <a
                         href={link.href}
-                        class="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors"
+                        class="text-sm font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
+                        aria-current={currentPath === link.href ? "page" : undefined}
                     >
                         {link.name}
                     </a>
@@ -43,11 +46,13 @@ const links = [
 
             {/* Mobile Menu Button */}
             <div class="md:hidden">
-                <button 
+                <button
                     id="mobile-menu-btn"
-                    type="button" 
-                    class="p-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400"
+                    type="button"
+                    class="p-2 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-md"
                     aria-label="Toggle menu"
+                    aria-expanded="false"
+                    aria-controls="mobile-menu"
                 >
                     <Menu className="h-6 w-6 block" id="menu-icon-open" />
                     <X className="h-6 w-6 hidden" id="menu-icon-close" />
@@ -63,6 +68,7 @@ const links = [
                 <a
                     href={link.href}
                     class="block py-2 text-base font-medium text-slate-600 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400"
+                    aria-current={currentPath === link.href ? "page" : undefined}
                 >
                     {link.name}
                 </a>
@@ -79,9 +85,11 @@ const links = [
 
     if (btn && menu && iconOpen && iconClose) {
         btn.addEventListener('click', () => {
+            const isOpen = !menu.classList.contains('hidden');
             menu.classList.toggle('hidden');
             iconOpen.classList.toggle('hidden');
             iconClose.classList.toggle('hidden');
+            btn.setAttribute('aria-expanded', String(!isOpen));
         });
     }
 

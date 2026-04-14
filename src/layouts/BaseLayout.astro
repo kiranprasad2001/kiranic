@@ -3,9 +3,13 @@ interface Props {
 	title: string;
     description?: string;
     keywords?: string;
+    ogImage?: string;
 }
 
-const { title, description = "Architecting Documents & Cloud Systems.", keywords } = Astro.props;
+const { title, description = "Architecting Documents & Cloud Systems.", keywords, ogImage } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const socialImageURL = new URL(ogImage || '/profile.jpg', Astro.site);
+const fullTitle = `${title} | Kiran Prasad`;
 ---
 
 <!doctype html>
@@ -17,23 +21,37 @@ const { title, description = "Architecting Documents & Cloud Systems.", keywords
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
 
-		<title>{title} | Kiran Prasad</title>
+        {/* Canonical URL */}
+        <link rel="canonical" href={canonicalURL} />
+
+		<title>{fullTitle}</title>
+
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalURL} />
+        <meta property="og:title" content={fullTitle} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={socialImageURL} />
+        <meta property="og:site_name" content="Kiran Prasad" />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={fullTitle} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={socialImageURL} />
 
         {/* JSON-LD Structured Data */}
         <script type="application/ld+json" set:html={JSON.stringify({
             "@context": "https://schema.org",
             "@type": "Person",
             "name": "Kiran Prasad",
-            "url": "https://kiranic.pages.dev",
+            "url": "https://kiranic.com",
             "jobTitle": "Enterprise CCM Architect",
             "knowsAbout": ["Quadient Inspire", "SmartComms", "Digital Transformation", "Cloud Strategy", "AWS"],
             "sameAs": [
                 "https://github.com/kiranprasad2001",
-                "https://linkedin.com/in/kiranprasad" // TODO: Update with real link if available
+                "https://linkedin.com/in/kiranprasad2001"
             ]
         })} />
 

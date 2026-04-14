@@ -11,13 +11,24 @@ const title = "Lab";
 const GITHUB_USERNAME = "kiranprasad2001";
 const GITHUB_TOKEN = import.meta.env.GITHUB_PAT || process.env.GITHUB_PAT;
 
-interface Repo {
+interface GitHubGraphQLRepo {
     name: string;
-    description: string;
+    description: string | null;
+    url: string;
+    homepageUrl: string | null;
+    pushedAt: string;
+    isArchived: boolean;
+    languages: { nodes: { name: string }[] };
+    repositoryTopics: { nodes: { topic: { name: string } }[] };
+}
+
+interface GitHubRestRepo {
+    name: string;
+    description: string | null;
     html_url: string;
-    homepage: string;
+    homepage: string | null;
     topics: string[];
-    language: string;
+    language: string | null;
     pushed_at: string;
     archived: boolean;
 }
@@ -108,20 +119,20 @@ try {
         if (!response.ok) throw new Error(`GitHub GraphQL Error: ${response.statusText}`);
         const { data } = await response.json();
         
-        experiments = data.user.repositories.nodes
-            .filter((repo: any) => !repo.isArchived)
-            .map((repo: any) => {
+        experiments = (data.user.repositories.nodes as GitHubGraphQLRepo[])
+            .filter((repo) => !repo.isArchived)
+            .map((repo) => {
                 const lastActive = new Date(repo.pushedAt);
                 const now = new Date();
                 const monthsSinceActive = (now.getFullYear() - lastActive.getFullYear()) * 12 + (now.getMonth() - lastActive.getMonth());
                 const year = monthsSinceActive < 6 ? "In Progress" : lastActive.getFullYear().toString();
-                
-                const tags = repo.repositoryTopics.nodes.map((t: any) => t.topic.name);
+
+                const tags = repo.repositoryTopics.nodes.map((t) => t.topic.name);
                 const mainLang = repo.languages.nodes[0]?.name;
                 if (mainLang && !tags.includes(mainLang)) tags.unshift(mainLang);
 
                 return {
-                    title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l:string) => l.toUpperCase()),
+                    title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                     description: repo.description || "No description provided.",
                     tags: tags.slice(0, 4),
                     link: repo.homepageUrl,
@@ -138,20 +149,20 @@ try {
         if (!response.ok) throw new Error(`GitHub REST API Error: ${response.statusText}`);
         const repos = await response.json();
         
-        experiments = repos.filter((r: any) => !r.archived).map((repo: any) => {
+        experiments = (repos as GitHubRestRepo[]).filter((r) => !r.archived).map((repo) => {
             const lastActive = new Date(repo.pushed_at);
             const now = new Date();
             const year = ((now.getFullYear() - lastActive.getFullYear()) * 12 + (now.getMonth() - lastActive.getMonth())) < 6 ? "In Progress" : lastActive.getFullYear().toString();
-            
+
             const tags = repo.topics || [];
             if (repo.language && !tags.includes(repo.language)) tags.unshift(repo.language);
 
             return {
-                title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l:string) => l.toUpperCase()),
+                title: repo.name.replace(/-/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
                 description: repo.description || "No description provided.",
-                tags: tags.slice(0, 4), // Limit tags
-                link: repo.homepage, // Live URL
-                github: repo.html_url, // GitHub URL
+                tags: tags.slice(0, 4),
+                link: repo.homepage,
+                github: repo.html_url,
                 year: year
             };
         });
@@ -163,7 +174,7 @@ try {
 }
 ---
 
-<BaseLayout title={title}>
+<BaseLayout title={title} description="My playground for side projects, research, and experiments.">
     <Navbar />
     
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
