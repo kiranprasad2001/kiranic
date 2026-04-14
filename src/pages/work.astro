@@ -2,10 +2,9 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-import ProjectCard from '../components/ProjectCard.astro';
 import DocumentWorkflow from '../components/DocumentWorkflow';
 import { getEntry } from 'astro:content';
-import { FileText } from 'lucide-react';
+import { FileText, ArrowRight } from 'lucide-react';
 
 const resumeEntry = await getEntry('resume', 'kiran');
 const { experience } = resumeEntry.data;
@@ -14,29 +13,49 @@ const title = "Work";
 
 <BaseLayout title={title} description="13+ years orchestrating legacy modernization and cloud migration initiatives.">
     <Navbar />
-    
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
-        <div class="mb-12">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                <h1 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white">Professional Experience</h1>
-                <a 
-                    href="/resume" 
-                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors w-fit"
-                >
-                    <FileText size={18} />
-                    View Resume
-                </a>
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 py-16 w-full">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-12">
+            <div>
+                <h1 class="font-mono text-2xl font-bold text-slate-900 dark:text-white mb-2">Professional Experience</h1>
+                <p class="text-slate-600 dark:text-slate-400">
+                    13+ years orchestrating legacy modernization and cloud migration initiatives.
+                </p>
             </div>
-            <p class="text-slate-600 dark:text-slate-300 max-w-2xl">
-                13+ years orchestrating legacy modernization and cloud migration initiatives.
-            </p>
+            <a
+                href="/resume"
+                class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-md hover:border-brand-teal dark:hover:border-brand-teal transition-colors w-fit"
+            >
+                <FileText size={16} />
+                Resume
+            </a>
         </div>
 
-        <DocumentWorkflow client:load />
+        {/* DocumentWorkflow with context */}
+        <section class="mb-16 border border-slate-200 dark:border-slate-700/50 rounded-lg p-6 bg-white dark:bg-brand-bg">
+            <h2 class="font-mono text-sm font-semibold text-brand-teal dark:text-brand-teal-light mb-1">How I think about document pipelines</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Design, integrate, compose, deliver — the four stages of enterprise CCM.</p>
+            <DocumentWorkflow client:load />
+        </section>
 
-        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Experience list */}
+        <div class="space-y-0 divide-y divide-slate-200 dark:divide-slate-700/50">
             {experience.map(item => (
-                <ProjectCard {...item} />
+                <a href={`/work/${item.slug}`} class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 py-5 group">
+                    <div class="flex-grow">
+                        <div class="flex items-center gap-3 mb-1">
+                            <span class="text-xs font-mono text-slate-400 dark:text-slate-500">{item.year}</span>
+                            <h3 class="font-medium text-slate-900 dark:text-white group-hover:text-brand-teal transition-colors">{item.title}</h3>
+                        </div>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-1 max-w-xl">{item.description}</p>
+                    </div>
+                    <div class="flex items-center gap-2 sm:mt-1 shrink-0">
+                        {item.tags.slice(0, 2).map(tag => (
+                            <span class="text-xs font-mono text-slate-400 dark:text-slate-500">{tag}</span>
+                        ))}
+                        <ArrowRight class="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-brand-teal transition-colors" />
+                    </div>
+                </a>
             ))}
         </div>
     </main>

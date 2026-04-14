@@ -2,159 +2,110 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-import ProjectCard from '../components/ProjectCard.astro';
-import TechStack from '../components/TechStack.astro';
 import { ArrowRight } from 'lucide-react';
 import { getEntry, getCollection } from 'astro:content';
 
 const title = "Digital Transformation & Cloud Strategy";
-const description = "Expert in Digital Transformation, CCM (Customer Communication Management), ECM (Enterprise Content Management), and CXM strategies. Modernizing legacy systems for banking and insurance.";
-const keywords = "Digital Transformation, CCM, ECM, CXM, Cloud Migration, SmartComms, Quadient, AWS, DevOps";
+const description = "Enterprise CCM Architect. 13+ years modernizing legacy systems for banking and insurance.";
 
-// Select specific work items for the featured section
 const resumeEntry = await getEntry('resume', 'kiran');
-const featuredWork = resumeEntry.data.experience.filter(item => 
-    item.slug === 'digital-transformation-lead'
-);
+const experience = resumeEntry.data.experience.slice(0, 4);
 
-// Freshness Strategy: Get the latest AI Slop article
 const allSlop = await getCollection('slop');
-const latestSlop = allSlop.length > 0 
-    ? allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0] 
+const latestSlop = allSlop.length > 0
+    ? allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())[0]
     : null;
-
 ---
 
-<BaseLayout title={title} description={description} keywords={keywords}>
+<BaseLayout title={title} description={description}>
     <Navbar />
-    
-    <main class="flex-grow overflow-hidden">
-        
-        {/* HERO SECTION */}
-        <section class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-            {/* Background Blobs - synchronized with AI Slop page style */}
-            <div class="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-                <div class="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-blue-100/40 dark:bg-blue-900/20 rounded-full blur-[100px] animate-pulse"></div>
-                <div class="absolute bottom-[10%] left-[-10%] w-[400px] h-[400px] bg-purple-100/40 dark:bg-purple-900/10 rounded-full blur-[100px]"></div>
+
+    <main class="flex-grow">
+        {/* Hero — minimal */}
+        <section class="max-w-5xl mx-auto px-4 sm:px-6 pt-24 pb-16 md:pt-32 md:pb-24">
+            <p class="font-mono text-sm text-brand-teal dark:text-brand-teal-light mb-4 tracking-wide">
+                ECM / CCM / CXM / Cloud
+            </p>
+            <h1 class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-6 leading-[1.1] max-w-3xl">
+                Architecting the future of digital experience.
+            </h1>
+            <p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mb-10">
+                13+ years transforming complex legacy infrastructure into agile, cloud-native ecosystems.
+                Specializing in regulatory communications and enterprise content strategies.
+            </p>
+
+            <div class="flex flex-wrap items-center gap-4">
+                <a
+                    href="/work"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-teal text-white font-medium text-sm rounded-md hover:bg-brand-teal/90 transition-colors"
+                >
+                    View my work <ArrowRight class="w-4 h-4" />
+                </a>
+                <a
+                    href="/lab"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-medium text-sm rounded-md hover:border-brand-teal dark:hover:border-brand-teal transition-colors"
+                >
+                    Visit the lab
+                </a>
             </div>
 
-            <div class="max-w-4xl relative z-10">
-                <div class="inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800">
-                    <span class="text-sm font-semibold text-blue-600 dark:text-blue-400 tracking-wide uppercase">
-                        ECM • CCM • CXM • Cloud
-                    </span>
-                </div>
-
-                <h1 class="text-5xl md:text-7xl font-bold tracking-tight text-slate-900 dark:text-white mb-8 leading-tight">
-                    Architecting the Future of <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400">Digital Experience.</span>
-                </h1>
-                
-                <p class="text-xl md:text-2xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mb-10">
-                    13+ years transforming complex legacy infrastructure into agile, cloud-native ecosystems. 
-                    Specializing in regulatory communications and enterprise content strategies.
-                </p>
-
-                <div class="flex flex-wrap gap-4 mb-8">
-                    <a 
-                        href="/work" 
-                        class="px-8 py-4 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-lg transition-all shadow-lg hover:shadow-blue-500/25 flex items-center gap-2 group"
-                    >
-                        my Work
-                        <ArrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </a>
-                    <a 
-                        href="/lab" 
-                        class="px-8 py-4 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium text-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
-                    >
-                        Visit my Lab
-                    </a>
-                </div>
-
-                {/* Freshness Signal: Latest AI Slop Article */}
-                {latestSlop && (
-                    <a href={`/ai-slop/${latestSlop.slug}`} class="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 hover:border-purple-500/50 transition-colors group">
-                        <span class="flex h-2 w-2 relative">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                        </span>
-                        <span class="text-sm font-medium text-slate-600 dark:text-slate-400 group-hover:text-purple-600 dark:group-hover:text-purple-400 truncate max-w-xs md:max-w-md">
-                            Latest from the Lab: {latestSlop.data.headline}
-                        </span>
-                        <ArrowRight class="w-3 h-3 text-slate-400 group-hover:text-purple-500" />
-                    </a>
-                )}
-            </div>
+            {/* Latest signal */}
+            {latestSlop && (
+                <a href={`/ai-slop/${latestSlop.slug}`} class="inline-flex items-center gap-2 mt-8 text-sm text-slate-500 dark:text-slate-400 hover:text-brand-ochre transition-colors group">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-brand-ochre"></span>
+                    Latest: {latestSlop.data.headline}
+                    <ArrowRight class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </a>
+            )}
         </section>
 
-        {/* SELECTED WORK SECTION */}
-        <section class="py-20 bg-white dark:bg-slate-900/50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-end mb-12">
-                     <div>
-                        <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Selected Work</h2>
-                        <p class="text-slate-500 dark:text-slate-400">Key enterprise initiatives and transformations.</p>
-                    </div>
-                    <a href="/work" class="hidden md:flex items-center gap-1 text-blue-600 dark:text-blue-400 font-medium hover:underline">
-                        View all <ArrowRight class="w-4 h-4" />
+        {/* Recent work — simple list */}
+        <section class="border-t border-slate-200 dark:border-slate-700/50">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+                <div class="flex items-center justify-between mb-8">
+                    <h2 class="font-mono font-semibold text-slate-900 dark:text-white">Selected work</h2>
+                    <a href="/work" class="text-sm text-slate-500 hover:text-brand-teal transition-colors flex items-center gap-1">
+                        View all <ArrowRight class="w-3 h-3" />
                     </a>
                 </div>
 
-                <div class="grid md:grid-cols-2 gap-8">
-                     {featuredWork.map(item => (
-                        <ProjectCard {...item} />
+                <div class="space-y-0 divide-y divide-slate-200 dark:divide-slate-700/50">
+                    {experience.map(item => (
+                        <a href={`/work/${item.slug}`} class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-4 group">
+                            <div class="flex items-center gap-4">
+                                <span class="text-xs font-mono text-slate-400 dark:text-slate-500 w-12 shrink-0">{item.year}</span>
+                                <span class="font-medium text-slate-900 dark:text-white group-hover:text-brand-teal transition-colors">{item.title}</span>
+                            </div>
+                            <div class="flex items-center gap-3 sm:ml-auto">
+                                {item.tags.slice(0, 2).map(tag => (
+                                    <span class="text-xs font-mono text-slate-400 dark:text-slate-500">{tag}</span>
+                                ))}
+                                <ArrowRight class="w-3.5 h-3.5 text-slate-300 dark:text-slate-600 group-hover:text-brand-teal transition-colors" />
+                            </div>
+                        </a>
                     ))}
                 </div>
-                 
-                 <div class="mt-8 text-center md:hidden">
-                    <a href="/work" class="text-blue-600 dark:text-blue-400 font-medium inline-flex items-center gap-1">
-                        View all projects <ArrowRight class="w-4 h-4" />
-                    </a>
-                 </div>
             </div>
         </section>
 
-        {/* TECH STACK SECTION */}
-        <section class="py-20 bg-slate-50 dark:bg-slate-800/50 border-y border-slate-200/50 dark:border-slate-700/50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-12 text-center">Enterprise Technology Stack</h2>
-                
-                <TechStack />
-            </div>
-        </section>
-
-        {/* ABOUT ME SECTION */}
-        <section class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-blue-600 dark:bg-blue-900 rounded-3xl p-8 md:p-16 relative overflow-hidden text-center md:text-left">
-                {/* Decorative background */}
-                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-                <div class="absolute bottom-0 left-0 w-64 h-64 bg-black/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
-
-                <div class="relative z-10 flex flex-col md:flex-row items-center gap-12">
-                    <div class="flex-shrink-0">
-                         <div class="w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/20 backdrop-blur-sm p-2">
-                            <div class="w-full h-full rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
-                                <img src="/profile.jpg" alt="Kiran Prasad" class="w-full h-full object-cover" width="160" height="160" loading="lazy" />
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-grow">
-                        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">About Me</h2>
-                        <p class="text-blue-100 text-lg leading-relaxed mb-6 max-w-2xl">
-                            I'm the person who gets called when a 15-year-old system needs to talk to modern infrastructure—and when business teams need someone to explain why the "simple" change isn't actually simple. I spend most days working on CCM platforms and cloud migrations, trying to make things both better and less fragile.
+        {/* About — compact */}
+        <section class="border-t border-slate-200 dark:border-slate-700/50">
+            <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16">
+                <div class="flex flex-col md:flex-row gap-8 items-start">
+                    <img src="/profile.jpg" alt="Kiran Prasad" class="w-20 h-20 rounded-full object-cover" width="80" height="80" loading="lazy" />
+                    <div class="max-w-2xl">
+                        <h2 class="font-mono font-semibold text-slate-900 dark:text-white mb-4">About</h2>
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed mb-3">
+                            I'm the person who gets called when a 15-year-old system needs to talk to modern infrastructure — and when business teams need someone to explain why the "simple" change isn't actually simple.
                         </p>
-                        <p class="text-blue-100 text-lg leading-relaxed max-w-2xl">
-                            Outside of work, I run local LLMs on my home setup and build small tools that solve real problems I've run into. The kind of stuff that doesn't make it to your resume but actually gets used.
+                        <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Outside of work, I run local LLMs on my home setup and build small tools that solve real problems.
                         </p>
                     </div>
                 </div>
             </div>
         </section>
-
     </main>
 
     <Footer />
 </BaseLayout>
-
-{/* Helper component for Tech Stack */}
-{/* Using an inline component or mapping is fine in Astro */}

@@ -1,76 +1,23 @@
 ---
-import { Github, Linkedin, Mail, Rss, Cloud, Newspaper } from 'lucide-react';
-
-const socialLinks = [
-    { 
-        name: 'GitHub', 
-        href: 'https://github.com/kiranprasad2001', 
-        icon: Github 
-    },
-    { 
-        name: 'LinkedIn', 
-        href: 'https://linkedin.com/in/kiranprasad2001', 
-        icon: Linkedin 
-    },
-    { 
-        name: 'Bluesky', 
-        href: 'https://bsky.app/profile/kiranic.com', 
-        icon: Cloud 
-    },
-    { 
-        name: 'Substack', 
-        href: 'https://kiranprasad2001.substack.com/', 
-        icon: Newspaper 
-    },
-    { 
-        name: 'Email', 
-        href: 'mailto:kp@kiranic.com', 
-        icon: Mail 
-    },
-    { 
-        name: 'RSS Feed', 
-        href: '/rss.xml', 
-        icon: Rss 
-    },
-];
+import { Github, Linkedin, Mail, Rss } from 'lucide-react';
 
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 mt-auto">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="flex flex-col items-center justify-between gap-6 md:flex-row">
-            <div class="flex flex-col items-center md:items-start gap-2">
-                <span class="text-xl font-bold text-slate-900 dark:text-white">Kiran Prasad</span>
-                <p class="text-sm text-slate-600 dark:text-slate-400">
-                    Architecting Documents & Cloud Systems.
-                </p>
-            </div>
+<footer class="border-t border-slate-200 dark:border-slate-700/50 mt-auto">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400">
+            <p>&copy; {currentYear} Kiran Prasad</p>
 
-            <div class="flex items-center gap-6">
-                {socialLinks.map(({ name, href, icon: Icon }) => (
-                    <a 
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="text-slate-500 hover:text-blue-600 dark:text-slate-400 dark:hover:text-blue-400 transition-colors"
-                        aria-label={name}
-                    >
-                        <Icon className="h-5 w-5" />
-                    </a>
-                ))}
-            </div>
-        </div>
-        
-        <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-500">
-                <p>&copy; {currentYear} Kiran Prasad. All rights reserved.</p>
-                <nav class="flex items-center gap-6" aria-label="Services">
-                    <a href="/services/quadient-development" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Quadient Inspire</a>
-                    <a href="/services/smartcomms-migration" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">SmartComms</a>
-                    <a href="/glossary/ccm" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Glossary</a>
-                </nav>
-            </div>
+            <nav class="flex items-center gap-5" aria-label="Footer links">
+                <a href="/services/quadient-development" class="hover:text-brand-teal transition-colors">Quadient</a>
+                <a href="/services/smartcomms-migration" class="hover:text-brand-teal transition-colors">SmartComms</a>
+                <span class="text-slate-300 dark:text-slate-600">|</span>
+                <a href="https://github.com/kiranprasad2001" target="_blank" rel="noopener noreferrer" class="hover:text-brand-teal transition-colors" aria-label="GitHub"><Github className="h-4 w-4" /></a>
+                <a href="https://linkedin.com/in/kiranprasad2001" target="_blank" rel="noopener noreferrer" class="hover:text-brand-teal transition-colors" aria-label="LinkedIn"><Linkedin className="h-4 w-4" /></a>
+                <a href="mailto:kp@kiranic.com" class="hover:text-brand-teal transition-colors" aria-label="Email"><Mail className="h-4 w-4" /></a>
+                <a href="/rss.xml" class="hover:text-brand-teal transition-colors" aria-label="RSS Feed"><Rss className="h-4 w-4" /></a>
+            </nav>
         </div>
     </div>
 </footer>
