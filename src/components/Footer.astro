@@ -62,8 +62,15 @@ const currentYear = new Date().getFullYear();
             </div>
         </div>
         
-        <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800 text-center text-sm text-slate-500 dark:text-slate-500">
-            <p>&copy; {currentYear} Kiran Prasad. All rights reserved.</p>
+        <div class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-500">
+                <p>&copy; {currentYear} Kiran Prasad. All rights reserved.</p>
+                <nav class="flex items-center gap-6" aria-label="Services">
+                    <a href="/services/quadient-development" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Quadient Inspire</a>
+                    <a href="/services/smartcomms-migration" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">SmartComms</a>
+                    <a href="/glossary/ccm" class="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">Glossary</a>
+                </nav>
+            </div>
         </div>
     </div>
 </footer>

@@ -2,7 +2,26 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
+// Strict rate limit: max 2 triggers per IP per minute
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 2;
+const RATE_LIMIT_WINDOW = 60_000;
+
+function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+        return false;
+    }
+    entry.count++;
+    return entry.count > RATE_LIMIT_MAX;
+}
+
 export const POST: APIRoute = async (context) => {
+    if (isRateLimited(context.clientAddress)) {
+        return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), { status: 429 });
+    }
     // Try to get secret from Cloudflare Runtime (Production) or import.meta (Dev/Build)
     const runtime = context.locals.runtime as any;
     const env = runtime?.env || {};

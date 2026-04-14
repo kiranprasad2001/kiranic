@@ -3,12 +3,30 @@ export const prerender = false;
 
 import type { APIRoute } from 'astro';
 
-export const POST: APIRoute = async ({ request, locals }) => {
+// Simple in-memory rate limiter: max 5 requests per IP per minute
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW = 60_000;
+
+function isRateLimited(ip: string): boolean {
+    const now = Date.now();
+    const entry = rateLimitMap.get(ip);
+    if (!entry || now > entry.resetAt) {
+        rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW });
+        return false;
+    }
+    entry.count++;
+    return entry.count > RATE_LIMIT_MAX;
+}
+
+export const POST: APIRoute = async ({ request, locals, clientAddress }) => {
+    if (isRateLimited(clientAddress)) {
+        return new Response(JSON.stringify({ message: "Too many requests. Please try again later." }), { status: 429 });
+    }
+
     try {
         const formData = await request.formData();
         const email = formData.get('email')?.toString().trim();
-
-        console.log('Subscribe attempt:', email); // Debug logging
 
         if (!email) {
             return new Response(JSON.stringify({ message: "Email is missing from request" }), { status: 400 });
@@ -24,12 +42,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const token = crypto.randomUUID();
 
         // Access D1 database from Cloudflare runtime
-        // @ts-ignore
-        const runtime = locals.runtime;
-
-        console.log('Runtime keys:', Object.keys(runtime || {}));
-        console.log('Env keys:', Object.keys(runtime?.env || {}));
-
+        const runtime = (locals as Record<string, any>).runtime;
         const db = runtime?.env?.DB;
 
         if (!db) {
