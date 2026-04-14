@@ -5,11 +5,17 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+                sans: ['"IBM Plex Sans"', 'ui-sans-serif', 'system-ui'],
+                mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'],
             },
             colors: {
-                // Branding: Slate/Dark Blues (Trust & Tech)
-                // Using standard Tailwind slate colors which are perfect for this
+                brand: {
+                    bg: '#292330',
+                    teal: '#297081',
+                    'teal-light': '#88BDC1',
+                    ochre: '#E29D35',
+                    surface: '#F5F5F4',
+                }
             }
         },
     },

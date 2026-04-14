@@ -8,12 +8,10 @@ import Footer from '../components/Footer.astro';
 import Newsletter from '../components/Newsletter.astro';
 import { getCollection } from 'astro:content';
 
-// Icon mapping
 const IconMap: Record<string, any> = {
     Bot, Terminal, Cpu, Sparkles, AlertTriangle
 };
 
-// Fetch and sort content
 const allSlop = await getCollection('slop');
 const aiNews = allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf()).map(entry => ({
     ...entry.data,
@@ -22,134 +20,54 @@ const aiNews = allSlop.sort((a, b) => b.data.date.valueOf() - a.data.date.valueO
 }));
 ---
 
-<BaseLayout title="Signals from the Latent Space | Kiranic" description="AI-curated daily digest of what matters in AI & tech.">
+<BaseLayout title="Signals from the Latent Space" description="AI-curated daily digest of what matters in AI & tech.">
     <Navbar />
-    <div class="relative bg-slate-50 dark:bg-slate-950 overflow-hidden min-h-screen">
-        <!-- Background Decor -->
-        <div class="absolute inset-0 z-0">
-            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-200/30 dark:bg-purple-900/10 rounded-full blur-[100px]"></div>
-            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-200/30 dark:bg-emerald-900/10 rounded-full blur-[100px]"></div>
-        </div>
 
-        <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-            
+    <main class="flex-grow">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 py-16 md:py-24">
+
             {/* Header */}
-            <div class="text-center mb-16">
-                <div class="inline-flex items-center justify-center p-3 bg-slate-100 dark:bg-slate-900 rounded-2xl mb-6 ring-1 ring-slate-200 dark:ring-slate-800 shadow-sm">
-                    <Bot class="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            <div class="mb-16">
+                <div class="flex items-center gap-3 mb-4">
+                    <Bot class="w-6 h-6 text-brand-teal dark:text-brand-teal-light" />
+                    <a href="/rss.xml" class="text-xs font-mono text-brand-ochre hover:underline" target="_blank">RSS</a>
                 </div>
-                <h1 class="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-4 tracking-tight">
-                    Signals from the <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-emerald-500">Latent Space</span>
+                <h1 class="font-mono text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-3 tracking-tight">
+                    Signals from the Latent Space
                 </h1>
-                <div class="flex items-center justify-center gap-4 mb-4">
-                    <p class="text-lg text-slate-600 dark:text-slate-400 max-w-2xl">
-                         AI-curated daily digest of what matters in AI &amp; tech.
-                    </p>
-                    <a href="/rss.xml" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-sm font-medium hover:bg-orange-200 dark:hover:bg-orange-900/50 transition-colors" target="_blank">
-                        <Rss class="w-4 h-4" />
-                        <span class="hidden sm:inline">RSS Feed</span>
-                    </a>
-                </div>
-                <p class="text-sm text-slate-500 italic opacity-75 max-w-2xl mx-auto">
-                    Real stories, AI-synthesized daily. Powered by Gemini.
+                <p class="text-slate-600 dark:text-slate-400 max-w-xl">
+                    AI-curated daily digest of what matters in AI & tech. Real stories, synthesized by Gemini.
                 </p>
             </div>
 
             {/* News Grid */}
-            <div class="grid gap-8 md:grid-cols-2">
+            <div class="grid gap-6 md:grid-cols-2">
                 {aiNews.map((news) => (
-                    <a href={`/ai-slop/${news.slug}`} class="block group relative bg-white dark:bg-slate-900 rounded-3xl p-6 md:p-8 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:shadow-purple-500/10 hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer">
-                        
-                        {/* Hover Gradient */}
-                        <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-
-                        {/* Header */}
-                        <div class="relative flex items-start justify-between mb-6">
-                            <div class="p-3 bg-slate-50 dark:bg-slate-800 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                                <news.icon class="w-6 h-6 text-slate-700 dark:text-slate-300" />
-                            </div>
-                            <span class="text-xs font-mono text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                    <a href={`/ai-slop/${news.slug}`} class="group block border border-slate-200 dark:border-slate-700/50 rounded-lg p-6 hover:border-brand-teal-light dark:hover:border-brand-teal transition-colors bg-white dark:bg-brand-bg">
+                        <div class="flex items-start justify-between mb-4">
+                            <news.icon class="w-5 h-5 text-slate-400 dark:text-slate-500 group-hover:text-brand-teal transition-colors" />
+                            <span class="text-xs font-mono text-slate-400 dark:text-slate-500">
                                 {news.date.toISOString().split('T')[0]}
                             </span>
                         </div>
-
-                        {/* Content */}
-                        <div class="relative">
-                            <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-3 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                                {news.headline}
-                            </h2>
-                            <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-6">
-                                {news.summary}
-                            </p>
-                            
-                            {/* Tags */}
-                            <div class="flex flex-wrap gap-2">
-                                {news.tags.map(tag => (
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200">
-                                        #{tag}
-                                    </span>
-                                ))}
-                            </div>
+                        <h2 class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-brand-teal transition-colors leading-snug">
+                            {news.headline}
+                        </h2>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-4 line-clamp-2">
+                            {news.summary}
+                        </p>
+                        <div class="flex flex-wrap gap-2">
+                            {news.tags.map(tag => (
+                                <span class="text-xs font-mono text-slate-400 dark:text-slate-500">#{tag}</span>
+                            ))}
                         </div>
                     </a>
                 ))}
             </div>
 
             <Newsletter />
-
-            {/* CTA */}
-            <div class="mt-16 text-center">
-                <div class="inline-block p-[2px] rounded-full bg-gradient-to-r from-purple-500 via-pink-500 to-emerald-500">
-                    <button id="trigger-btn" class="px-8 py-3 bg-white dark:bg-slate-900 rounded-full text-slate-900 dark:text-white font-bold hover:bg-transparent hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                        Generate Today's Digest
-                    </button>
-                </div>
-                <p id="trigger-status" class="mt-4 text-xs text-slate-400 h-4 transition-colors">
-                    Triggers a fresh digest from the latest AI &amp; tech news.
-                </p>
-            </div>
-
         </div>
-    </div>
+    </main>
+
     <Footer />
 </BaseLayout>
-
-<script>
-    const btn = document.getElementById('trigger-btn') as HTMLButtonElement;
-    const status = document.getElementById('trigger-status') as HTMLParagraphElement;
-
-    if (btn && status) {
-        btn.addEventListener('click', async () => {
-            // Loading state
-            btn.disabled = true;
-            const originalText = btn.innerText;
-            btn.innerText = "Researching...";
-            status.innerText = "Scanning today's AI & tech news...";
-            status.classList.remove('text-red-500', 'text-green-500');
-
-            try {
-                const res = await fetch('/api/trigger-slop', { method: 'POST' });
-                const data = await res.json();
-
-                if (res.ok) {
-                    status.innerHTML = `Success! <a href="${data.url}" target="_blank" class="underline hover:text-blue-400">Track progress on GitHub</a>.`;
-                    status.classList.add('text-green-500');
-                    btn.innerText = "Digest Queued";
-                } else {
-                    throw new Error(data.error || 'Failed to trigger');
-                }
-            } catch (e: any) {
-                console.error(e);
-                // Extract clean error message
-                let msg = e.message || "Unknown error";
-                if (msg.includes("GitHub API failed")) {
-                    msg = msg.split("GitHub API failed:")[1].trim(); // Show just the status/reason
-                }
-                status.innerText = `Error: ${msg}`;
-                status.classList.add('text-red-500');
-                btn.disabled = false;
-                btn.innerText = originalText;
-            }
-        });
-    }
-</script>
