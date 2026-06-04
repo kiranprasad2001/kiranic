@@ -1,0 +1,190 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const title = "The Slop Machine";
+const description = "An infinite, zero-cost AI headline generator. No GPUs were harmed. No Gemini tokens were spent. Pure artisanal slop, hallucinated in your browser.";
+---
+
+<BaseLayout title={title} description={description}>
+    <Navbar />
+
+    <main class="flex-grow max-w-3xl mx-auto px-4 sm:px-6 py-16 w-full">
+        {/* Header */}
+        <div class="mb-10">
+            <p class="font-mono text-sm text-brand-teal dark:text-brand-teal-light mb-3 tracking-wide">
+                /dev/null &gt; brain
+            </p>
+            <h1 class="font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                The Slop Machine
+            </h1>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                The <a href="/ai-slop" class="text-brand-teal dark:text-brand-teal-light hover:underline">AI Slop feed</a> burns
+                real Gemini tokens on a daily cron job. This one hallucinates an infinite supply of the
+                same nonsense — instantly, locally, for <span class="font-mono text-brand-ochre">$0.00</span>.
+                Pull the lever. Mock the industry. Repeat.
+            </p>
+        </div>
+
+        {/* The Machine */}
+        <div class="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900/40 shadow-sm overflow-hidden">
+            {/* Display window */}
+            <div class="relative px-6 py-10 sm:px-10 sm:py-14 bg-brand-surface dark:bg-brand-bg border-b border-slate-200 dark:border-slate-700/60 min-h-[220px] flex flex-col justify-center">
+                {/* scanline vibe */}
+                <div class="pointer-events-none absolute inset-0 opacity-[0.04] dark:opacity-[0.06]" style="background-image: repeating-linear-gradient(0deg, currentColor 0 1px, transparent 1px 4px);"></div>
+
+                <p id="kicker" class="font-mono text-xs uppercase tracking-widest text-brand-ochre mb-4 transition-opacity">
+                    BREAKING · VENTUREBEAT-ADJACENT
+                </p>
+                <h2
+                    id="headline"
+                    aria-live="polite"
+                    class="font-mono text-xl sm:text-2xl font-bold leading-snug text-slate-900 dark:text-white [text-wrap:balance]"
+                >
+                    Pull the lever to manufacture your first headline.
+                </h2>
+                <p id="dek" class="mt-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed transition-opacity">
+                    Warning: may be indistinguishable from your actual LinkedIn feed.
+                </p>
+            </div>
+
+            {/* Controls */}
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-5">
+                <button
+                    id="lever"
+                    type="button"
+                    class="group flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-teal text-white font-mono font-semibold text-sm rounded-md hover:bg-brand-teal/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                >
+                    <span id="lever-label">🎰 Generate Slop</span>
+                </button>
+                <button
+                    id="copy-btn"
+                    type="button"
+                    disabled
+                    class="inline-flex items-center justify-center gap-2 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-sm rounded-md hover:border-brand-teal dark:hover:border-brand-teal disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                >
+                    <span id="copy-label">Copy</span>
+                </button>
+                <a
+                    id="tweet-btn"
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-disabled="true"
+                    class="inline-flex items-center justify-center gap-2 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-sm rounded-md hover:border-brand-ochre dark:hover:border-brand-ochre aria-disabled:opacity-40 aria-disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ochre"
+                >
+                    Post
+                </a>
+            </div>
+        </div>
+
+        {/* Counter / footnote */}
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3 font-mono text-xs text-slate-500 dark:text-slate-500">
+            <p>
+                Slop produced this session:
+                <span id="counter" class="text-brand-teal dark:text-brand-teal-light font-bold">0</span>
+            </p>
+            <p id="savings" class="text-right">
+                Tokens spent: <span class="text-brand-ochre">0</span> · GPUs melted: <span class="text-brand-ochre">0</span>
+            </p>
+        </div>
+
+        <p class="mt-8 text-xs text-slate-400 dark:text-slate-600 leading-relaxed">
+            Tip: hit <kbd class="px-1.5 py-0.5 rounded border border-slate-300 dark:border-slate-700 font-mono">space</kbd> to keep pulling.
+            All headlines are procedurally generated from a finite bag of buzzwords — any resemblance to a real Series B is purely structural.
+        </p>
+    </main>
+
+    <Footer />
+</BaseLayout>
+
+<script>
+    import { buildSlop } from "../data/slop";
+
+    // The reels share one bag of buzzwords with the homepage + article telemetry.
+    const buildHeadline = () => buildSlop();
+
+    // ── Wiring ───────────────────────────────────────────────────────
+    const lever = document.getElementById("lever") as HTMLButtonElement;
+    const leverLabel = document.getElementById("lever-label")!;
+    const headlineEl = document.getElementById("headline")!;
+    const dekEl = document.getElementById("dek")!;
+    const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
+    const copyLabel = document.getElementById("copy-label")!;
+    const tweetBtn = document.getElementById("tweet-btn") as HTMLAnchorElement;
+    const counterEl = document.getElementById("counter")!;
+    const savingsEl = document.getElementById("savings")!;
+
+    let count = 0;
+    let spinning = false;
+    let current = "";
+
+    function spin() {
+        if (spinning) return;
+        spinning = true;
+        lever.disabled = true;
+        leverLabel.textContent = "🎰 Spinning…";
+        dekEl.style.opacity = "0.25";
+
+        const final = buildHeadline();
+        let ticks = 0;
+        const total = 14;
+
+        const reel = setInterval(() => {
+            ticks++;
+            // Flicker through random nonsense as the "reels" spin.
+            headlineEl.textContent = buildHeadline().headline;
+            if (ticks >= total) {
+                clearInterval(reel);
+                headlineEl.textContent = final.headline;
+                dekEl.textContent = final.dek;
+                dekEl.style.opacity = "1";
+                current = final.headline;
+
+                count++;
+                counterEl.textContent = String(count);
+                savingsEl.innerHTML =
+                    `Tokens spent: <span class="text-brand-ochre">0</span> · GPUs melted: <span class="text-brand-ochre">0</span> · ` +
+                    `Headlines hallucinated: <span class="text-brand-ochre">${count}</span>`;
+
+                copyBtn.disabled = false;
+                copyLabel.textContent = "Copy";
+                tweetBtn.setAttribute("aria-disabled", "false");
+                tweetBtn.href =
+                    "https://twitter.com/intent/tweet?" +
+                    new URLSearchParams({
+                        text: final.headline,
+                        url: "https://kiranic.com/slop-machine",
+                    }).toString();
+
+                lever.disabled = false;
+                leverLabel.textContent = count === 1 ? "🎰 Generate More" : "🎰 Pull Again";
+                spinning = false;
+            }
+        }, 55);
+    }
+
+    lever.addEventListener("click", spin);
+
+    copyBtn.addEventListener("click", async () => {
+        if (!current) return;
+        try {
+            await navigator.clipboard.writeText(current);
+            copyLabel.textContent = "Copied ✓";
+            setTimeout(() => (copyLabel.textContent = "Copy"), 1500);
+        } catch {
+            copyLabel.textContent = "Nope";
+            setTimeout(() => (copyLabel.textContent = "Copy"), 1500);
+        }
+    });
+
+    // Spacebar pulls the lever (unless typing somewhere).
+    document.addEventListener("keydown", (e) => {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (e.code === "Space" && tag !== "INPUT" && tag !== "TEXTAREA") {
+            e.preventDefault();
+            spin();
+        }
+    });
+</script>

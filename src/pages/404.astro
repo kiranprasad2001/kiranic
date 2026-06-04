@@ -2,28 +2,73 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Home, FlaskConical, Newspaper } from 'lucide-react';
 ---
 
-<BaseLayout title="Page Not Found" description="The page you're looking for doesn't exist.">
+<BaseLayout title="404 — Page Hallucinated" description="This page was confidently asserted but never actually existed.">
     <Navbar />
 
-    <main class="flex-grow flex items-center justify-center min-h-[60vh] px-4">
-        <div class="text-center">
-            <p class="font-mono text-6xl font-bold text-slate-200 dark:text-slate-700 mb-4">404</p>
-            <h1 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Page not found</h1>
-            <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">
-                The page you're looking for doesn't exist or has been moved.
+    <main class="flex-grow flex items-center justify-center px-4 py-20">
+        <div class="w-full max-w-xl">
+            {/* Terminal card */}
+            <div class="overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700/70 bg-white dark:bg-slate-900/50 shadow-sm font-mono text-sm">
+                {/* Title bar */}
+                <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-700/60 bg-brand-surface dark:bg-brand-bg px-4 py-2.5">
+                    <span class="h-3 w-3 rounded-full bg-red-400"></span>
+                    <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+                    <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
+                    <span class="ml-2 text-xs text-slate-400">~/kiranic — zsh — 80×24</span>
+                </div>
+
+                {/* Body */}
+                <div class="px-5 py-6 leading-relaxed text-slate-600 dark:text-slate-300">
+                    <p><span class="text-brand-teal dark:text-brand-teal-light">kiran@kiranic</span>:<span class="text-brand-ochre">~</span>$ cat <span id="bad-path" class="text-slate-900 dark:text-white">requested.page</span></p>
+                    <p class="mt-3 text-red-500 dark:text-red-400">HallucinationError: <span class="text-slate-700 dark:text-slate-300">page was confidently asserted but never existed (HTTP 404)</span></p>
+                    <pre class="mt-2 text-xs text-slate-400 dark:text-slate-500 whitespace-pre-wrap">    at Reality.resolve (universe.js:42)
+    at Router.handle (very-real-router.ts:1)
+    at <span class="text-slate-500 dark:text-slate-400">your.expectations</span> (hope.tsx:∞)</pre>
+                    <p class="mt-4">
+                        <span class="text-brand-teal dark:text-brand-teal-light">kiran@kiranic</span>:<span class="text-brand-ochre">~</span>$
+                        <span class="text-slate-900 dark:text-white"> cd /somewhere-real</span><span id="cursor" class="ml-0.5 inline-block w-2 h-4 -mb-0.5 bg-brand-teal dark:bg-brand-teal-light"></span>
+                    </p>
+                </div>
+            </div>
+
+            {/* Recovery links */}
+            <p class="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">Try a path that actually compiles:</p>
+            <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
+                <a href="/" class="inline-flex items-center gap-2 rounded-md bg-brand-teal px-4 py-2 text-sm font-medium text-white hover:bg-brand-teal/90 transition-colors">
+                    <Home class="w-4 h-4" /> Home
+                </a>
+                <a href="/lab" class="inline-flex items-center gap-2 rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:border-brand-teal dark:hover:border-brand-teal transition-colors">
+                    <FlaskConical class="w-4 h-4" /> Lab
+                </a>
+                <a href="/ai-slop" class="inline-flex items-center gap-2 rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:border-brand-ochre dark:hover:border-brand-ochre transition-colors">
+                    <Newspaper class="w-4 h-4" /> AI Slop
+                </a>
+            </div>
+
+            <p class="mt-8 text-center font-mono text-xs text-slate-400 dark:text-slate-600">
+                Lost? Hit <button type="button" data-cmdk-open class="underline decoration-dotted hover:text-brand-teal">⌘K</button> to search,
+                or <a href="/slop-machine" class="underline decoration-dotted hover:text-brand-ochre">generate a page that doesn't exist either</a>.
             </p>
-            <a
-                href="/"
-                class="inline-flex items-center gap-1.5 text-sm text-brand-teal hover:underline"
-            >
-                <ArrowLeft class="w-3.5 h-3.5" />
-                Back to home
-            </a>
         </div>
     </main>
 
     <Footer />
 </BaseLayout>
+
+<script>
+    // Show the path the visitor actually tried to reach.
+    const el = document.getElementById("bad-path");
+    if (el && location.pathname && location.pathname !== "/404") {
+        el.textContent = location.pathname.replace(/^\//, "").slice(0, 60) || "requested.page";
+    }
+    // Blink the cursor.
+    const cursor = document.getElementById("cursor");
+    if (cursor) {
+        setInterval(() => {
+            cursor.style.opacity = cursor.style.opacity === "0" ? "1" : "0";
+        }, 530);
+    }
+</script>

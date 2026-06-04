@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const title = "Colophon";
+
+const stack = [
+    { name: "Astro", role: "Static site generator. Ships zero JS until something actually needs it." },
+    { name: "Tailwind CSS", role: "So I never have to name a CSS class again." },
+    { name: "IBM Plex", role: "Sans for prose, Mono for everything that wants to look serious." },
+    { name: "Cloudflare", role: "Pages for hosting, D1 for the newsletter, $0 on the invoice." },
+    { name: "Google Gemini", role: "Hallucinates the daily AI Slop feed on a cron, against its will." },
+    { name: "Resend", role: "Sends the newsletter from kp@kiranic.com without a mail server." },
+    { name: "An LLM agent", role: "Wrote roughly 99% of this. The human supervised, mostly." },
+];
+
+const truths = [
+    "Approximately 99% of this codebase was written by an AI agent.",
+    "The human's main contributions were hitting Enter, drinking coffee, and the occasional z-index fix.",
+    "The AI Slop feed costs real tokens. The Slop Machine costs nothing and is somehow more honest.",
+    "Every tagline in the footer is also AI-generated. It's models all the way down.",
+    "If something is broken, blame the model. If it works, that was the plan all along.",
+];
+---
+
+<BaseLayout title={title} description="How this site was built, who built it (mostly an AI), and what's hiding in it.">
+    <Navbar />
+
+    <main class="flex-grow max-w-3xl mx-auto px-4 sm:px-6 py-16 w-full">
+        <div class="mb-12">
+            <p class="font-mono text-sm text-brand-teal dark:text-brand-teal-light mb-3 tracking-wide">
+                /about/this-website
+            </p>
+            <h1 class="font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                Colophon
+            </h1>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed">
+                A short, honest accounting of how <span class="font-mono text-brand-teal dark:text-brand-teal-light">kiranic.com</span>
+                gets made — the tools, the truths, and the things hiding between the pixels.
+            </p>
+        </div>
+
+        {/* The Stack */}
+        <section class="mb-12">
+            <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">The Stack</h2>
+            <div class="divide-y divide-slate-200 dark:divide-slate-700/50 border-y border-slate-200 dark:border-slate-700/50">
+                {stack.map((s) => (
+                    <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-6 py-3">
+                        <span class="font-mono text-sm font-semibold text-slate-900 dark:text-white w-40 shrink-0">{s.name}</span>
+                        <span class="text-sm text-slate-600 dark:text-slate-400">{s.role}</span>
+                    </div>
+                ))}
+            </div>
+        </section>
+
+        {/* Full Disclosure */}
+        <section class="mb-12">
+            <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Full Disclosure</h2>
+            <ul class="space-y-3">
+                {truths.map((t) => (
+                    <li class="flex gap-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        <span class="text-brand-ochre shrink-0">▸</span>
+                        <span>{t}</span>
+                    </li>
+                ))}
+            </ul>
+        </section>
+
+        {/* Hidden things */}
+        <section class="rounded-xl border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-900/40 p-6">
+            <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">Things Hiding Here</h2>
+            <ul class="space-y-3 text-sm text-slate-600 dark:text-slate-400">
+                <li class="flex items-center gap-3">
+                    <kbd class="rounded border border-slate-300 dark:border-slate-600 px-1.5 py-0.5 font-mono text-[11px]">⌘K</kbd>
+                    <span>opens a command palette from anywhere. Try it.</span>
+                </li>
+                <li class="flex items-center gap-3">
+                    <span class="font-mono text-[11px] text-brand-teal dark:text-brand-teal-light shrink-0">↑↑↓↓←→←→ B A</span>
+                    <span>does something you'd expect a site like this to do.</span>
+                </li>
+                <li class="flex items-center gap-3">
+                    <a href="/slop-machine" class="font-mono text-[11px] text-brand-ochre hover:underline shrink-0">/slop-machine</a>
+                    <span>manufactures infinite headlines for the low price of $0.00.</span>
+                </li>
+            </ul>
+        </section>
+
+        <p class="mt-10 text-center text-xs text-slate-400 dark:text-slate-600 font-mono">
+            View the source — and judge the AI's work —
+            <a href="https://github.com/kiranprasad2001/kiranic" target="_blank" rel="noopener noreferrer" class="text-brand-teal hover:underline">on GitHub</a>.
+        </p>
+    </main>
+
+    <Footer />
+</BaseLayout>

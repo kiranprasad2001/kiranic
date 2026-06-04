@@ -14,6 +14,8 @@ export async function getStaticPaths() {
     }));
 }
 
+import { mulberry32, seedFromString } from '../../data/slop';
+
 const { entry } = Astro.props;
 const { headline, summary, date, tags, icon } = entry.data;
 const { Content } = await entry.render();
@@ -23,6 +25,15 @@ const IconMap: Record<string, any> = {
 };
 
 const Icon = IconMap[icon] || Bot;
+
+// Tongue-in-cheek "telemetry" — deterministic per article (seeded by slug),
+// so it never changes between builds. Reading time is real; the rest is satire.
+const words = entry.body.trim().split(/\s+/).filter(Boolean).length;
+const readingMin = Math.max(1, Math.round(words / 200));
+const rand = mulberry32(seedFromString(entry.slug));
+const confidence = 88 + Math.floor(rand() * 12);          // 88–99% (always overconfident)
+const tokensBurned = (2 + Math.floor(rand() * 18)) / 1;   // "k" tokens
+const humanEdits = Math.floor(rand() * 3);                // 0–2 reluctant human touches
 ---
 
 <BaseLayout title={headline} description={summary}>
@@ -54,6 +65,22 @@ const Icon = IconMap[icon] || Bot;
                 <p class="text-slate-600 dark:text-slate-400 leading-relaxed border-l-2 border-brand-teal pl-4">
                     {summary}
                 </p>
+
+                {/* Fake telemetry — because every AI artifact deserves a confident dashboard */}
+                <div class="mt-6 rounded-lg border border-slate-200 dark:border-slate-700/50 bg-white/60 dark:bg-slate-900/30 px-4 py-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                    <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                        <span>⏱ {readingMin} min read</span>
+                        <span>🔥 ~{tokensBurned}k tokens burned</span>
+                        <span>🧑‍💻 {humanEdits} human edit{humanEdits === 1 ? '' : 's'}</span>
+                    </div>
+                    <div class="mt-3 flex items-center gap-3">
+                        <span class="shrink-0">AI confidence</span>
+                        <span class="relative h-1.5 flex-1 rounded-full bg-slate-200 dark:bg-slate-700/60 overflow-hidden">
+                            <span class="absolute inset-y-0 left-0 rounded-full bg-brand-ochre" style={`width:${confidence}%`}></span>
+                        </span>
+                        <span class="shrink-0 text-brand-ochre">{confidence}%</span>
+                    </div>
+                </div>
             </header>
 
             {/* Content */}
