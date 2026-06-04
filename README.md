@@ -21,6 +21,30 @@ Approximately **99% of this code was written by an AI Agent** (Google DeepMind's
 *   **Tech**: Uses Google Gemini API (`scripts/generate-slop.js`) to hallucinate markdown articles.
 *   **Automation**: A daily GitHub Action cron job (`.github/workflows/daily-slop.yml`) generates, commits, and deploys new content automatically.
 
+#### 🎰 The Slop Machine
+*   **Concept**: The Slop Feed costs real Gemini tokens. This one (`src/pages/slop-machine.astro`) hallucinates the same nonsense client-side, infinitely, for **$0.00**. The irony is the feature.
+*   **Tech**: A combinatorial grammar in vanilla JS pulls a slot-machine lever, "spins the reels," and assembles satirical headlines. Copy + tweet built in. Bound to spacebar for the truly committed.
+
+#### ⌘K Command Palette
+*   **Concept**: A site-wide launcher (`src/components/CommandPalette.astro`) for people who refuse to touch a mouse.
+*   **Features**: Fuzzy search across pages and actions, "jump to a random slop article," theme toggle, copy-email — all keyboard-navigable. Press <kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd> anywhere.
+
+#### 🥚 The Konami Egg
+*   **Concept**: <kbd>↑↑↓↓←→←→ B A</kbd> engages "SLOP MODE" — a brief rain of buzzwords from `src/components/EasterEgg.astro`.
+*   **Tasteful**: Respects `prefers-reduced-motion` and cleans up after itself even if you rage-quit to another tab.
+
+#### 💥 A 404 That Owns It
+*   **Concept**: `src/pages/404.astro` greets missing pages with a terminal-styled `HallucinationError` stack trace and the path you actually tried to reach. Confidently asserted, never existed.
+
+#### 🗞️ Slop of the Day
+*   **Concept**: The homepage hero shows one freshly-hallucinated headline — deterministic per day (seeded by date), so the daily deploy reseeds it. Shares its grammar with the Slop Machine via `src/data/slop.ts`.
+
+#### 📊 Fake Article Telemetry
+*   **Concept**: Every AI Slop article gets a confident little dashboard — real reading time, plus a satirical "AI confidence" meter, tokens burned, and (reluctant) human edits. Deterministic per article (seeded by slug).
+
+#### 📜 Colophon
+*   **Concept**: `/colophon` is an honest accounting of the stack, the truths ("99% written by an AI"), and a wink at everything hiding between the pixels.
+
 #### 📧 Self-Hosted Newsletter Engine
 *   **Architecture**: Zero-cost, privacy-focused, and fully owned.
 *   **Stack**:
@@ -76,6 +100,18 @@ If you really want to run this locally and see how the sausage is made:
 If you click the "Generate More Hallucinations" button on the `/ai-slop` page enough times, nothing special happens, but you *will* help warm up the Earth by a fraction of a degree.
 
 Also, try searching the codebase for "stochastic parrot".
+
+## 📚 Documentation
+
+For a deep dive into the architecture, deployment, and operation of this project, please refer to the comprehensive documentation suite located in the `docs/` directory:
+
+- [Overview](docs/OVERVIEW.md): High-level purpose and functionality.
+- [Architecture (HLD/LLD)](docs/architecture/): System design, data models, and component diagrams.
+- [Pipeline](docs/PIPELINE.md): CI/CD and automation workflows.
+- [Technical Reference](docs/TECHNICAL_REFERENCE.md): APIs, environment variables, and configurations.
+- [Runbooks](docs/runbooks/): Troubleshooting and deployment guides.
+- [Business & User Guide](docs/BUSINESS_USER_GUIDE.md): Target audience and user manuals.
+- [Brand Guidelines](docs/branding.md): Design tokens and aesthetics.
 
 ## License
 

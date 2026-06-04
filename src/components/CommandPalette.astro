@@ -1,0 +1,238 @@
+---
+// Site-wide ⌘K command palette. Navigation, actions, and a jump to a
+// random AI Slop article. Vanilla JS, no framework — loads everywhere.
+import { getCollection } from 'astro:content';
+
+let slopSlugs: string[] = [];
+try {
+    const slop = await getCollection('slop');
+    slopSlugs = slop.map((s) => s.slug);
+} catch {
+    slopSlugs = [];
+}
+---
+
+<div
+    id="cmdk"
+    class="fixed inset-0 z-[100] hidden items-start justify-center p-4 pt-[12vh] sm:pt-[18vh]"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Command palette"
+>
+    {/* Backdrop */}
+    <div id="cmdk-backdrop" class="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"></div>
+
+    {/* Panel */}
+    <div class="relative w-full max-w-xl overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700/70 bg-brand-surface dark:bg-brand-bg shadow-2xl">
+        <div class="flex items-center gap-3 border-b border-slate-200 dark:border-slate-700/60 px-4">
+            <span class="font-mono text-brand-teal dark:text-brand-teal-light text-sm select-none">&gt;</span>
+            <input
+                id="cmdk-input"
+                type="text"
+                autocomplete="off"
+                spellcheck="false"
+                placeholder="Search pages, run a command, summon some slop…"
+                class="w-full bg-transparent py-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none"
+            />
+            <kbd class="hidden sm:inline-block rounded border border-slate-300 dark:border-slate-600 px-1.5 py-0.5 font-mono text-[10px] text-slate-400">esc</kbd>
+        </div>
+        <ul id="cmdk-list" class="max-h-[50vh] overflow-y-auto py-2" role="listbox"></ul>
+        <div class="flex items-center justify-between gap-4 border-t border-slate-200 dark:border-slate-700/60 px-4 py-2 font-mono text-[10px] text-slate-400 dark:text-slate-500">
+            <span class="flex items-center gap-3">
+                <span><kbd class="font-sans">↑↓</kbd> navigate</span>
+                <span><kbd class="font-sans">↵</kbd> select</span>
+            </span>
+            <span class="hidden sm:inline">kiranic://command</span>
+        </div>
+    </div>
+</div>
+
+<script define:vars={{ slopSlugs }}>
+    (function () {
+        const palette = document.getElementById("cmdk");
+        if (!palette) return;
+        const backdrop = document.getElementById("cmdk-backdrop");
+        const input = document.getElementById("cmdk-input");
+        const list = document.getElementById("cmdk-list");
+
+        const go = (href) => () => (window.location.href = href);
+
+        const toggleTheme = () => {
+            const root = document.documentElement;
+            if (root.classList.contains("dark")) {
+                root.classList.remove("dark");
+                localStorage.theme = "light";
+            } else {
+                root.classList.add("dark");
+                localStorage.theme = "dark";
+            }
+        };
+
+        const randomSlop = () => {
+            if (!slopSlugs.length) return (window.location.href = "/ai-slop");
+            const slug = slopSlugs[Math.floor(Math.random() * slopSlugs.length)];
+            window.location.href = "/ai-slop/" + slug;
+        };
+
+        const commands = [
+            { group: "Navigate", icon: "→", label: "Home", hint: "/", run: go("/") },
+            { group: "Navigate", icon: "→", label: "Work", hint: "/work", run: go("/work") },
+            { group: "Navigate", icon: "→", label: "Lab", hint: "/lab", run: go("/lab") },
+            { group: "Navigate", icon: "→", label: "Life", hint: "/life", run: go("/life") },
+            { group: "Navigate", icon: "→", label: "AI Slop", hint: "/ai-slop", run: go("/ai-slop") },
+            { group: "Navigate", icon: "→", label: "Résumé", hint: "/resume", run: go("/resume") },
+            { group: "Navigate", icon: "→", label: "Colophon", hint: "how this was made", run: go("/colophon") },
+            { group: "Actions", icon: "🎰", label: "Open the Slop Machine", hint: "infinite headlines, $0", run: go("/slop-machine") },
+            { group: "Actions", icon: "🎲", label: "Read a random slop article", hint: "feeling lucky", run: randomSlop },
+            { group: "Actions", icon: "◐", label: "Toggle dark mode", hint: "light / dark", run: toggleTheme, keep: true },
+            { group: "Actions", icon: "✉", label: "Copy email address", hint: "kp@kiranic.com", run: copyEmail, keep: true },
+            { group: "Elsewhere", icon: "⧉", label: "GitHub", hint: "kiranprasad2001", run: go("https://github.com/kiranprasad2001") },
+            { group: "Elsewhere", icon: "⧉", label: "LinkedIn", hint: "in/kiranprasad2001", run: go("https://linkedin.com/in/kiranprasad2001") },
+            { group: "Elsewhere", icon: "⧉", label: "RSS feed", hint: "/rss.xml", run: go("/rss.xml") },
+        ];
+
+        function copyEmail() {
+            navigator.clipboard?.writeText("kp@kiranic.com").then(() => flash("Copied kp@kiranic.com ✓"));
+        }
+
+        let flashTimer;
+        function flash(msg) {
+            let el = document.getElementById("cmdk-flash");
+            if (!el) {
+                el = document.createElement("div");
+                el.id = "cmdk-flash";
+                el.className =
+                    "fixed bottom-5 left-1/2 z-[110] -translate-x-1/2 rounded-md bg-brand-teal px-4 py-2 font-mono text-xs text-white shadow-lg transition-opacity";
+                document.body.appendChild(el);
+            }
+            el.textContent = msg;
+            el.style.opacity = "1";
+            clearTimeout(flashTimer);
+            flashTimer = setTimeout(() => (el.style.opacity = "0"), 1600);
+        }
+
+        let active = 0;
+        let filtered = commands;
+
+        function render() {
+            const q = input.value.trim().toLowerCase();
+            filtered = q
+                ? commands.filter((c) => (c.label + " " + c.hint + " " + c.group).toLowerCase().includes(q))
+                : commands;
+            if (active >= filtered.length) active = Math.max(0, filtered.length - 1);
+
+            if (!filtered.length) {
+                list.innerHTML =
+                    '<li class="px-4 py-6 text-center font-mono text-xs text-slate-400">No match. Even the AI is stumped.</li>';
+                return;
+            }
+
+            let html = "";
+            let lastGroup = "";
+            filtered.forEach((c, i) => {
+                if (c.group !== lastGroup) {
+                    html += `<li class="px-4 pt-3 pb-1 font-mono text-[10px] uppercase tracking-widest text-slate-400 dark:text-slate-500">${c.group}</li>`;
+                    lastGroup = c.group;
+                }
+                const on = i === active;
+                html += `<li role="option" data-i="${i}" aria-selected="${on}"
+                    class="mx-2 flex cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm ${
+                        on ? "bg-brand-teal/10 dark:bg-brand-teal/20 text-slate-900 dark:text-white" : "text-slate-600 dark:text-slate-300"
+                    }">
+                    <span class="w-4 text-center text-brand-teal dark:text-brand-teal-light">${c.icon}</span>
+                    <span class="flex-1">${c.label}</span>
+                    <span class="font-mono text-[10px] text-slate-400 dark:text-slate-500">${c.hint}</span>
+                </li>`;
+            });
+            list.innerHTML = html;
+        }
+
+        function open() {
+            palette.classList.remove("hidden");
+            palette.classList.add("flex");
+            input.value = "";
+            active = 0;
+            render();
+            requestAnimationFrame(() => input.focus());
+        }
+
+        function close() {
+            palette.classList.add("hidden");
+            palette.classList.remove("flex");
+        }
+
+        function isOpen() {
+            return !palette.classList.contains("hidden");
+        }
+
+        function exec(i) {
+            const c = filtered[i];
+            if (!c) return;
+            if (!c.keep) close();
+            c.run();
+            if (c.keep) render();
+        }
+
+        input.addEventListener("input", () => {
+            active = 0;
+            render();
+        });
+
+        list.addEventListener("mousemove", (e) => {
+            const li = e.target.closest("[data-i]");
+            if (li) {
+                const i = Number(li.dataset.i);
+                if (i !== active) {
+                    active = i;
+                    render();
+                }
+            }
+        });
+        list.addEventListener("click", (e) => {
+            const li = e.target.closest("[data-i]");
+            if (li) exec(Number(li.dataset.i));
+        });
+
+        backdrop.addEventListener("click", close);
+
+        document.addEventListener("keydown", (e) => {
+            const mod = e.metaKey || e.ctrlKey;
+            if (mod && e.key.toLowerCase() === "k") {
+                e.preventDefault();
+                isOpen() ? close() : open();
+                return;
+            }
+            if (!isOpen()) return;
+
+            if (e.key === "Escape") {
+                e.preventDefault();
+                close();
+            } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                active = Math.min(active + 1, filtered.length - 1);
+                render();
+                scrollActive();
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                active = Math.max(active - 1, 0);
+                render();
+                scrollActive();
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                exec(active);
+            }
+        });
+
+        function scrollActive() {
+            list.querySelector('[aria-selected="true"]')?.scrollIntoView({ block: "nearest" });
+        }
+
+        // Let other parts of the site open the palette (e.g. footer hint).
+        document.querySelectorAll("[data-cmdk-open]").forEach((el) =>
+            el.addEventListener("click", (e) => {
+                e.preventDefault();
+                open();
+            })
+        );
+    })();
+</script>

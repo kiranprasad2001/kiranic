@@ -1,0 +1,117 @@
+---
+// Konami code (↑↑↓↓←→←→ B A) → "SLOP MODE": a brief rain of buzzwords.
+// Pure decoration, respects prefers-reduced-motion, cleans up after itself.
+---
+
+<script>
+    (function () {
+        const SEQ = [
+            "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+            "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
+            "b", "a",
+        ];
+        let pos = 0;
+        let running = false;
+
+        const WORDS = [
+            "synergy", "agentic", "paradigm", "leverage", "blockchain", "hallucinate",
+            "GPT-∞", "disrupt", "pivot", "vibes", "RAG", "quantum", "web4", "AGI",
+            "scalable", "north-star", "low-latency", "moat", "thought leadership",
+            "stakeholder", "alignment", "roadmap", "synergize", "10x", "frictionless",
+        ];
+
+        document.addEventListener("keydown", (e) => {
+            const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+            pos = key === SEQ[pos] ? pos + 1 : (key === SEQ[0] ? 1 : 0);
+            if (pos === SEQ.length) {
+                pos = 0;
+                slopMode();
+            }
+        });
+
+        function toast() {
+            const el = document.createElement("div");
+            el.textContent = "🎰 SLOP MODE ENGAGED";
+            el.setAttribute("role", "status");
+            el.className =
+                "fixed top-20 left-1/2 z-[120] -translate-x-1/2 rounded-md bg-brand-ochre px-4 py-2 font-mono text-sm font-bold text-brand-bg shadow-lg";
+            el.style.transition = "opacity .4s";
+            document.body.appendChild(el);
+            setTimeout(() => (el.style.opacity = "0"), 2600);
+            setTimeout(() => el.remove(), 3200);
+        }
+
+        function slopMode() {
+            if (running) return;
+            running = true;
+            toast();
+
+            const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            if (reduced) {
+                setTimeout(() => (running = false), 2600);
+                return;
+            }
+
+            const layer = document.createElement("div");
+            layer.className = "fixed inset-0 z-[115] pointer-events-none overflow-hidden";
+            document.body.appendChild(layer);
+
+            const colors = ["#297081", "#88BDC1", "#E29D35"];
+            const count = 36;
+            const drops = [];
+
+            for (let i = 0; i < count; i++) {
+                const s = document.createElement("span");
+                s.textContent = WORDS[(i * 7) % WORDS.length];
+                s.style.position = "absolute";
+                s.style.left = ((i * 137) % 100) + "%";
+                s.style.top = "-10%";
+                s.style.fontFamily = '"IBM Plex Mono", monospace';
+                s.style.fontSize = 12 + ((i * 13) % 10) + "px";
+                s.style.color = colors[i % colors.length];
+                s.style.opacity = "0";
+                s.style.whiteSpace = "nowrap";
+                layer.appendChild(s);
+                drops.push({
+                    el: s,
+                    y: -10 - (i % 12) * 8,
+                    vy: 0.25 + ((i * 17) % 10) / 18,
+                    drift: (((i % 5) - 2) * 0.04),
+                    x: (i * 137) % 100,
+                    rot: ((i % 7) - 3) * 4,
+                });
+            }
+
+            const start = performance.now();
+            const DURATION = 3200;
+
+            // Safety net: rAF is paused on hidden tabs, so guarantee cleanup
+            // via a timer even if the frame loop never reaches the end.
+            const cleanup = () => {
+                if (layer.isConnected) layer.remove();
+                running = false;
+            };
+            const safety = setTimeout(cleanup, DURATION + 1500);
+
+            function frame(now) {
+                const t = now - start;
+                drops.forEach((d) => {
+                    d.y += d.vy;
+                    d.x += d.drift;
+                    const fade = t < 300 ? t / 300 : t > DURATION - 600 ? Math.max(0, (DURATION - t) / 600) : 1;
+                    d.el.style.top = d.y + "%";
+                    d.el.style.left = d.x + "%";
+                    d.el.style.opacity = String(0.85 * fade);
+                    d.el.style.transform = `rotate(${d.rot}deg)`;
+                });
+                if (t < DURATION) {
+                    requestAnimationFrame(frame);
+                } else {
+                    clearTimeout(safety);
+                    cleanup();
+                }
+            }
+            requestAnimationFrame(frame);
+        }
+    })();
+</script>
