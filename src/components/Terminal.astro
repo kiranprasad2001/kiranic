@@ -1,0 +1,296 @@
+---
+// A hidden interactive shell, summoned with the backtick (`) key from anywhere.
+// Type real commands: help, whoami, ls, cd, cat, slop, theme, social, sudo…
+// Vanilla JS, no framework. Output is built with textContent (no HTML injection).
+---
+
+<div
+    id="term"
+    class="fixed inset-0 z-[105] hidden items-end sm:items-center justify-center p-0 sm:p-4"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Interactive terminal"
+>
+    <div id="term-backdrop" class="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm"></div>
+
+    <div class="relative w-full sm:max-w-2xl overflow-hidden sm:rounded-xl border border-slate-300/70 dark:border-slate-700/70 bg-[#1d1822] shadow-2xl font-mono text-sm">
+        {/* Title bar */}
+        <div class="flex items-center gap-2 border-b border-slate-700/60 px-4 py-2.5 select-none">
+            <span class="h-3 w-3 rounded-full bg-red-400"></span>
+            <span class="h-3 w-3 rounded-full bg-amber-400"></span>
+            <span class="h-3 w-3 rounded-full bg-emerald-400"></span>
+            <span class="ml-2 text-xs text-slate-400">kiran@kiranic — interactive shell</span>
+            <button id="term-close" type="button" aria-label="Close terminal" class="ml-auto text-slate-500 hover:text-slate-300 text-xs">esc ✕</button>
+        </div>
+
+        {/* Output + input */}
+        <div id="term-body" class="h-[60vh] sm:h-[360px] overflow-y-auto px-4 py-3 text-slate-300 leading-relaxed">
+            <div id="term-output"></div>
+            <div class="flex items-center gap-2">
+                <span class="shrink-0 text-brand-teal-light">kiran@kiranic<span class="text-slate-500">:</span><span class="text-brand-ochre">~</span><span class="text-slate-500">$</span></span>
+                <input
+                    id="term-input"
+                    type="text"
+                    autocomplete="off"
+                    autocapitalize="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                    aria-label="Terminal input"
+                    class="flex-1 bg-transparent text-slate-100 caret-brand-teal-light focus:outline-none"
+                />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    import { buildSlop } from "../data/slop";
+
+    const term = document.getElementById("term")!;
+    const backdrop = document.getElementById("term-backdrop")!;
+    const body = document.getElementById("term-body")!;
+    const output = document.getElementById("term-output")!;
+    const input = document.getElementById("term-input") as HTMLInputElement;
+    const closeBtn = document.getElementById("term-close")!;
+
+    const pages: Record<string, string> = {
+        home: "/", work: "/work", lab: "/lab", life: "/life",
+        "ai-slop": "/ai-slop", slop: "/ai-slop", "slop-machine": "/slop-machine",
+        resume: "/resume", colophon: "/colophon",
+    };
+
+    const files: Record<string, string[]> = {
+        about: [
+            "Kiran Prasad — Enterprise CCM Architect.",
+            "13+ years turning 15-year-old systems into cloud-native ones,",
+            "and explaining why the 'simple' change isn't actually simple.",
+        ],
+        readme: [
+            "kiranic.com — the 'I let the AI do it' edition.",
+            "~99% written by an AI agent. The human hit Enter and drank coffee.",
+            "Type 'slop' to manufacture a headline. Type 'help' for more.",
+        ],
+        resume: ["→ It's a PDF. Run: open resume   (or visit /resume)"],
+        secret: ["You found it. There's nothing here but the satisfaction of looking. 🫡"],
+    };
+
+    let history: string[] = [];
+    let histIdx = -1;
+    let booted = false;
+
+    const isOpen = () => !term.classList.contains("hidden");
+
+    function open() {
+        term.classList.remove("hidden");
+        term.classList.add("flex");
+        if (!booted) {
+            booted = true;
+            printLines([
+                "kiranic shell v1.0.0 — hallucinated, not audited.",
+                "Type 'help' to begin. Press ` or 'exit' to close.",
+                "",
+            ], "text-slate-400");
+        }
+        requestAnimationFrame(() => input.focus());
+    }
+    function close() {
+        term.classList.add("hidden");
+        term.classList.remove("flex");
+    }
+
+    // --- output helpers (textContent only; no HTML injection) ---
+    function printLines(lines: string[], cls = "") {
+        for (const line of lines) {
+            const div = document.createElement("div");
+            if (cls) div.className = cls;
+            div.textContent = line === "" ? " " : line;
+            output.appendChild(div);
+        }
+        scroll();
+    }
+    function printEcho(cmd: string) {
+        const div = document.createElement("div");
+        div.className = "flex gap-2";
+        const p = document.createElement("span");
+        p.className = "shrink-0 text-brand-teal-light";
+        p.textContent = "kiran@kiranic:~$";
+        const c = document.createElement("span");
+        c.className = "text-slate-200";
+        c.textContent = cmd;
+        div.append(p, c);
+        output.appendChild(div);
+    }
+    function printLink(label: string, href: string) {
+        const div = document.createElement("div");
+        const a = document.createElement("a");
+        a.href = href;
+        a.textContent = label;
+        a.className = "text-brand-ochre underline decoration-dotted hover:text-brand-teal-light";
+        if (href.startsWith("http")) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
+        div.appendChild(a);
+        output.appendChild(div);
+        scroll();
+    }
+    function scroll() { body.scrollTop = body.scrollHeight; }
+
+    // --- command table ---
+    const commands: Record<string, (args: string[]) => void> = {
+        help() {
+            printLines([
+                "available commands:",
+                "  help            this list",
+                "  whoami          who is this guy",
+                "  ls              list the pages on this site",
+                "  cd <page>       navigate (e.g. cd work)",
+                "  open <page>     same as cd",
+                "  cat <file>      read about | readme | resume",
+                "  slop            hallucinate a fresh headline 🎰",
+                "  theme [d|l]     toggle / set dark or light mode",
+                "  social          where to find me",
+                "  date            today, allegedly",
+                "  echo <text>     say something back",
+                "  clear           wipe the screen",
+                "  exit            close the shell",
+            ], "text-slate-400");
+        },
+        whoami() {
+            printLines([
+                "kiran prasad",
+                "  role:   Enterprise CCM Architect",
+                "  stack:  Quadient · SmartComms · AWS · a lot of XML",
+                "  status: letting the AI do it (see: this entire site)",
+            ]);
+        },
+        ls() {
+            printLines(["drwxr-xr-x  pages/"], "text-slate-500");
+            const names = Object.keys(pages).filter((k) => k !== "slop" && k !== "home");
+            printLines(["  " + names.join("   ")], "text-brand-teal-light");
+        },
+        cd(args) { this.open(args); },
+        open(args) {
+            const target = (args[0] || "").replace(/^\/+|\/+$/g, "").toLowerCase();
+            if (!target) return printLines(["usage: cd <page>. try 'ls'."], "text-slate-400");
+            if (target === "resume") { printLines(["opening resume.pdf…"], "text-slate-400"); setTimeout(() => (location.href = "/resume"), 350); return; }
+            if (pages[target]) {
+                printLines([`cd ${target} → ${pages[target]}`], "text-slate-400");
+                setTimeout(() => (location.href = pages[target]), 350);
+            } else {
+                printLines([`cd: no such page: ${target}. try 'ls'.`], "text-red-400");
+            }
+        },
+        cat(args) {
+            const f = (args[0] || "").toLowerCase();
+            if (!f) return printLines(["usage: cat <file>. try: cat about"], "text-slate-400");
+            if (files[f]) {
+                printLines(files[f]);
+                if (f === "resume") printLink("→ open /resume", "/resume");
+            } else {
+                printLines([`cat: ${f}: No such file. try: cat about | readme | resume`], "text-red-400");
+            }
+        },
+        slop() {
+            const { headline, dek } = buildSlop();
+            printLines(["🎰 BREAKING:"], "text-brand-ochre");
+            printLines([headline], "text-slate-100");
+            printLines([dek, ""], "text-slate-500");
+            printLink("→ make more at /slop-machine", "/slop-machine");
+        },
+        theme(args) {
+            const root = document.documentElement;
+            const want = (args[0] || "").toLowerCase();
+            let dark: boolean;
+            if (want.startsWith("d")) dark = true;
+            else if (want.startsWith("l")) dark = false;
+            else dark = !root.classList.contains("dark");
+            root.classList.toggle("dark", dark);
+            localStorage.theme = dark ? "dark" : "light";
+            printLines([`theme set to ${dark ? "dark" : "light"} mode.`], "text-slate-400");
+        },
+        social() {
+            printLink("→ GitHub:   github.com/kiranprasad2001", "https://github.com/kiranprasad2001");
+            printLink("→ LinkedIn: in/kiranprasad2001", "https://linkedin.com/in/kiranprasad2001");
+            printLink("→ Email:    kp@kiranic.com", "mailto:kp@kiranic.com");
+        },
+        contact() { this.social([]); },
+        date() { printLines([new Date().toString()], "text-slate-400"); },
+        echo(args) { printLines([args.join(" ") || " "]); },
+        clear() { output.replaceChildren(); },
+        exit() { close(); },
+        sudo(args) {
+            if (!args.length) return printLines(["usage: sudo <command>"], "text-slate-400");
+            const rest = args.join(" ").toLowerCase();
+            if (rest.includes("sandwich")) return printLines(["Okay. 🥪  (this is the only thing sudo will get you here.)"], "text-emerald-400");
+            printLines([`kiran is not in the sudoers file. This incident will be reported.`], "text-red-400");
+        },
+    };
+
+    // easter eggs that aren't "real" commands
+    const eggs: Record<string, string[]> = {
+        "make me a sandwich": ["What? Make it yourself.  (psst: try 'sudo make me a sandwich')"],
+        coffee: ["      ( (", "       ) )", "    ........", "    |      |]", "    \\      /", "     `----'   ☕  brewing… productivity not guaranteed."],
+        ls: [],
+        "rm -rf /": ["Nice try. This site is statically generated — there's nothing to delete. 🙂"],
+        vim: ["You're trapped in vim now. Just kidding. :q has been pressed for you."],
+        "hello": ["hi 👋"],
+    };
+
+    function run(raw: string) {
+        const line = raw.trim();
+        printEcho(line);
+        if (!line) return;
+
+        history.unshift(line);
+        histIdx = -1;
+
+        const lower = line.toLowerCase();
+        if (eggs[lower]) return printLines(eggs[lower], "text-slate-400") as unknown as void;
+
+        const [name, ...args] = line.split(/\s+/);
+        const cmd = commands[name.toLowerCase()];
+        if (cmd) {
+            try { cmd.call(commands, args); }
+            catch { printLines([`error running '${name}'.`], "text-red-400"); }
+        } else {
+            printLines([`command not found: ${name}. type 'help'.`], "text-red-400");
+        }
+    }
+
+    // --- events ---
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            run(input.value);
+            input.value = "";
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+        } else if (e.key === "ArrowDown") {
+            e.preventDefault();
+            if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+            else { histIdx = -1; input.value = ""; }
+        }
+    });
+
+    backdrop.addEventListener("click", close);
+    closeBtn.addEventListener("click", close);
+    body.addEventListener("click", () => input.focus());
+
+    document.addEventListener("keydown", (e) => {
+        const tag = (e.target as HTMLElement)?.tagName;
+        const typing = tag === "INPUT" || tag === "TEXTAREA";
+        // Backtick toggles the shell (but not while typing elsewhere).
+        if ((e.key === "`" || e.key === "~") && (!typing || e.target === input)) {
+            if (e.target === input) return; // allow typing backticks inside the shell
+            e.preventDefault();
+            isOpen() ? close() : open();
+        } else if (e.key === "Escape" && isOpen()) {
+            close();
+        }
+    });
+
+    document.querySelectorAll("[data-term-open]").forEach((el) =>
+        el.addEventListener("click", (e) => { e.preventDefault(); open(); })
+    );
+
+    // Let the command palette (separate script) open the shell.
+    document.addEventListener("open-terminal", open);
+</script>

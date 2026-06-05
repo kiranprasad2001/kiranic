@@ -74,6 +74,8 @@ try {
             window.location.href = "/ai-slop/" + slug;
         };
 
+        const openTerminal = () => document.dispatchEvent(new CustomEvent("open-terminal"));
+
         const commands = [
             { group: "Navigate", icon: "→", label: "Home", hint: "/", run: go("/") },
             { group: "Navigate", icon: "→", label: "Work", hint: "/work", run: go("/work") },
@@ -84,6 +86,7 @@ try {
             { group: "Navigate", icon: "→", label: "Colophon", hint: "how this was made", run: go("/colophon") },
             { group: "Actions", icon: "🎰", label: "Open the Slop Machine", hint: "infinite headlines, $0", run: go("/slop-machine") },
             { group: "Actions", icon: "🎲", label: "Read a random slop article", hint: "feeling lucky", run: randomSlop },
+            { group: "Actions", icon: "⌨", label: "Open the terminal", hint: "or press `", run: openTerminal },
             { group: "Actions", icon: "◐", label: "Toggle dark mode", hint: "light / dark", run: toggleTheme, keep: true },
             { group: "Actions", icon: "✉", label: "Copy email address", hint: "kp@kiranic.com", run: copyEmail, keep: true },
             { group: "Elsewhere", icon: "⧉", label: "GitHub", hint: "kiranprasad2001", run: go("https://github.com/kiranprasad2001") },
