@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { network, allProducts } from '../data/network';
+
+const title = "The Network";
+const description = "The family of small sites under *.kiranic.com — transit apps, kid-learning tools, and experiments. One brand, many subdomains.";
+---
+
+<BaseLayout title={title} description={description}>
+    <Navbar />
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 py-16 w-full">
+        {/* Header */}
+        <div class="mb-12">
+            <p class="font-mono text-sm text-brand-teal dark:text-brand-teal-light mb-3 tracking-wide">
+                *.kiranic.com
+            </p>
+            <h1 class="font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                The Kiranic Network
+            </h1>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+                A little constellation of {allProducts.length} sites under one roof — transit trackers,
+                tools for teaching my kid on the train, and the odd experiment. One shared brand,
+                many subdomains.
+                <span class="inline-flex items-center gap-1.5 ml-1 font-mono text-xs">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    = pinging live
+                </span>
+            </p>
+        </div>
+
+        {network.map((cluster) => (
+            <section class="mb-12">
+                <div class="flex items-baseline gap-3 mb-5">
+                    <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">{cluster.title}</h2>
+                    <span class="text-xs text-slate-400 dark:text-slate-600">{cluster.note}</span>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {cluster.products.map((p) => (
+                        <a
+                            href={p.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="group relative block rounded-lg border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-brand-bg p-5 hover:border-brand-teal dark:hover:border-brand-teal transition-colors"
+                        >
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-mono font-semibold text-slate-900 dark:text-white group-hover:text-brand-teal transition-colors">{p.name}</span>
+                                <span
+                                    class="status-dot inline-block w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"
+                                    data-url={p.url}
+                                    title="checking…"
+                                    aria-hidden="true"
+                                ></span>
+                            </div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-3 min-h-[2.5rem]">
+                                {p.blurb}
+                                {p.confirm && <span class="ml-1 text-[10px] align-top text-brand-ochre" title="placeholder copy — to confirm">*</span>}
+                            </p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                {p.tags.map((t) => (
+                                    <span class="text-[10px] font-mono text-slate-400 dark:text-slate-500">#{t}</span>
+                                ))}
+                                <span class="ml-auto font-mono text-[10px] text-slate-300 dark:text-slate-600 group-hover:text-brand-teal transition-colors">{p.url.replace('https://', '')} ↗</span>
+                            </div>
+                        </a>
+                    ))}
+                </div>
+            </section>
+        ))}
+
+        <p class="mt-4 font-mono text-xs text-slate-400 dark:text-slate-600">
+            <span class="text-brand-ochre">*</span> placeholder description — these two predate their own README.
+            Held together by <a href="https://github.com/kiranprasad2001/kiranic-brand" target="_blank" rel="noopener noreferrer" class="text-brand-teal hover:underline">kiranic-brand</a>:
+            shared tokens, one source of truth, zero dependency drift.
+        </p>
+    </main>
+
+    <Footer />
+</BaseLayout>
+
+<script>
+    // Best-effort liveness check. Cross-origin reads are blocked by CORS, so we
+    // fire a no-cors request and treat "resolved before timeout" as reachable.
+    // It's a reachability ping, not an HTTP status — honest about its limits.
+    const dots = document.querySelectorAll<HTMLElement>(".status-dot");
+
+    async function ping(url: string): Promise<boolean> {
+        try {
+            await fetch(url, { mode: "no-cors", signal: AbortSignal.timeout(6000) });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    dots.forEach(async (dot) => {
+        const url = dot.dataset.url!;
+        const up = await ping(url);
+        dot.classList.remove("bg-slate-300", "dark:bg-slate-600");
+        if (up) {
+            dot.classList.add("bg-emerald-400", "animate-pulse");
+            dot.title = "reachable";
+        } else {
+            dot.classList.add("bg-slate-400", "dark:bg-slate-600");
+            dot.title = "no response";
+        }
+    });
+</script>
