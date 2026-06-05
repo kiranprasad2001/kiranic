@@ -7,7 +7,8 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "og": "node scripts/generate-og.js"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.1.0",
@@ -28,9 +29,12 @@
     "tailwindcss": "^3.4.17"
   },
   "devDependencies": {
+    "@ibm/plex-mono": "^1.1.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@types/react": "^19.0.7",
     "@types/react-dom": "^19.0.3",
     "dotenv": "^17.2.3",
+    "satori": "^0.26.0",
     "typescript": "^5.7.3"
   }
 }

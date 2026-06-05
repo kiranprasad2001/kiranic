@@ -7,7 +7,7 @@ const title = "The Slop Machine";
 const description = "An infinite, zero-cost AI headline generator. No GPUs were harmed. No Gemini tokens were spent. Pure artisanal slop, hallucinated in your browser.";
 ---
 
-<BaseLayout title={title} description={description}>
+<BaseLayout title={title} description={description} ogImage="/og-slop-machine.png">
     <Navbar />
 
     <main class="flex-grow max-w-3xl mx-auto px-4 sm:px-6 py-16 w-full">
@@ -50,32 +50,32 @@ const description = "An infinite, zero-cost AI headline generator. No GPUs were 
             </div>
 
             {/* Controls */}
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-5">
+            <div class="flex flex-col gap-3 p-5">
                 <button
                     id="lever"
                     type="button"
-                    class="group flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-teal text-white font-mono font-semibold text-sm rounded-md hover:bg-brand-teal/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
+                    class="group inline-flex items-center justify-center gap-2 px-5 py-3 bg-brand-teal text-white font-mono font-semibold text-sm rounded-md hover:bg-brand-teal/90 active:scale-[0.98] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
                 >
                     <span id="lever-label">🎰 Generate Slop</span>
                 </button>
-                <button
-                    id="copy-btn"
-                    type="button"
-                    disabled
-                    class="inline-flex items-center justify-center gap-2 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-sm rounded-md hover:border-brand-teal dark:hover:border-brand-teal disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
-                >
-                    <span id="copy-label">Copy</span>
-                </button>
-                <a
-                    id="tweet-btn"
-                    href="#"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-disabled="true"
-                    class="inline-flex items-center justify-center gap-2 px-4 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-sm rounded-md hover:border-brand-ochre dark:hover:border-brand-ochre aria-disabled:opacity-40 aria-disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ochre"
-                >
-                    Post
-                </a>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                    <button id="copy-btn" type="button" disabled data-action
+                        class="inline-flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-md hover:border-brand-teal dark:hover:border-brand-teal disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal">
+                        <span id="copy-label">Copy text</span>
+                    </button>
+                    <button id="md-btn" type="button" disabled data-action
+                        class="inline-flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-md hover:border-brand-teal dark:hover:border-brand-teal disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal">
+                        <span id="md-label">Copy MD</span>
+                    </button>
+                    <button id="link-btn" type="button" disabled data-action
+                        class="inline-flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-md hover:border-brand-teal dark:hover:border-brand-teal disabled:opacity-40 disabled:cursor-not-allowed transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal">
+                        <span id="link-label">Copy link</span>
+                    </button>
+                    <a id="tweet-btn" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true"
+                        class="inline-flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 font-mono text-xs rounded-md hover:border-brand-ochre dark:hover:border-brand-ochre aria-disabled:opacity-40 aria-disabled:pointer-events-none transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-ochre">
+                        Post 𝕏
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -100,83 +100,118 @@ const description = "An infinite, zero-cost AI headline generator. No GPUs were 
 </BaseLayout>
 
 <script>
-    import { buildSlop } from "../data/slop";
+    import { buildSlop, mulberry32, type Slop } from "../data/slop";
 
-    // The reels share one bag of buzzwords with the homepage + article telemetry.
-    const buildHeadline = () => buildSlop();
+    // Every headline is reproducible from a 32-bit seed, so a permalink like
+    // ?seed=123456 always renders the exact same slop. Shareable, stable.
+    const randomSeed = () => Math.floor(Math.random() * 4294967296);
+    const fromSeed = (seed: number): Slop => buildSlop(mulberry32(seed));
+    const permalink = (seed: number) =>
+        location.origin + location.pathname + "?seed=" + seed;
 
-    // ── Wiring ───────────────────────────────────────────────────────
+    // ── Elements ─────────────────────────────────────────────────────
     const lever = document.getElementById("lever") as HTMLButtonElement;
     const leverLabel = document.getElementById("lever-label")!;
+    const kickerEl = document.getElementById("kicker")!;
     const headlineEl = document.getElementById("headline")!;
     const dekEl = document.getElementById("dek")!;
     const copyBtn = document.getElementById("copy-btn") as HTMLButtonElement;
     const copyLabel = document.getElementById("copy-label")!;
+    const mdBtn = document.getElementById("md-btn") as HTMLButtonElement;
+    const mdLabel = document.getElementById("md-label")!;
+    const linkBtn = document.getElementById("link-btn") as HTMLButtonElement;
+    const linkLabel = document.getElementById("link-label")!;
     const tweetBtn = document.getElementById("tweet-btn") as HTMLAnchorElement;
     const counterEl = document.getElementById("counter")!;
     const savingsEl = document.getElementById("savings")!;
 
     let count = 0;
     let spinning = false;
-    let current = "";
+    let currentSeed: number | null = null;
+    let current: Slop | null = null;
+
+    function enableActions(on: boolean) {
+        [copyBtn, mdBtn, linkBtn].forEach((b) => (b.disabled = !on));
+        tweetBtn.setAttribute("aria-disabled", String(!on));
+    }
+
+    function settle(seed: number, opts: { silent?: boolean } = {}) {
+        const slop = fromSeed(seed);
+        currentSeed = seed;
+        current = slop;
+
+        headlineEl.textContent = slop.headline;
+        dekEl.textContent = slop.dek;
+        dekEl.style.opacity = "1";
+
+        enableActions(true);
+        tweetBtn.href =
+            "https://twitter.com/intent/tweet?" +
+            new URLSearchParams({ text: slop.headline, url: permalink(seed) }).toString();
+
+        // Reflect the current headline in the address bar so it's always shareable.
+        history.replaceState(null, "", "?seed=" + seed);
+
+        count++;
+        counterEl.textContent = String(count);
+        savingsEl.innerHTML =
+            `Tokens spent: <span class="text-brand-ochre">0</span> · GPUs melted: <span class="text-brand-ochre">0</span> · ` +
+            `Headlines hallucinated: <span class="text-brand-ochre">${count}</span>`;
+        leverLabel.textContent = count === 1 ? "🎰 Generate More" : "🎰 Pull Again";
+    }
 
     function spin() {
         if (spinning) return;
         spinning = true;
         lever.disabled = true;
         leverLabel.textContent = "🎰 Spinning…";
+        kickerEl.textContent = "BREAKING · VENTUREBEAT-ADJACENT";
         dekEl.style.opacity = "0.25";
 
-        const final = buildHeadline();
+        const finalSeed = randomSeed();
         let ticks = 0;
         const total = 14;
 
         const reel = setInterval(() => {
             ticks++;
             // Flicker through random nonsense as the "reels" spin.
-            headlineEl.textContent = buildHeadline().headline;
+            headlineEl.textContent = fromSeed(randomSeed()).headline;
             if (ticks >= total) {
                 clearInterval(reel);
-                headlineEl.textContent = final.headline;
-                dekEl.textContent = final.dek;
-                dekEl.style.opacity = "1";
-                current = final.headline;
-
-                count++;
-                counterEl.textContent = String(count);
-                savingsEl.innerHTML =
-                    `Tokens spent: <span class="text-brand-ochre">0</span> · GPUs melted: <span class="text-brand-ochre">0</span> · ` +
-                    `Headlines hallucinated: <span class="text-brand-ochre">${count}</span>`;
-
-                copyBtn.disabled = false;
-                copyLabel.textContent = "Copy";
-                tweetBtn.setAttribute("aria-disabled", "false");
-                tweetBtn.href =
-                    "https://twitter.com/intent/tweet?" +
-                    new URLSearchParams({
-                        text: final.headline,
-                        url: "https://kiranic.com/slop-machine",
-                    }).toString();
-
+                settle(finalSeed);
                 lever.disabled = false;
-                leverLabel.textContent = count === 1 ? "🎰 Generate More" : "🎰 Pull Again";
                 spinning = false;
             }
         }, 55);
     }
 
+    // Tiny helper: flash a button's label, then restore it.
+    function flash(labelEl: HTMLElement, msg: string, restore: string) {
+        labelEl.textContent = msg;
+        setTimeout(() => (labelEl.textContent = restore), 1500);
+    }
+
+    async function copy(text: string, labelEl: HTMLElement, restore: string) {
+        try {
+            await navigator.clipboard.writeText(text);
+            flash(labelEl, "Copied ✓", restore);
+        } catch {
+            flash(labelEl, "Nope", restore);
+        }
+    }
+
     lever.addEventListener("click", spin);
 
-    copyBtn.addEventListener("click", async () => {
-        if (!current) return;
-        try {
-            await navigator.clipboard.writeText(current);
-            copyLabel.textContent = "Copied ✓";
-            setTimeout(() => (copyLabel.textContent = "Copy"), 1500);
-        } catch {
-            copyLabel.textContent = "Nope";
-            setTimeout(() => (copyLabel.textContent = "Copy"), 1500);
-        }
+    copyBtn.addEventListener("click", () => {
+        if (current) copy(current.headline, copyLabel, "Copy text");
+    });
+    mdBtn.addEventListener("click", () => {
+        if (!current || currentSeed === null) return;
+        const md = `## ${current.headline}\n\n_${current.dek}_\n\n— Freshly hallucinated by [The Slop Machine](${permalink(currentSeed)})`;
+        copy(md, mdLabel, "Copy MD");
+    });
+    linkBtn.addEventListener("click", () => {
+        if (currentSeed !== null) copy(permalink(currentSeed), linkLabel, "Copy link");
     });
 
     // Spacebar pulls the lever (unless typing somewhere).
@@ -187,4 +222,18 @@ const description = "An infinite, zero-cost AI headline generator. No GPUs were 
             spin();
         }
     });
+
+    // Deep link: ?seed=… renders that exact headline on load, no spin.
+    const seedParam = new URLSearchParams(location.search).get("seed");
+    if (seedParam !== null && /^\d+$/.test(seedParam)) {
+        const seed = Number(seedParam) >>> 0;
+        kickerEl.textContent = "PERMALINK · REPRODUCIBLE SLOP";
+        settle(seed);
+        // A shared link shouldn't claim you produced anything this session.
+        leverLabel.textContent = "🎰 Generate Slop";
+        count = 0;
+        counterEl.textContent = "0";
+        savingsEl.innerHTML =
+            `Tokens spent: <span class="text-brand-ochre">0</span> · GPUs melted: <span class="text-brand-ochre">0</span>`;
+    }
 </script>
