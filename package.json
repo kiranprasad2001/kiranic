@@ -8,7 +8,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "og": "node scripts/generate-og.js"
+    "og": "node scripts/generate-og.js",
+    "art": "node scripts/generate-poster.js"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^12.1.0",
