@@ -1,6 +1,7 @@
 ---
 import CommandPalette from '../components/CommandPalette.astro';
 import EasterEgg from '../components/EasterEgg.astro';
+import Terminal from '../components/Terminal.astro';
 
 interface Props {
 	title: string;
@@ -77,5 +78,6 @@ const fullTitle = `${title} | Kiran Prasad`;
 		<slot />
 		<CommandPalette />
 		<EasterEgg />
+		<Terminal />
 	</body>
 </html>
