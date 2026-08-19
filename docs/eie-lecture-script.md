@@ -720,6 +720,24 @@ the most credible position in the room.]`
 > useful thing to have. It is not a twin, because it cannot answer "what happens if I raise the
 > feed rate ten percent."
 
+## 4.2b Twin or Dashboard — the room game (1 min)
+
+`[Switch tabs to kiranic.com/lecture/twin-or-dashboard.html — press F for full-screen.
+This is the highest-energy 60 seconds in the talk. Do not skip it.]`
+
+> Now let us try that on some real-looking screens. I am going to show you five vendor
+> mockups. Some are twins. Some are dashboards with the word "twin" printed on them. When
+> the screen goes up, everybody shouts — TWIN, or DASHBOARD. Louder is fine.
+
+`[Space bar to advance. Five rounds, ~10 seconds each. Wait for the room to commit before
+you press Reveal — the game only works if they call it out. Answers, in order:
+DASHBOARD (turbine viz), DASHBOARD (SCADA), TWIN (MPC preview), DASHBOARD (enterprise
+marketing screen), TWIN (your own bearing model).]`
+
+> Two twins, three dashboards. In a real vendor pitch it is more like one in twenty. The
+> test is your line: **what does it predict that a human could not, and how was that
+> prediction validated.** Say it out loud in the meeting.
+
 ## 4.3 The extrapolation trap (3 min)
 
 `[Slow down. This is the intellectual core of the part and the thing that will still be true in

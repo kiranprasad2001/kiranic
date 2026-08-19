@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Twin or Dashboard? — the vendor test, rapid fire</title>
+<style>
+  :root{
+    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
+    --text:#D8DBE0; --dim:#79808B;
+    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4; --green:#6EBF6A; --blue:#5D8FBF;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{background:var(--panel);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.5;
+       display:flex;flex-direction:column;min-height:100vh}
+
+  header{border-bottom:1px solid var(--rule);padding:16px 24px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  header .brand{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+  header h1{font-size:22px;font-weight:600;margin:2px 0 0;letter-spacing:-.01em}
+  header .score{font-family:var(--mono);font-size:13px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em}
+  header .score .n{color:var(--amber);font-size:16px;margin-left:4px}
+
+  main{flex-grow:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:24px}
+
+  /* Prompt card + stage */
+  .prompt{font-family:var(--mono);font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);text-align:center}
+  .prompt .rnd{color:var(--dim);margin-right:12px}
+
+  .stage{background:var(--panel2);border:1px solid var(--rule);border-radius:4px;padding:26px;
+    max-width:960px;width:100%;display:flex;flex-direction:column;gap:16px;position:relative}
+  .stage .tag{position:absolute;top:14px;right:14px;font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dim);background:var(--panel3);padding:4px 8px;border-radius:2px;border:1px solid var(--rule)}
+  .stage .caption{color:var(--dim);font-size:13px;text-align:center;font-style:italic}
+  .stage svg{display:block;width:100%;max-height:420px;background:#0A0C10;border:1px solid var(--rule);border-radius:2px}
+
+  /* Reveal overlay */
+  .reveal{max-width:960px;width:100%;background:var(--panel2);border:1px solid var(--rule);border-radius:4px;
+    padding:26px;display:none;flex-direction:column;align-items:center;gap:14px}
+  .reveal.show{display:flex}
+  .verdict{font-size:96px;font-weight:700;letter-spacing:-.03em;line-height:1;margin:0}
+  .verdict.twin{color:var(--teal)}
+  .verdict.dash{color:var(--red)}
+  .why{font-size:18px;text-align:center;max-width:640px;color:var(--text);margin:0}
+  .why em{color:var(--amber);font-style:normal}
+  .why .test{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:block;margin-top:14px}
+
+  /* Controls */
+  .controls{display:flex;gap:10px;align-items:center;padding:16px 24px;border-top:1px solid var(--rule);
+    background:var(--panel);justify-content:space-between}
+  .controls .set{display:flex;gap:8px;align-items:center}
+  .controls button{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:10px 18px;border-radius:2px;cursor:pointer;min-width:100px}
+  .controls button:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+  .controls button:disabled{opacity:.35;cursor:not-allowed}
+  .controls button.primary{background:var(--amber);color:#000;border-color:var(--amber)}
+  .controls button.primary:hover{background:#fff;color:#000;border-color:#fff}
+  .controls .hint{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+  .controls .hint kbd{background:var(--panel3);border:1px solid var(--rule);border-radius:2px;padding:2px 6px;font-family:var(--mono);color:var(--text);margin:0 3px}
+
+  /* Intro / end screens */
+  .screen{max-width:640px;text-align:center}
+  .screen h2{font-size:28px;margin:0 0 14px;letter-spacing:-.02em}
+  .screen p{color:var(--dim);font-size:15px;margin:0 0 12px;line-height:1.5}
+  .screen .test-quote{background:#0A0C10;border:1px solid var(--rule);border-radius:3px;padding:18px 22px;margin:20px 0;
+    font-size:17px;font-style:italic;color:var(--text)}
+  .screen .test-quote em{color:var(--amber);font-style:normal;font-weight:600}
+  .screen .final-score{font-family:var(--mono);font-size:48px;color:var(--amber);margin:20px 0}
+
+  /* Full-screen mode tweaks */
+  :fullscreen{background:var(--panel)}
+  :fullscreen .verdict{font-size:140px}
+  :fullscreen .stage svg{max-height:520px}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="brand">Guest lecture · Part 4 · §4.2 · Slide 25</div>
+    <h1>Twin or Dashboard?</h1>
+  </div>
+  <div class="score">
+    Round <span class="n" id="s-round">0</span> / 5
+    <span style="margin-left:20px;color:var(--dim)">|</span>
+    <span style="margin-left:20px">Room score <span class="n" id="s-score">—</span></span>
+  </div>
+</header>
+
+<main id="main">
+  <!-- Intro screen -->
+  <div class="screen" id="intro">
+    <h2>The vendor test, in unison.</h2>
+    <p>Five vendor screens. Ten seconds each. The room shouts <em style="color:var(--teal)">TWIN</em> or <em style="color:var(--red)">DASHBOARD</em>. Then the reveal.</p>
+    <div class="test-quote">"What does your twin predict that a human could not — <em>and how was that prediction validated?</em>"</div>
+    <p>No answer to the first half → it is a visualization. No answer to the second half → it is a guess with good graphics.</p>
+  </div>
+</main>
+
+<div class="controls">
+  <div class="set">
+    <span class="hint">
+      <kbd>Space</kbd> next  ·  <kbd>R</kbd> reset  ·  <kbd>F</kbd> full-screen
+    </span>
+  </div>
+  <div class="set">
+    <button id="reset">Reset</button>
+    <button id="fs">Full-screen</button>
+    <button id="next" class="primary">Start →</button>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+var rounds = [
+  {
+    tag: "VENDOR A · 'Live 3D Turbine Twin'",
+    caption: "Real-time 3D model of a wind turbine with sensor values painted onto it. Rotates. Values update every second.",
+    svg: turbineSVG,
+    verdict: "DASHBOARD",
+    why: "3D + live values ≠ twin. It shows what <em>is</em>. It cannot answer &quot;what happens if wind rises twenty knots?&quot; — no model, no prediction, no validation."
+  },
+  {
+    tag: "VENDOR B · 'Plant Digital Twin Console'",
+    caption: "Control-room SCADA view of a treatment plant. Tank levels, valve states, one alarm bell.",
+    svg: scadaSVG,
+    verdict: "DASHBOARD",
+    why: "This is a SCADA screen with the word &quot;twin&quot; in the product name. Pure monitoring. Fails the vendor test on both halves."
+  },
+  {
+    tag: "VENDOR C · MPC Setpoint Preview",
+    caption: "Chart of the last four hours of actual plant behaviour, plus a two-hour prediction. Setpoint proposal below.",
+    svg: mpcSVG,
+    verdict: "TWIN",
+    why: "It <em>predicts</em> future trajectory from a model, and you can see the model's past accuracy on the same chart. Both halves of the vendor test — even though nobody would market this as a &quot;twin&quot;."
+  },
+  {
+    tag: "VENDOR D · 'AI-Powered Enterprise Digital Twin Platform'",
+    caption: "Corporate marketing screen. KPI tiles. '89% accurate' badge. 'Predictive insights' label. Rendered plant photo behind.",
+    svg: enterpriseSVG,
+    verdict: "DASHBOARD",
+    why: "The word &quot;twin&quot; is in the product name and on every tile. Where is the prediction? What was it? How was &quot;89% accurate&quot; measured, on which cases? This is a category error dressed as a category leader."
+  },
+  {
+    tag: "VENDOR E · Bearing physics model (yours)",
+    caption: "The live condition monitor from Part 4. Four motors on a plant clock, physics forward-integrated, days-to-fault estimated and checked against actual failures.",
+    svg: bearingTwinSVG,
+    verdict: "TWIN",
+    why: "Physics model kept current by the machine's own data, producing a falsifiable prediction (days-to-fault) whose accuracy is measurable after the fact. <em>You built this.</em> It is the smallest possible thing that passes the test."
+  }
+];
+
+var round = 0;   // 0 = intro, 1..5 = rounds, 6 = final
+var phase = "intro";  // intro | question | reveal | final
+var scoreShown = 0;   // rounds where reveal has been shown
+
+/* =========== SVG mockups =========== */
+
+function turbineSVG(){
+  return `<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a2030"/><stop offset="1" stop-color="#0A0C10"/>
+    </linearGradient></defs>
+    <rect width="800" height="420" fill="url(#sky)"/>
+    <!-- ground -->
+    <rect y="380" width="800" height="40" fill="#0A0C10" stroke="#2F343D"/>
+    <text x="20" y="30" font-family="Courier New" font-size="11" fill="#3FB6A8" letter-spacing="1.5">● LIVE</text>
+    <text x="80" y="30" font-family="Courier New" font-size="11" fill="#79808B" letter-spacing="1.5">TURBINE-042 · MODEL WTG-3.2MW</text>
+
+    <!-- Tower -->
+    <rect x="380" y="160" width="14" height="220" fill="#79808B" stroke="#2F343D"/>
+    <!-- Nacelle -->
+    <rect x="360" y="140" width="60" height="30" fill="#242830" stroke="#79808B"/>
+    <!-- Hub -->
+    <circle cx="420" cy="155" r="10" fill="#5D8FBF" stroke="#79808B"/>
+    <!-- 3 Blades in a Y -->
+    <line x1="420" y1="155" x2="420" y2="30" stroke="#D8DBE0" stroke-width="6"/>
+    <line x1="420" y1="155" x2="530" y2="220" stroke="#D8DBE0" stroke-width="6"/>
+    <line x1="420" y1="155" x2="310" y2="220" stroke="#D8DBE0" stroke-width="6"/>
+
+    <!-- Sensor gauges around it -->
+    <g font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1">
+      <g transform="translate(80,90)"><rect width="130" height="60" fill="#101216" stroke="#2F343D"/>
+        <text x="8" y="14" letter-spacing="1.5">ROTOR RPM</text>
+        <text x="8" y="42" font-size="22" fill="#E8A33D">14.8</text></g>
+      <g transform="translate(80,180)"><rect width="130" height="60" fill="#101216" stroke="#2F343D"/>
+        <text x="8" y="14" letter-spacing="1.5">WIND</text>
+        <text x="8" y="42" font-size="22" fill="#3FB6A8">9.2 m/s</text></g>
+      <g transform="translate(80,270)"><rect width="130" height="60" fill="#101216" stroke="#2F343D"/>
+        <text x="8" y="14" letter-spacing="1.5">GEARBOX °C</text>
+        <text x="8" y="42" font-size="22" fill="#6EBF6A">64</text></g>
+      <g transform="translate(590,90)"><rect width="140" height="60" fill="#101216" stroke="#2F343D"/>
+        <text x="8" y="14" letter-spacing="1.5">POWER (kW)</text>
+        <text x="8" y="42" font-size="22" fill="#E8A33D">2 480</text></g>
+      <g transform="translate(590,180)"><rect width="140" height="60" fill="#101216" stroke="#2F343D"/>
+        <text x="8" y="14" letter-spacing="1.5">BLADE VIB (g)</text>
+        <text x="8" y="42" font-size="22" fill="#5D8FBF">0.38</text></g>
+      <g transform="translate(590,270)"><rect width="140" height="60" fill="#101216" stroke="#2F343D"/>
+        <text x="8" y="14" letter-spacing="1.5">YAW ANGLE °</text>
+        <text x="8" y="42" font-size="22" fill="#9B8CD4">232</text></g>
+    </g>
+
+    <!-- Marketing badge -->
+    <rect x="330" y="380" width="140" height="20" fill="#242830" stroke="#3FB6A8"/>
+    <text x="400" y="394" text-anchor="middle" font-family="Courier New" font-size="10" fill="#3FB6A8" letter-spacing="1.5">DIGITAL TWIN VIEW</text>
+  </svg>`;
+}
+
+function scadaSVG(){
+  return `<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="420" fill="#0A0C10"/>
+    <text x="20" y="30" font-family="Courier New" font-size="11" fill="#3FB6A8" letter-spacing="1.5">● LIVE  ·  WATER TREATMENT PLANT · UNIT 3</text>
+
+    <!-- Two big tanks -->
+    <g>
+      <rect x="80" y="70" width="130" height="270" fill="#101216" stroke="#79808B" stroke-width="2"/>
+      <rect x="82" y="200" width="126" height="138" fill="#5D8FBF" opacity=".6"/>
+      <text x="145" y="60" text-anchor="middle" font-family="Courier New" font-size="11" fill="#D8DBE0">CLARIFIER 1</text>
+      <text x="145" y="365" text-anchor="middle" font-family="Courier New" font-size="14" fill="#E8A33D">51 %</text>
+    </g>
+    <g>
+      <rect x="260" y="70" width="130" height="270" fill="#101216" stroke="#79808B" stroke-width="2"/>
+      <rect x="262" y="100" width="126" height="238" fill="#5D8FBF" opacity=".6"/>
+      <text x="325" y="60" text-anchor="middle" font-family="Courier New" font-size="11" fill="#D8DBE0">CLARIFIER 2</text>
+      <text x="325" y="365" text-anchor="middle" font-family="Courier New" font-size="14" fill="#D14B3C">88 %</text>
+    </g>
+
+    <!-- Pipes between tanks -->
+    <line x1="210" y1="180" x2="260" y2="180" stroke="#5D8FBF" stroke-width="6"/>
+    <!-- Valves -->
+    <g transform="translate(232,175)">
+      <rect width="10" height="10" fill="#6EBF6A" stroke="#79808B"/>
+      <text x="14" y="9" font-family="Courier New" font-size="9" fill="#79808B">V-31 OPEN</text>
+    </g>
+
+    <!-- Pumps -->
+    <g transform="translate(440,140)">
+      <circle r="24" fill="#242830" stroke="#79808B" stroke-width="2"/>
+      <text y="4" text-anchor="middle" font-family="Courier New" font-size="14" fill="#3FB6A8">P</text>
+      <text y="42" text-anchor="middle" font-family="Courier New" font-size="9" fill="#D8DBE0">PUMP 1</text>
+      <text y="56" text-anchor="middle" font-family="Courier New" font-size="10" fill="#6EBF6A">RUN</text>
+    </g>
+    <g transform="translate(520,140)">
+      <circle r="24" fill="#242830" stroke="#79808B" stroke-width="2"/>
+      <text y="4" text-anchor="middle" font-family="Courier New" font-size="14" fill="#79808B">P</text>
+      <text y="42" text-anchor="middle" font-family="Courier New" font-size="9" fill="#D8DBE0">PUMP 2</text>
+      <text y="56" text-anchor="middle" font-family="Courier New" font-size="10" fill="#79808B">STOP</text>
+    </g>
+
+    <!-- Alarm banner -->
+    <g transform="translate(430,240)">
+      <rect width="330" height="46" fill="#D14B3C" opacity=".9"/>
+      <text x="16" y="20" font-family="Courier New" font-size="11" fill="#fff" letter-spacing="1.5">⚠  ALARM  ·  CLARIFIER 2 HIGH LEVEL</text>
+      <text x="16" y="36" font-family="Courier New" font-size="10" fill="#fff" opacity=".8">Acknowledged? [Y/N]  ·  T +03:22</text>
+    </g>
+
+    <!-- KPI strip along top right -->
+    <g font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1">
+      <g transform="translate(430,70)"><rect width="330" height="70" fill="#101216" stroke="#2F343D"/>
+        <text x="12" y="18">INFLOW (m³/h)</text><text x="120" y="18">TURBIDITY (NTU)</text><text x="240" y="18">pH</text>
+        <text x="12" y="46" font-size="20" fill="#3FB6A8">1 240</text>
+        <text x="120" y="46" font-size="20" fill="#E8A33D">3.8</text>
+        <text x="240" y="46" font-size="20" fill="#6EBF6A">7.2</text>
+      </g>
+    </g>
+
+    <text x="400" y="400" text-anchor="middle" font-family="Courier New" font-size="10" fill="#3FB6A8" letter-spacing="2">— PLANT DIGITAL TWIN CONSOLE —</text>
+  </svg>`;
+}
+
+function mpcSVG(){
+  return `<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="420" fill="#0A0C10"/>
+    <text x="20" y="30" font-family="Courier New" font-size="11" fill="#3FB6A8" letter-spacing="1.5">MPC · CRUDE UNIT · TOWER-101 · HORIZON 2 h</text>
+
+    <!-- Chart frame -->
+    <g transform="translate(50,60)">
+      <rect width="700" height="260" fill="#101216" stroke="#2F343D"/>
+      <!-- axes -->
+      <line x1="50" y1="220" x2="700" y2="220" stroke="#79808B"/>
+      <line x1="50" y1="20" x2="50" y2="220" stroke="#79808B"/>
+      <!-- "now" divider -->
+      <line x1="450" y1="20" x2="450" y2="220" stroke="#E8A33D" stroke-dasharray="4 4"/>
+      <text x="450" y="14" text-anchor="middle" font-family="Courier New" font-size="10" fill="#E8A33D" letter-spacing="1">NOW</text>
+      <!-- setpoint band -->
+      <line x1="50" y1="100" x2="700" y2="100" stroke="#6EBF6A" stroke-dasharray="2 4" opacity=".6"/>
+      <text x="55" y="94" font-family="Courier New" font-size="10" fill="#6EBF6A">setpoint</text>
+      <!-- actual (solid teal, past 4h) -->
+      <path d="M 50 130 L 100 128 L 150 122 L 200 118 L 250 112 L 300 108 L 350 108 L 400 102 L 450 100" stroke="#3FB6A8" stroke-width="2.5" fill="none"/>
+      <text x="200" y="150" font-family="Courier New" font-size="10" fill="#3FB6A8">actual (past 4 h)</text>
+      <!-- predicted (dashed amber, next 2h, converging to setpoint) -->
+      <path d="M 450 100 L 500 96 L 550 100 L 600 100 L 650 100 L 690 100" stroke="#E8A33D" stroke-width="2.5" fill="none" stroke-dasharray="6 4"/>
+      <text x="510" y="80" font-family="Courier New" font-size="10" fill="#E8A33D">predicted trajectory (2 h)</text>
+      <!-- confidence band -->
+      <path d="M 450 100 L 500 88 L 550 90 L 600 88 L 650 88 L 690 88 L 690 112 L 650 112 L 600 112 L 550 110 L 500 110 L 450 100 Z" fill="#E8A33D" opacity=".15"/>
+
+      <text x="50" y="240" font-family="Courier New" font-size="10" fill="#79808B">−4 h</text>
+      <text x="450" y="240" text-anchor="middle" font-family="Courier New" font-size="10" fill="#79808B">t=0</text>
+      <text x="690" y="240" text-anchor="end" font-family="Courier New" font-size="10" fill="#79808B">+2 h</text>
+    </g>
+
+    <!-- Proposal box -->
+    <g transform="translate(50,340)">
+      <rect width="440" height="66" fill="#101216" stroke="#3FB6A8"/>
+      <text x="14" y="18" font-family="Courier New" font-size="10" fill="#3FB6A8" letter-spacing="1.5">PROPOSED SETPOINT MOVE</text>
+      <text x="14" y="42" font-family="Courier New" font-size="14" fill="#D8DBE0">Feed rate 480 → 508 t/h   ·   T_top 118 → 121 °C</text>
+      <text x="14" y="58" font-family="Courier New" font-size="10" fill="#79808B">Predicted PUE benefit: +2.1 %  ·  Confidence: 84 %</text>
+    </g>
+    <g transform="translate(510,340)">
+      <rect width="240" height="66" fill="#101216" stroke="#2F343D"/>
+      <text x="14" y="18" font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1.5">MODEL SKILL (LAST 30 DAYS)</text>
+      <text x="14" y="42" font-family="Courier New" font-size="14" fill="#E8A33D">2-h MAE  1.3 °C</text>
+      <text x="14" y="58" font-family="Courier New" font-size="10" fill="#79808B">on held-out data · 720 predictions</text>
+    </g>
+  </svg>`;
+}
+
+function enterpriseSVG(){
+  return `<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="420" fill="#0A0C10"/>
+    <!-- Rendered plant photo hint -->
+    <rect x="20" y="60" width="760" height="120" fill="#1a2030" stroke="#2F343D"/>
+    <g opacity=".5">
+      <circle cx="120" cy="140" r="30" fill="#242830"/>
+      <rect x="180" y="95" width="80" height="70" fill="#242830"/>
+      <rect x="280" y="80" width="60" height="90" fill="#242830"/>
+      <polygon points="360,170 400,80 440,170" fill="#242830"/>
+      <rect x="470" y="105" width="90" height="60" fill="#242830"/>
+      <rect x="590" y="85" width="140" height="85" fill="#242830"/>
+    </g>
+    <text x="400" y="30" text-anchor="middle" font-family="Courier New" font-size="14" fill="#E8A33D" letter-spacing="2">AI-POWERED ENTERPRISE DIGITAL TWIN PLATFORM</text>
+    <text x="400" y="48" text-anchor="middle" font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1.5">predictive insights · real-time optimisation · asset intelligence</text>
+
+    <!-- KPI tiles -->
+    <g font-family="Courier New" fill="#D8DBE0" letter-spacing="1">
+      <g transform="translate(30,210)"><rect width="180" height="90" fill="#1E2127" stroke="#2F343D"/>
+        <text x="14" y="20" font-size="10" fill="#79808B">FLEET HEALTH</text>
+        <text x="14" y="56" font-size="34" fill="#6EBF6A">94%</text>
+        <text x="14" y="76" font-size="10" fill="#79808B">↑ 2 pts this week</text></g>
+      <g transform="translate(220,210)"><rect width="180" height="90" fill="#1E2127" stroke="#2F343D"/>
+        <text x="14" y="20" font-size="10" fill="#79808B">REVENUE IMPACT</text>
+        <text x="14" y="56" font-size="34" fill="#E8A33D">$4.2M</text>
+        <text x="14" y="76" font-size="10" fill="#79808B">YTD savings via AI</text></g>
+      <g transform="translate(410,210)"><rect width="180" height="90" fill="#1E2127" stroke="#2F343D"/>
+        <text x="14" y="20" font-size="10" fill="#79808B">MODEL ACCURACY</text>
+        <text x="14" y="56" font-size="34" fill="#3FB6A8">89%</text>
+        <text x="14" y="76" font-size="10" fill="#79808B">across all assets</text></g>
+      <g transform="translate(600,210)"><rect width="180" height="90" fill="#1E2127" stroke="#2F343D"/>
+        <text x="14" y="20" font-size="10" fill="#79808B">ASSETS ONBOARDED</text>
+        <text x="14" y="56" font-size="34" fill="#5D8FBF">1 240</text>
+        <text x="14" y="76" font-size="10" fill="#79808B">83% of goal</text></g>
+    </g>
+
+    <!-- Vague sparklines / more filler -->
+    <g transform="translate(30,320)">
+      <rect width="370" height="80" fill="#1E2127" stroke="#2F343D"/>
+      <text x="14" y="20" font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1">PREDICTIVE INSIGHTS · LAST 24 h</text>
+      <path d="M 20 60 Q 60 40 100 55 T 180 50 T 260 45 T 340 42" stroke="#3FB6A8" stroke-width="2" fill="none"/>
+      <text x="180" y="75" text-anchor="middle" font-family="Courier New" font-size="9" fill="#79808B">— trending —</text>
+    </g>
+    <g transform="translate(410,320)">
+      <rect width="370" height="80" fill="#1E2127" stroke="#2F343D"/>
+      <text x="14" y="20" font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1">OPTIMISATION SCORE</text>
+      <text x="14" y="55" font-size="20" font-family="Courier New" fill="#E8A33D">EXCELLENT</text>
+      <text x="14" y="70" font-family="Courier New" font-size="9" fill="#79808B">based on proprietary methodology</text>
+    </g>
+  </svg>`;
+}
+
+function bearingTwinSVG(){
+  return `<svg viewBox="0 0 800 420" xmlns="http://www.w3.org/2000/svg">
+    <rect width="800" height="420" fill="#0A0C10"/>
+    <text x="20" y="30" font-family="Courier New" font-size="11" fill="#3FB6A8" letter-spacing="1.5">● LIVE  ·  BEARING TWIN  ·  MTR-402 · SKF 6205</text>
+
+    <!-- Asset list -->
+    <g transform="translate(20,60)">
+      <g transform="translate(0,0)"><rect width="180" height="30" fill="#101216" stroke="#2F343D"/>
+        <circle cx="16" cy="15" r="5" fill="#6EBF6A"/>
+        <text x="30" y="19" font-family="Courier New" font-size="12" fill="#D8DBE0">MTR-401</text>
+        <text x="140" y="19" font-family="Courier New" font-size="12" fill="#6EBF6A" text-anchor="end">0.42</text></g>
+      <g transform="translate(0,38)"><rect width="180" height="30" fill="#101216" stroke="#E8A33D"/>
+        <circle cx="16" cy="15" r="5" fill="#E8A33D"/>
+        <text x="30" y="19" font-family="Courier New" font-size="12" fill="#E8A33D">MTR-402</text>
+        <text x="140" y="19" font-family="Courier New" font-size="12" fill="#E8A33D" text-anchor="end">3.71</text></g>
+      <g transform="translate(0,76)"><rect width="180" height="30" fill="#101216" stroke="#2F343D"/>
+        <circle cx="16" cy="15" r="5" fill="#6EBF6A"/>
+        <text x="30" y="19" font-family="Courier New" font-size="12" fill="#D8DBE0">MTR-403</text>
+        <text x="140" y="19" font-family="Courier New" font-size="12" fill="#6EBF6A" text-anchor="end">0.38</text></g>
+      <g transform="translate(0,114)"><rect width="180" height="30" fill="#101216" stroke="#2F343D"/>
+        <circle cx="16" cy="15" r="5" fill="#6EBF6A"/>
+        <text x="30" y="19" font-family="Courier New" font-size="12" fill="#D8DBE0">MTR-404</text>
+        <text x="140" y="19" font-family="Courier New" font-size="12" fill="#6EBF6A" text-anchor="end">0.51</text></g>
+    </g>
+
+    <!-- Trend chart of MTR-402 index over 60 days with prediction -->
+    <g transform="translate(220,60)">
+      <rect width="560" height="200" fill="#101216" stroke="#2F343D"/>
+      <text x="12" y="16" font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1.5">MTR-402 · BPFO INDEX  ·  DAYS 0–60</text>
+      <line x1="30" y1="170" x2="540" y2="170" stroke="#79808B"/>
+      <line x1="30" y1="20" x2="30" y2="170" stroke="#79808B"/>
+      <line x1="30" y1="150" x2="540" y2="150" stroke="#D14B3C" stroke-dasharray="3 4"/>
+      <text x="540" y="147" text-anchor="end" font-family="Courier New" font-size="9" fill="#D14B3C">alert 1.8</text>
+      <!-- past trace -->
+      <path d="M 30 165 L 100 164 L 150 162 L 200 158 L 250 145 L 300 130 L 340 115" stroke="#3FB6A8" stroke-width="2" fill="none"/>
+      <!-- prediction (dashed) with band -->
+      <path d="M 340 115 L 400 92 L 460 65 L 510 42" stroke="#E8A33D" stroke-width="2" fill="none" stroke-dasharray="5 4"/>
+      <path d="M 340 115 L 400 82 L 460 50 L 510 28 L 510 56 L 460 80 L 400 102 L 340 115 Z" fill="#E8A33D" opacity=".18"/>
+      <!-- now marker -->
+      <line x1="340" y1="20" x2="340" y2="170" stroke="#E8A33D" stroke-dasharray="2 3" opacity=".5"/>
+      <text x="340" y="16" text-anchor="middle" font-family="Courier New" font-size="9" fill="#E8A33D">NOW · DAY 24</text>
+    </g>
+
+    <!-- Prediction card -->
+    <g transform="translate(220,280)">
+      <rect width="270" height="110" fill="#101216" stroke="#3FB6A8"/>
+      <text x="14" y="20" font-family="Courier New" font-size="10" fill="#3FB6A8" letter-spacing="1.5">FALSIFIABLE PREDICTION</text>
+      <text x="14" y="52" font-family="Courier New" font-size="28" fill="#E8A33D">28 ± 6 d</text>
+      <text x="14" y="72" font-family="Courier New" font-size="11" fill="#D8DBE0">days to threshold crossing</text>
+      <text x="14" y="94" font-family="Courier New" font-size="9" fill="#79808B">outer-race spall growth model · SKF 6205</text>
+    </g>
+    <g transform="translate(510,280)">
+      <rect width="270" height="110" fill="#101216" stroke="#2F343D"/>
+      <text x="14" y="20" font-family="Courier New" font-size="10" fill="#79808B" letter-spacing="1.5">VALIDATION (LAST 6 FAILURES)</text>
+      <text x="14" y="52" font-family="Courier New" font-size="28" fill="#3FB6A8">5 / 6</text>
+      <text x="14" y="72" font-family="Courier New" font-size="11" fill="#D8DBE0">within predicted window</text>
+      <text x="14" y="94" font-family="Courier New" font-size="9" fill="#79808B">mean absolute error 3.2 days · N=6</text>
+    </g>
+  </svg>`;
+}
+
+/* =========== render loop =========== */
+function render(){
+  var main = document.getElementById("main");
+  var nextBtn = document.getElementById("next");
+  var scoreEl = document.getElementById("s-score");
+  var roundEl = document.getElementById("s-round");
+
+  roundEl.textContent = Math.max(0, Math.min(5, round));
+  scoreEl.textContent = scoreShown === 0 ? "—" : scoreShown + " revealed";
+
+  if(phase === "intro"){
+    main.innerHTML = `<div class="screen" id="intro">
+      <h2>The vendor test, in unison.</h2>
+      <p>Five vendor screens. Ten seconds each. The room shouts <em style="color:var(--teal)">TWIN</em> or <em style="color:var(--red)">DASHBOARD</em>. Then the reveal.</p>
+      <div class="test-quote">"What does your twin predict that a human could not — <em>and how was that prediction validated?</em>"</div>
+      <p>No answer to the first half → it is a visualization. No answer to the second half → it is a guess with good graphics.</p>
+    </div>`;
+    nextBtn.textContent = "Start →";
+  } else if(phase === "question"){
+    var r = rounds[round-1];
+    main.innerHTML = `
+      <div class="prompt"><span class="rnd">Round ${round} / 5</span>Twin or Dashboard?</div>
+      <div class="stage">
+        <div class="tag">${r.tag}</div>
+        ${r.svg()}
+        <div class="caption">${r.caption}</div>
+      </div>`;
+    nextBtn.textContent = "Reveal →";
+  } else if(phase === "reveal"){
+    var r = rounds[round-1];
+    var isT = r.verdict === "TWIN";
+    main.innerHTML = `
+      <div class="prompt"><span class="rnd">Round ${round} / 5</span>Verdict</div>
+      <div class="reveal show">
+        <h2 class="verdict ${isT?'twin':'dash'}">${r.verdict}</h2>
+        <p class="why">${r.why}
+          <span class="test">vendor test: predicts what a human could not · validated how?</span>
+        </p>
+      </div>`;
+    nextBtn.textContent = round === 5 ? "Finish →" : "Next round →";
+  } else if(phase === "final"){
+    main.innerHTML = `<div class="screen">
+      <h2>That is the vendor test.</h2>
+      <p>Five screens. Two twins, three dashboards. In a real vendor pitch it is more like one twin per twenty dashboards.</p>
+      <div class="test-quote">"What does it predict that a human could not — <em>and how was that prediction validated?</em>"</div>
+      <p>Say it out loud in the meeting. Watch what happens next.</p>
+    </div>`;
+    nextBtn.textContent = "Replay";
+  }
+}
+
+function advance(){
+  if(phase === "intro"){
+    round = 1; phase = "question";
+  } else if(phase === "question"){
+    phase = "reveal";
+    scoreShown++;
+  } else if(phase === "reveal"){
+    if(round === 5){
+      phase = "final";
+    } else {
+      round++;
+      phase = "question";
+    }
+  } else if(phase === "final"){
+    round = 0; phase = "intro"; scoreShown = 0;
+  }
+  render();
+}
+
+function reset(){
+  round = 0; phase = "intro"; scoreShown = 0;
+  render();
+}
+
+document.getElementById("next").addEventListener("click", advance);
+document.getElementById("reset").addEventListener("click", reset);
+document.getElementById("fs").addEventListener("click", function(){
+  if(!document.fullscreenElement){ document.documentElement.requestFullscreen(); this.textContent = "Exit full-screen"; }
+  else{ document.exitFullscreen(); this.textContent = "Full-screen"; }
+});
+document.addEventListener("keydown", function(e){
+  if(e.key === " " || e.key === "Enter"){ e.preventDefault(); advance(); }
+  else if(e.key === "r" || e.key === "R"){ reset(); }
+  else if(e.key === "f" || e.key === "F"){ document.getElementById("fs").click(); }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

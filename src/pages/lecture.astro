@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 
 const title = "AI and Digital Twins in Instrumentation";
-const description = "Four interactive simulators from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
+const description = "Four simulators and a room game from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
 
 const demos = [
     {
@@ -56,6 +56,18 @@ const demos = [
         ],
         accent: "ochre",
     },
+    {
+        name: "Twin or Dashboard?",
+        href: "/lecture/twin-or-dashboard.html",
+        tag: "rapid-fire · 60 sec",
+        blurb: "The vendor test as a room game. Five mock vendor screens — a live 3D turbine, a SCADA console, an MPC preview, an 'AI-powered enterprise digital twin platform', and your own bearing model. The room shouts <em>twin</em> or <em>dashboard</em>, then the reveal lands with the one-line reason.",
+        points: [
+            "Full-screen mode, space bar to advance — manual pace so you can wait for the room to commit",
+            "Two twins and three dashboards, in a mix that mirrors what actually gets sold under the name",
+            "Closes on the bearing twin you demoed earlier — the smallest possible thing that passes the test",
+        ],
+        accent: "ochre",
+    },
 ];
 ---
 
@@ -85,7 +97,7 @@ const demos = [
                 bearing forward in time and produces predictions you can check against what happens.
             </p>
             <p class="text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl mt-3 text-sm">
-                All four simulators below run entirely in your browser. No build step, no CDN, no network
+                Everything below runs entirely in your browser. No build step, no CDN, no network
                 calls, no analytics, no storage. They work offline, and they reflow on a phone —
                 though the live monitor computes four FFTs a second, so an older phone will run warm.
             </p>
