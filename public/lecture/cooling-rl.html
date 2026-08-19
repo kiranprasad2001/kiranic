@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data-centre cooling with RL — how the 40% figure was earned</title>
+<style>
+  :root{
+    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
+    --text:#D8DBE0; --dim:#79808B;
+    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4; --green:#6EBF6A; --blue:#5D8FBF;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--panel);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.5;padding:16px}
+
+  .silk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  header{border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:16px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between}
+  h1{font-size:19px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em}
+  header p{margin:0;color:var(--dim);font-size:13px;max-width:64ch}
+
+  .tabs{display:flex;gap:2px;background:var(--panel3);border:1px solid var(--rule);border-radius:3px;padding:2px}
+  .tabs button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:transparent;color:var(--dim);border:0;padding:8px 14px;border-radius:2px;cursor:pointer}
+  .tabs button.on{background:var(--panel);color:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;padding:14px}
+  .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);margin:0 0 10px;font-weight:400}
+
+  svg.plant{display:block;width:100%;height:auto;background:#101216;border:1px solid var(--rule);border-radius:2px}
+  canvas.chart{display:block;width:100%;height:220px;background:#101216;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
+
+  .clock-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .clock-row .clk{color:var(--amber);font-size:14px}
+  .clock-row label{display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.1em}
+  .clock-row input[type="range"]{width:110px;accent-color:var(--teal)}
+  .clock-row button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:6px 12px;border-radius:2px;cursor:pointer}
+  .clock-row button.on{border-color:var(--teal);color:var(--teal)}
+
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .kpi{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:9px 10px}
+  .kpi .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+  .kpi .v{font-family:var(--mono);font-size:16px;margin-top:2px}
+  .kpi .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:3px}
+  .kpi.baseline .v{color:var(--dim)}
+  .kpi.smart .v{color:var(--teal)}
+  .kpi.gap .v{color:var(--amber)}
+  .kpi.pue .v{color:var(--green)}
+  .kpi.unsafe .v{color:var(--red)}
+
+  /* stage panel */
+  .stage-num{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--amber);margin-bottom:6px}
+  .stage-title{font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
+  .stage-body{color:var(--text);font-size:13.5px;line-height:1.55}
+  .stage-body p{margin:0 0 10px}
+  .stage-body em{color:var(--teal);font-style:normal}
+  .stage-body strong{color:var(--amber);font-weight:600}
+  .stage-body .warn{color:var(--red)}
+
+  .formula-block{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:12px 14px;margin:10px 0;
+    font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--text)}
+  .formula-block .lbl{color:var(--amber);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+  .formula-block .note{color:var(--dim);font-family:var(--ui);font-size:12px;margin-top:6px;font-style:italic}
+
+  .step-nav{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
+  .step-nav button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:9px 14px;border-radius:2px;cursor:pointer;min-width:82px}
+  .step-nav button:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+  .step-nav button:disabled{opacity:.35;cursor:not-allowed}
+  .step-dots{display:flex;gap:5px}
+  .step-dots .dot{width:8px;height:8px;border-radius:50%;background:var(--panel3);border:1px solid var(--rule);cursor:pointer}
+  .step-dots .dot.on{background:var(--amber);border-color:var(--amber)}
+  .step-dots .dot.done{background:var(--teal);border-color:var(--teal)}
+
+  /* explore controls */
+  .ctl label{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.06em;color:var(--dim);text-transform:uppercase;margin:12px 0 4px}
+  .ctl label .vl{color:var(--amber);font-family:var(--mono);font-size:13px;letter-spacing:0}
+  .ctl input[type="range"]{width:100%;accent-color:var(--amber)}
+  .ctl .btns{display:flex;gap:6px;margin-top:6px}
+  .ctl .btns button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:7px 11px;border-radius:2px;cursor:pointer;flex:1}
+  .ctl .btns button.on{border-color:var(--amber);color:var(--amber)}
+
+  .setpoints{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+  .sp{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:8px 9px}
+  .sp .k{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
+  .sp .v{font-family:var(--mono);font-size:13px;color:var(--amber);margin-top:2px}
+  .sp .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:2px}
+  .sp.free .v{color:var(--teal)}
+  .sp.chill .v{color:var(--blue)}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <p class="silk">Guest lecture · Part 2 · §2.8 · Slide 21</p>
+    <h1>Data-centre cooling with RL — how the 40% figure was earned</h1>
+    <p>Google's DeepMind reported a 40% cut in cooling energy at their data centres. The number is real. The tool that delivered it was <em>not</em> reinforcement learning turning valves — it was a learned optimiser choosing setpoints, running <em>advisory-first</em>, with hard safety constraints and operator override. This is what that looks like.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button id="tab-guided" class="on" role="tab">Guided walkthrough</button>
+    <button id="tab-explore" role="tab">Explore</button>
+  </div>
+</header>
+
+<div class="grid">
+  <!-- LEFT: the visual + chart -->
+  <div class="card">
+    <h2>The plant · IT load 1 MW</h2>
+    <svg class="plant" viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" id="svg">
+      <!-- Sun / weather -->
+      <g id="g-weather">
+        <circle cx="60" cy="45" r="18" fill="#242830" stroke="#79808B" stroke-width="1"/>
+        <text x="60" y="49" text-anchor="middle" font-family="Courier New" font-size="10" fill="#E8A33D" id="wb-icon">☀</text>
+        <text x="60" y="80" text-anchor="middle" font-family="Courier New" font-size="9" fill="#79808B" letter-spacing="1">WET-BULB</text>
+        <text x="60" y="94" text-anchor="middle" font-family="Courier New" font-size="14" fill="#E8A33D" id="wb-val">15.0 °C</text>
+      </g>
+
+      <!-- IT hall -->
+      <g id="g-it">
+        <rect x="130" y="30" width="150" height="240" fill="#1E2127" stroke="#79808B" stroke-width="1.5"/>
+        <text x="205" y="20" text-anchor="middle" font-family="Courier New" font-size="10" fill="#D8DBE0" letter-spacing="1.5">IT HALL</text>
+        <!-- server racks -->
+        <g id="racks">
+          <rect x="145" y="55"  width="30" height="200" fill="#242830" stroke="#3FB6A8" stroke-width="1" id="rack-1"/>
+          <rect x="188" y="55"  width="30" height="200" fill="#242830" stroke="#3FB6A8" stroke-width="1" id="rack-2"/>
+          <rect x="231" y="55"  width="30" height="200" fill="#242830" stroke="#3FB6A8" stroke-width="1" id="rack-3"/>
+          <!-- LED strips on each rack -->
+          <line x1="150" y1="65"  x2="170" y2="65"  stroke="#6EBF6A" stroke-width="1.5"/>
+          <line x1="150" y1="75"  x2="170" y2="75"  stroke="#6EBF6A" stroke-width="1.5"/>
+          <line x1="193" y1="65"  x2="213" y2="65"  stroke="#6EBF6A" stroke-width="1.5"/>
+          <line x1="193" y1="75"  x2="213" y2="75"  stroke="#6EBF6A" stroke-width="1.5"/>
+          <line x1="236" y1="65"  x2="256" y2="65"  stroke="#6EBF6A" stroke-width="1.5"/>
+          <line x1="236" y1="75"  x2="256" y2="75"  stroke="#6EBF6A" stroke-width="1.5"/>
+        </g>
+        <!-- IT inlet temp badge -->
+        <rect x="145" y="270" width="120" height="18" fill="#101216" stroke="#2F343D"/>
+        <text x="150" y="283" font-family="Courier New" font-size="9" fill="#79808B" letter-spacing="1">INLET</text>
+        <text x="260" y="283" text-anchor="end" font-family="Courier New" font-size="10" fill="#6EBF6A" id="inlet-val">22.0 °C</text>
+      </g>
+
+      <!-- Chiller -->
+      <g id="g-chiller">
+        <rect x="330" y="90" width="90" height="120" fill="#1E2127" stroke="#79808B" stroke-width="1.5"/>
+        <text x="375" y="80" text-anchor="middle" font-family="Courier New" font-size="10" fill="#D8DBE0" letter-spacing="1.5">CHILLER</text>
+        <!-- compressor icon -->
+        <circle cx="375" cy="130" r="18" fill="#242830" stroke="#5D8FBF" stroke-width="1.5"/>
+        <text x="375" y="134" text-anchor="middle" font-family="Courier New" font-size="14" fill="#5D8FBF">C</text>
+        <!-- power badge -->
+        <rect x="335" y="180" width="80" height="24" fill="#101216" stroke="#2F343D"/>
+        <text x="340" y="192" font-family="Courier New" font-size="8" fill="#79808B" letter-spacing="1">CHILLER</text>
+        <text x="410" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#5D8FBF" id="chiller-kw">285 kW</text>
+      </g>
+
+      <!-- Cooling tower -->
+      <g id="g-tower">
+        <path d="M 480 240 L 490 100 L 570 100 L 580 240 Z" fill="#1E2127" stroke="#79808B" stroke-width="1.5"/>
+        <text x="530" y="90" text-anchor="middle" font-family="Courier New" font-size="10" fill="#D8DBE0" letter-spacing="1.5">COOLING TOWER</text>
+        <!-- fan -->
+        <circle cx="530" cy="130" r="16" fill="#242830" stroke="#3FB6A8" stroke-width="1.5"/>
+        <line x1="530" y1="114" x2="530" y2="146" stroke="#3FB6A8" stroke-width="1.5" id="fan-blade-a"/>
+        <line x1="514" y1="130" x2="546" y2="130" stroke="#3FB6A8" stroke-width="1.5" id="fan-blade-b"/>
+        <!-- fan badge -->
+        <rect x="490" y="180" width="80" height="24" fill="#101216" stroke="#2F343D"/>
+        <text x="495" y="192" font-family="Courier New" font-size="8" fill="#79808B" letter-spacing="1">FAN</text>
+        <text x="565" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#3FB6A8" id="fan-kw">31 kW</text>
+        <!-- evap plume -->
+        <g id="g-plume" opacity=".4">
+          <ellipse cx="510" cy="70" rx="12" ry="18" fill="#79808B"/>
+          <ellipse cx="530" cy="55" rx="14" ry="22" fill="#79808B"/>
+          <ellipse cx="550" cy="70" rx="12" ry="18" fill="#79808B"/>
+        </g>
+      </g>
+
+      <!-- Pipes: IT ← chiller ← tower -->
+      <!-- chilled water supply (cold, blue) — chiller → IT -->
+      <line x1="330" y1="150" x2="280" y2="150" stroke="#5D8FBF" stroke-width="3"/>
+      <text x="305" y="144" text-anchor="middle" font-family="Courier New" font-size="8" fill="#79808B">CHW</text>
+      <text x="305" y="164" text-anchor="middle" font-family="Courier New" font-size="10" fill="#5D8FBF" id="chw-val">7 °C</text>
+      <!-- return warm from IT to chiller (top) -->
+      <line x1="280" y1="115" x2="330" y2="115" stroke="#D14B3C" stroke-width="3"/>
+      <text x="305" y="109" text-anchor="middle" font-family="Courier New" font-size="8" fill="#79808B">RETURN</text>
+      <!-- condenser water: chiller → tower -->
+      <line x1="420" y1="115" x2="490" y2="115" stroke="#D14B3C" stroke-width="3" opacity=".7"/>
+      <line x1="420" y1="150" x2="490" y2="150" stroke="#5D8FBF" stroke-width="3" opacity=".7"/>
+
+      <!-- Free-cooling bypass (only shown when active) -->
+      <g id="g-free" opacity="0">
+        <path d="M 375 210 Q 375 240 450 240 Q 530 240 530 210" stroke="#3FB6A8" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+        <text x="450" y="260" text-anchor="middle" font-family="Courier New" font-size="9" fill="#3FB6A8" letter-spacing="1.5">FREE-COOLING BYPASS</text>
+      </g>
+
+      <!-- Policy badge (top-right) -->
+      <g id="g-policy">
+        <rect x="450" y="15" width="160" height="26" fill="#101216" stroke="#E8A33D" stroke-width="1"/>
+        <text x="530" y="32" text-anchor="middle" font-family="Courier New" font-size="10" fill="#E8A33D" letter-spacing="1.5" id="policy-lbl">POLICY : BASELINE</text>
+      </g>
+
+      <!-- Safety trip banner (hidden unless triggered) -->
+      <g id="g-trip" opacity="0">
+        <rect x="130" y="30" width="150" height="240" fill="#D14B3C" opacity=".18"/>
+        <rect x="145" y="140" width="120" height="20" fill="#D14B3C"/>
+        <text x="205" y="154" text-anchor="middle" font-family="Courier New" font-size="10" fill="#fff" letter-spacing="1.5" font-weight="bold">SAFETY CLAMP</text>
+      </g>
+    </svg>
+
+    <canvas class="chart" id="chart" width="1200" height="440"></canvas>
+
+    <div class="clock-row">
+      <span class="clk"><span id="clock">Hour 0 / 168</span> · <span id="dayname">Mon</span></span>
+      <label>Sim speed <input id="speed" type="range" min="0.5" max="8" step="0.5" value="2"><span id="speed-v">2×</span></label>
+      <button id="pause">Pause</button>
+      <button id="reset">Reset week</button>
+    </div>
+
+    <div class="kpis">
+      <div class="kpi baseline"><div class="k">Baseline kWh</div><div class="v"><span id="k-base">0</span></div></div>
+      <div class="kpi smart"><div class="k">Smart kWh</div><div class="v"><span id="k-smart">0</span></div></div>
+      <div class="kpi gap"><div class="k">Reduction</div><div class="v"><span id="k-red">—</span><span class="u"> %</span></div></div>
+      <div class="kpi pue"><div class="k">Smart PUE</div><div class="v"><span id="k-pue">—</span></div></div>
+    </div>
+
+    <div class="setpoints">
+      <div class="sp chill"><div class="k">CHW setpoint</div><div class="v"><span id="sp-chw">7.0</span><span class="u"> °C</span></div></div>
+      <div class="sp"><div class="k">Fan speed</div><div class="v"><span id="sp-fan">80</span><span class="u"> %</span></div></div>
+      <div class="sp free"><div class="k">Mode</div><div class="v" id="sp-mode">CHILLED</div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: guided or explore -->
+  <div class="card" id="right"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ physics ============ */
+var IT_LOAD_KW = 1000;
+var SAFETY_INLET_C = 27;
+var APPROACH_C = 3;
+
+function chillerCOP(t_chw, t_wb){
+  var t_cond = t_wb + APPROACH_C + 4;
+  var lift = Math.max(5, t_cond - t_chw);
+  return Math.max(2, 8 - 0.1*lift);
+}
+function fanPower(pct){ return 60 * Math.pow(pct/100, 3); }
+
+function coolingPower(t_chw, fanPct, t_wb, useFree){
+  var coilDT = 8;
+  var t_inlet = t_chw + coilDT;
+  var safe = t_inlet <= SAFETY_INLET_C;
+  var p_chiller = 0;
+  if(useFree && (t_wb + APPROACH_C < t_chw)){
+    p_chiller = 0;
+  } else {
+    p_chiller = IT_LOAD_KW / chillerCOP(t_chw, t_wb);
+  }
+  return { p_chiller:p_chiller, p_fan:fanPower(fanPct), total:p_chiller+fanPower(fanPct), safe:safe, t_inlet:t_inlet };
+}
+
+/* wet-bulb over a synthetic week: mild continental spring */
+function wetbulb(hour){
+  var day = hour/24;
+  var seasonal = 12;                                    // week-average
+  var diurnal = 5*Math.sin(2*Math.PI * (hour - 15)/24); // daily swing
+  var weather = 3*Math.sin(2*Math.PI * day/3.5);        // slower weather
+  return seasonal + diurnal + weather;
+}
+
+/* ============ policies ============ */
+function policyBaseline(t_wb){ return { t_chw:7, fan:80, free:false, name:"BASELINE" }; }
+function policySmart(t_wb, safetyMargin){
+  var canFree = (t_wb + APPROACH_C + 2) < 15;
+  if(canFree){
+    return { t_chw: Math.max(10, t_wb + APPROACH_C + 2), fan:60, free:true, name:"RL (FREE)" };
+  }
+  return { t_chw: Math.min(14, SAFETY_INLET_C - 8 - safetyMargin), fan:55, free:false, name:"RL (CHILLED)" };
+}
+/* explicit unsafe policy for stage 5: strip the safety margin */
+function policyRLUnsafe(t_wb){
+  return { t_chw: Math.min(20, SAFETY_INLET_C - 8 + 1), fan:40, free:false, name:"RL (NO SAFETY)" };
+}
+
+/* ============ state ============ */
+var running = true;
+var speedMul = 2;                    // hours per real second
+var mode = "guided";
+var stage = 0;
+var showBaseline = true, showSmart = true;
+var currentPolicy = "smart";         // baseline | smart | unsafe
+var safetyMargin = 2;
+var seriesLen = 168;                 // one week hourly
+var hour = 0;
+var baseKWh = 0, smartKWh = 0;
+var unsafeMinutes = 0;
+var trendBase = [], trendSmart = [], trendWB = [];
+var chartHover = -1;
+
+/* ============ stages ============ */
+var stages = [
+  {
+    num:"STAGE 1 / 6",
+    title:"What is being cooled",
+    body:`<p>A 1 MW data centre. That is a thousand kilowatts of servers turning electricity into heat — a small industrial site's worth. That heat has to leave the building, or the machines slow down and eventually the metal fails.</p>
+      <p>Three components move the heat from CPU to atmosphere:</p>
+      <p><em>Air handlers</em> — blow cold air across the racks, warm air out the back. <em>Chilled-water loop</em> — carries the heat from the air handlers to the chiller. <em>Chiller and cooling tower</em> — reject the heat to the outside atmosphere.</p>
+      <p>Cooling itself takes energy. Fans, pumps, chiller compressors. In a badly-run facility it can be 40% of the total power bill. That is the number Google set out to cut.</p>`,
+    show:{policy:"baseline", allowUnsafe:false, showBoth:false, tripBanner:false, safetyMargin:2}
+  },
+  {
+    num:"STAGE 2 / 6",
+    title:"The baseline — how it used to be run",
+    body:`<p>Human operators pick conservative setpoints and leave them alone. Chilled water at 7°C year-round. Cooling-tower fan at 80% year-round.</p>
+      <p>Watch the plant run a week. The chiller is always on, working hard whether it needs to or not. The cooling tower runs at the same speed at 3 a.m. in January as it does at 3 p.m. in July.</p>
+      <p>The safe-and-stupid policy. Nothing catches fire — and nothing gets optimised either.</p>`,
+    show:{policy:"baseline", allowUnsafe:false, showBoth:false, tripBanner:false, safetyMargin:2},
+    formulas:[
+      { lbl:"BASELINE setpoints", eq:"T_chw = 7°C   ·   fan = 80%   ·   no free-cooling",
+        note:"Safe in every condition. Also uses the maximum energy in every condition." }
+    ]
+  },
+  {
+    num:"STAGE 3 / 6",
+    title:"The three levers",
+    body:`<p>An RL agent (or any smart controller) has three knobs. They are not independent — moving one changes what the others should be.</p>
+      <p><em>Chilled-water setpoint (T_chw).</em> Higher = the chiller works less hard. But if it goes too high, IT inlet temperature crosses the safety limit and the servers throttle.</p>
+      <p><em>Cooling-tower fan speed.</em> Fan power scales roughly as the <em>cube</em> of speed — dropping from 80% to 60% cuts fan energy by more than half.</p>
+      <p><em>Free-cooling bypass.</em> When outside air is cold enough, skip the chiller entirely. The compressor uses the most energy in the plant; getting rid of it whenever possible is where the real savings live.</p>`,
+    show:{policy:"baseline", allowUnsafe:false, showBoth:false, tripBanner:false, safetyMargin:2},
+    formulas:[
+      { lbl:"CHILLER POWER", eq:"P_chiller  =  IT_load  ÷  COP(T_chw, T_wetbulb)",
+        note:"COP falls as the lift (T_condenser − T_chw) rises. Raising T_chw raises COP." },
+      { lbl:"FAN POWER", eq:"P_fan  =  60 kW × (speed / 100)³",
+        note:"Cubic — small speed reductions are huge power reductions." }
+    ]
+  },
+  {
+    num:"STAGE 4 / 6",
+    title:"The smart policy — react to the weather",
+    body:`<p>Turn on the RL agent. Same plant, same 1 MW load, same week. The agent watches the outdoor wet-bulb temperature and adjusts T_chw and the fan every step.</p>
+      <p>On cool nights the plume disappears and the chiller stops. <em>Free cooling.</em> Cool outside air rejects the heat directly through the tower, and the compressor — the biggest consumer in the plant — is off.</p>
+      <p>Watch the two lines on the chart. Grey is baseline, teal is the RL policy. The gap opens overnight and widens further whenever the weather turns cool.</p>`,
+    show:{policy:"smart", allowUnsafe:false, showBoth:true, tripBanner:false, safetyMargin:2}
+  },
+  {
+    num:"STAGE 5 / 6",
+    title:"Why the safety layer exists",
+    body:`<p>What if we let the RL agent push harder? It would drive T_chw right up against the safety limit — that saves more energy — and drop the fan even further.</p>
+      <p class="warn"><em>Do not do this.</em></p>
+      <p>Below is the same plant with the safety-margin taken out. Every time the wet-bulb spikes, the inlet crosses 27°C and the safety layer clamps the setpoint back down — you can see the trip banner. On a real site the servers would already be throttling, and if this were an RL system that was learning by trying things, you would have discovered the failure mode <em>on the plant.</em></p>
+      <p>The famous Google result was <em>not</em> RL exploring in production. It was a learned model choosing setpoints, running <em>advisory-first</em> for months, then constrained autonomous, with hard limits the model could not violate. Take that architecture, or do not take the technique.</p>`,
+    show:{policy:"unsafe", allowUnsafe:true, showBoth:true, tripBanner:true, safetyMargin:0}
+  },
+  {
+    num:"STAGE 6 / 6",
+    title:"Where the 40% actually comes from",
+    body:`<p>Run a full year and the RL agent uses about <strong>40% less cooling energy than baseline</strong>. That is DeepMind's headline figure, and the mechanism is not exotic:</p>
+      <p><em>Free-cooling during cool hours</em> — chiller off completely. Where most of the savings actually come from. <em>Higher T_chw the rest of the time</em> — every degree closer to the safety limit is a few percent off compressor work. <em>Reduced fan speed</em> — cubic scaling means small drops matter a lot.</p>
+      <p>The RL part matters because those three levers interact and depend on weather that changes every hour. A hand-tuned schedule cannot keep up; an optimiser trained on the plant's own operating data can.</p>
+      <p>PUE — total power ÷ IT power — drops from about <em>1.19 to 1.11</em>. On a 1 MW site that is roughly 700 MWh a year saved, and it is real money.</p>`,
+    show:{policy:"smart", allowUnsafe:false, showBoth:true, tripBanner:false, safetyMargin:2},
+    formulas:[
+      { lbl:"WHAT DEEPMIND ACTUALLY BUILT (per their 2016 paper)", eq:"neural net predicts PUE  →  optimiser picks setpoints  →  operator or safety layer approves",
+        note:"Not RL turning valves. A learned predictor + a constrained optimiser + human/safety oversight. That architecture is transferable; the specific ML technique is a detail." }
+    ]
+  }
+];
+
+/* ============ render right panel ============ */
+function applyStage(cfg){
+  currentPolicy = cfg.policy;
+  showBaseline = cfg.showBoth ? true : (cfg.policy === "baseline");
+  showSmart    = cfg.showBoth ? true : (cfg.policy !== "baseline");
+  safetyMargin = cfg.safetyMargin;
+  document.getElementById("g-trip").style.opacity = 0;   // reset banner
+  // reset accumulators when moving stages so the numbers make sense for THIS stage
+  hour = 0; baseKWh = 0; smartKWh = 0; unsafeMinutes = 0;
+  trendBase = []; trendSmart = []; trendWB = [];
+}
+
+function render(){
+  var right = document.getElementById("right");
+  if(mode === "guided"){
+    var s = stages[stage];
+    applyStage(s.show);
+
+    var html = '<div class="stage-num">'+s.num+'</div>';
+    html += '<h2 class="stage-title" style="color:var(--text)">'+s.title+'</h2>';
+    html += '<div class="stage-body">'+s.body+'</div>';
+    if(s.formulas){
+      for(var i=0;i<s.formulas.length;i++){
+        var f = s.formulas[i];
+        html += '<div class="formula-block"><span class="lbl">'+f.lbl+'</span>'+f.eq;
+        if(f.note) html += '<div class="note">'+f.note+'</div>';
+        html += '</div>';
+      }
+    }
+
+    html += '<div class="step-nav">';
+    html += '<button id="prev" '+(stage===0?"disabled":"")+'>← Prev</button>';
+    html += '<div class="step-dots">';
+    for(var j=0;j<stages.length;j++){
+      var cls = "dot" + (j===stage?" on":(j<stage?" done":""));
+      html += '<div class="'+cls+'" data-j="'+j+'"></div>';
+    }
+    html += '</div>';
+    html += '<button id="next" '+(stage===stages.length-1?"disabled":"")+'>Next →</button>';
+    html += '</div>';
+
+    right.innerHTML = html;
+    document.getElementById("prev").onclick = function(){ if(stage>0){ stage--; render(); }};
+    document.getElementById("next").onclick = function(){ if(stage<stages.length-1){ stage++; render(); }};
+    var dots = right.querySelectorAll(".step-dots .dot");
+    for(var k=0;k<dots.length;k++){
+      (function(el){ el.onclick = function(){ stage=+el.getAttribute("data-j"); render(); }; })(dots[k]);
+    }
+  } else {
+    // EXPLORE
+    var html = '<div class="stage-num">EXPLORE</div>';
+    html += '<h2 class="stage-title" style="color:var(--text)">Change conditions, watch the plant</h2>';
+    html += '<div class="stage-body"><p>Both controllers run on the same weather, from the same 1 MW load. Change the wet-bulb offset to force a heatwave or a cold snap. Reduce the safety margin to see the RL agent get punished by the safety layer.</p></div>';
+    html += '<div class="ctl">';
+    html += '<label><span>Wet-bulb offset</span><span class="vl" id="v-off">'+wbOffset.toFixed(1)+' °C</span></label>';
+    html += '<input id="s-off" type="range" min="-10" max="15" step="0.5" value="'+wbOffset+'">';
+    html += '<label><span>Safety margin</span><span class="vl" id="v-sm">'+safetyMargin+' °C</span></label>';
+    html += '<input id="s-sm" type="range" min="0" max="5" step="0.5" value="'+safetyMargin+'">';
+    html += '<label style="margin-top:14px"><span>Active policy on plant</span><span class="vl"></span></label>';
+    html += '<div class="btns">';
+    html += '<button id="p-base" class="'+(currentPolicy==="baseline"?"on":"")+'">Baseline</button>';
+    html += '<button id="p-smart" class="'+(currentPolicy==="smart"?"on":"")+'">RL smart</button>';
+    html += '<button id="p-unsafe" class="'+(currentPolicy==="unsafe"?"on":"")+'">RL, no safety</button>';
+    html += '</div>';
+    html += '<label style="margin-top:14px"><span>Presets</span><span class="vl"></span></label>';
+    html += '<div class="btns">';
+    html += '<button id="p-mild">Mild spring</button>';
+    html += '<button id="p-heat">Heatwave</button>';
+    html += '<button id="p-cold">Winter</button>';
+    html += '</div>';
+    html += '</div>';
+
+    right.innerHTML = html;
+    wireExplore();
+  }
+}
+
+var wbOffset = 0;
+function wireExplore(){
+  var byId = function(id){ return document.getElementById(id); };
+  byId("s-off").addEventListener("input", function(){ wbOffset = +this.value; byId("v-off").textContent = wbOffset.toFixed(1)+" °C"; resetSim(); });
+  byId("s-sm").addEventListener("input",  function(){ safetyMargin = +this.value; byId("v-sm").textContent = safetyMargin+" °C"; resetSim(); });
+  var setPol = function(p){
+    currentPolicy = p;
+    ["p-base","p-smart","p-unsafe"].forEach(function(id){ byId(id).classList.remove("on"); });
+    byId(p === "baseline" ? "p-base" : p === "smart" ? "p-smart" : "p-unsafe").classList.add("on");
+    showBaseline = true; showSmart = true;
+    resetSim();
+  };
+  byId("p-base").onclick = function(){ setPol("baseline"); };
+  byId("p-smart").onclick = function(){ setPol("smart"); };
+  byId("p-unsafe").onclick = function(){ setPol("unsafe"); };
+  byId("p-mild").onclick = function(){ wbOffset = 0; byId("s-off").value=0; byId("v-off").textContent="0.0 °C"; resetSim(); };
+  byId("p-heat").onclick = function(){ wbOffset = 12; byId("s-off").value=12; byId("v-off").textContent="12.0 °C"; resetSim(); };
+  byId("p-cold").onclick = function(){ wbOffset = -10; byId("s-off").value=-10; byId("v-off").textContent="-10.0 °C"; resetSim(); };
+}
+
+function resetSim(){
+  hour = 0; baseKWh = 0; smartKWh = 0; unsafeMinutes = 0;
+  trendBase = []; trendSmart = []; trendWB = [];
+  document.getElementById("g-trip").style.opacity = 0;
+}
+
+/* ============ SVG state updates ============ */
+var fanAngle = 0;
+function updateSVG(t_wb, sp, r_active, r_baseline){
+  document.getElementById("wb-val").textContent = t_wb.toFixed(1) + " °C";
+  document.getElementById("wb-icon").textContent = t_wb < 8 ? "❄" : t_wb > 22 ? "☀" : "◐";
+
+  document.getElementById("chw-val").textContent = sp.t_chw.toFixed(1) + " °C";
+  document.getElementById("chiller-kw").textContent = Math.round(r_active.p_chiller) + " kW";
+  document.getElementById("fan-kw").textContent    = Math.round(r_active.p_fan) + " kW";
+  document.getElementById("inlet-val").textContent = r_active.t_inlet.toFixed(1) + " °C";
+  document.getElementById("inlet-val").style.fill  = r_active.t_inlet > 26 ? "#D14B3C" : r_active.t_inlet > 24 ? "#E8A33D" : "#6EBF6A";
+
+  document.getElementById("g-free").style.opacity  = sp.free ? 1 : 0;
+  document.getElementById("g-plume").style.opacity = sp.free ? 0.15 : 0.5;
+
+  // rack color reflects inlet temp
+  var stroke = r_active.t_inlet > 26 ? "#D14B3C" : r_active.t_inlet > 24 ? "#E8A33D" : "#3FB6A8";
+  ["rack-1","rack-2","rack-3"].forEach(function(id){ document.getElementById(id).setAttribute("stroke", stroke); });
+
+  document.getElementById("policy-lbl").textContent = "POLICY : " + sp.name;
+  document.getElementById("g-policy").querySelector("rect").setAttribute("stroke",
+    currentPolicy === "unsafe" ? "#D14B3C" : currentPolicy === "smart" ? "#3FB6A8" : "#E8A33D");
+  document.getElementById("policy-lbl").setAttribute("fill",
+    currentPolicy === "unsafe" ? "#D14B3C" : currentPolicy === "smart" ? "#3FB6A8" : "#E8A33D");
+
+  // spin fan
+  fanAngle = (fanAngle + sp.fan/8) % 360;
+  document.getElementById("fan-blade-a").setAttribute("transform","rotate("+fanAngle+" 530 130)");
+  document.getElementById("fan-blade-b").setAttribute("transform","rotate("+fanAngle+" 530 130)");
+
+  // setpoint chips
+  document.getElementById("sp-chw").textContent = sp.t_chw.toFixed(1);
+  document.getElementById("sp-fan").textContent = sp.fan;
+  document.getElementById("sp-mode").textContent = sp.free ? "FREE-COOLING" : "CHILLED";
+  document.getElementById("sp-mode").style.color = sp.free ? "#3FB6A8" : "#5D8FBF";
+
+  // safety trip
+  if(!r_active.safe){
+    document.getElementById("g-trip").style.opacity = 1;
+    setTimeout(function(){ document.getElementById("g-trip").style.opacity = 0; }, 600);
+  }
+}
+
+/* ============ chart ============ */
+var ctx = document.getElementById("chart").getContext("2d");
+function drawChart(){
+  var W = ctx.canvas.width, H = ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+
+  // background grid
+  ctx.strokeStyle = "#2F343D";
+  ctx.lineWidth = 1;
+  ctx.font = "11px 'Courier New'";
+  ctx.fillStyle = "#79808B";
+
+  var padL = 60, padR = 20, padT = 24, padB = 34;
+  var innerW = W - padL - padR;
+  var innerH = H - padT - padB;
+
+  // compute y-range from data
+  var maxKW = 400;   // upper bound of cooling power for y-axis in kW
+  var maxWB = 40;    // wet-bulb axis top
+
+  // gridlines & labels
+  for(var g=0; g<=4; g++){
+    var y = padT + (innerH * g/4);
+    ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL+innerW, y); ctx.stroke();
+    var val = Math.round(maxKW - (maxKW * g/4));
+    ctx.textAlign = "right";
+    ctx.fillText(val + " kW", padL - 6, y + 4);
+  }
+
+  // x axis label
+  ctx.textAlign = "left";
+  ctx.fillText("time (hours)", padL, H - 8);
+  ctx.textAlign = "right";
+  ctx.fillText("wet-bulb °C", W - padR, H - 8);
+
+  // day markers
+  var days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  ctx.strokeStyle = "#242830";
+  for(var d=0; d<7; d++){
+    var x = padL + innerW * (d*24)/seriesLen;
+    ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+innerH); ctx.stroke();
+    ctx.fillStyle = "#79808B";
+    ctx.textAlign = "left";
+    ctx.fillText(days[d], x+4, padT + 12);
+  }
+
+  // wet-bulb trace (small, top)
+  if(trendWB.length > 1){
+    ctx.strokeStyle = "#E8A33D";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(var i=0; i<trendWB.length; i++){
+      var x = padL + innerW * (i/seriesLen);
+      var y = padT + innerH - (innerH * (trendWB[i]/maxWB));
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  // baseline (grey)
+  if(showBaseline && trendBase.length > 1){
+    ctx.strokeStyle = "#79808B";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(var i=0; i<trendBase.length; i++){
+      var x = padL + innerW * (i/seriesLen);
+      var y = padT + innerH - (innerH * Math.min(1, trendBase[i]/maxKW));
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  // smart (teal or red-if-unsafe)
+  if(showSmart && trendSmart.length > 1){
+    ctx.strokeStyle = currentPolicy === "unsafe" ? "#D14B3C" : "#3FB6A8";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for(var i=0; i<trendSmart.length; i++){
+      var x = padL + innerW * (i/seriesLen);
+      var y = padT + innerH - (innerH * Math.min(1, trendSmart[i]/maxKW));
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  // legend (top right of plot)
+  ctx.font = "11px 'Courier New'";
+  ctx.textAlign = "left";
+  var lx = padL + innerW - 220, ly = padT + 8;
+  var box = function(color, label){
+    ctx.fillStyle = color; ctx.fillRect(lx, ly-8, 12, 3);
+    ctx.fillStyle = "#D8DBE0"; ctx.fillText(label, lx+18, ly-3);
+    ly += 14;
+  };
+  if(showBaseline) box("#79808B", "baseline cooling power");
+  if(showSmart)    box(currentPolicy === "unsafe" ? "#D14B3C" : "#3FB6A8", "RL cooling power");
+  box("#E8A33D", "wet-bulb °C  (scaled)");
+}
+
+/* ============ main loop ============ */
+var lastMs = 0, accum = 0;
+function loop(ms){
+  var dt = lastMs ? Math.min(0.1, (ms-lastMs)/1000) : 0.016;
+  lastMs = ms;
+  if(running){
+    accum += dt * speedMul;              // simulated hours to advance
+    while(accum >= 1){
+      accum -= 1;
+      var t_wb = wetbulb(hour) + wbOffset;
+      var b_sp = policyBaseline(t_wb);
+      var s_sp = currentPolicy === "unsafe" ? policyRLUnsafe(t_wb)
+              :  currentPolicy === "baseline" ? b_sp
+              :  policySmart(t_wb, safetyMargin);
+
+      var b = coolingPower(b_sp.t_chw, b_sp.fan, t_wb, b_sp.free);
+      var s = coolingPower(s_sp.t_chw, s_sp.fan, t_wb, s_sp.free);
+
+      // safety clamp for smart/unsafe: if inlet violates, cap t_chw
+      if(!s.safe){
+        unsafeMinutes += 60;
+        s_sp = { t_chw: SAFETY_INLET_C - 8 - 1, fan: s_sp.fan, free:false, name: s_sp.name };
+        s = coolingPower(s_sp.t_chw, s_sp.fan, t_wb, s_sp.free);
+      }
+
+      baseKWh  += b.total;
+      smartKWh += s.total;
+      trendBase.push(b.total);
+      trendSmart.push(s.total);
+      trendWB.push(t_wb);
+      hour++;
+
+      // render at end of loop with current-hour readings
+      if(accum < 1){
+        var active = currentPolicy === "baseline" ? { p_chiller:b.p_chiller, p_fan:b.p_fan, t_inlet:b.t_inlet, safe:b.safe }
+                                                  : { p_chiller:s.p_chiller, p_fan:s.p_fan, t_inlet:s.t_inlet, safe:s.safe };
+        var activeSp = currentPolicy === "baseline" ? b_sp : s_sp;
+        updateSVG(t_wb, activeSp, active, b);
+      }
+
+      if(hour >= seriesLen){
+        hour = 0;
+        // scroll: keep last week only
+        if(trendBase.length > seriesLen){ trendBase = trendBase.slice(-seriesLen); trendSmart = trendSmart.slice(-seriesLen); trendWB = trendWB.slice(-seriesLen); }
+      }
+    }
+
+    // KPI refresh
+    document.getElementById("k-base").textContent  = Math.round(baseKWh);
+    document.getElementById("k-smart").textContent = Math.round(smartKWh);
+    var pct = baseKWh > 10 ? (100*(1 - smartKWh/baseKWh)).toFixed(1) : "—";
+    document.getElementById("k-red").textContent   = pct;
+    var itKWh = IT_LOAD_KW * (trendBase.length);
+    var pue   = itKWh > 0 ? (1 + smartKWh/itKWh).toFixed(3) : "—";
+    document.getElementById("k-pue").textContent   = pue;
+
+    var clk = document.getElementById("clock");
+    if(clk){
+      var d = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+      clk.textContent = "Hour " + hour + " / " + seriesLen;
+      document.getElementById("dayname").textContent = d[Math.floor(hour/24)];
+    }
+    drawChart();
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ============ init ============ */
+render();
+document.getElementById("speed").addEventListener("input", function(){
+  speedMul = +this.value;
+  document.getElementById("speed-v").textContent = speedMul + "×";
+});
+document.getElementById("pause").addEventListener("click", function(){
+  running = !running;
+  this.textContent = running ? "Pause" : "Run";
+  this.classList.toggle("on", !running);
+});
+document.getElementById("reset").addEventListener("click", resetSim);
+
+document.getElementById("tab-guided").addEventListener("click", function(){
+  if(mode==="guided") return;
+  mode = "guided";
+  this.classList.add("on"); document.getElementById("tab-explore").classList.remove("on");
+  render();
+});
+document.getElementById("tab-explore").addEventListener("click", function(){
+  if(mode==="explore") return;
+  mode = "explore";
+  this.classList.add("on"); document.getElementById("tab-guided").classList.remove("on");
+  render();
+});
+
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

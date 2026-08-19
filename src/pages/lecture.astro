@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 
 const title = "AI and Digital Twins in Instrumentation";
-const description = "Three interactive simulators from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
+const description = "Four interactive simulators from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
 
 const demos = [
     {
@@ -29,6 +29,18 @@ const demos = [
             "Raw spectrum vs. band-pass → Hilbert envelope → FFT, computed live in the browser",
             "Envelope BPFO index: 0.36 healthy → 3.2 early defect (Alert) → 7.7 advanced (Fault)",
             "<em>Noisy plant</em> keeps the same 22% defect but drops the index to ~1.7, back under the alert line — a missed detection",
+        ],
+        accent: "teal",
+    },
+    {
+        name: "Cooling with RL",
+        href: "/lecture/cooling-rl.html",
+        tag: "where the 40% came from",
+        blurb: "A 1 MW data centre with the three cooling levers a smart optimiser gets to touch — chilled-water setpoint, cooling-tower fan, free-cooling bypass. Watch a baseline policy and an RL policy run the same week on the same weather. The gap opens overnight and widens when the outside is cool.",
+        points: [
+            "Chiller COP falls with lift, fan power scales cubically with speed, and free-cooling kills the compressor entirely — the three physics facts the savings live on",
+            "Verified: 42% reduction over a synthetic week, PUE 1.19 → 1.10, no safety violations",
+            "Stage 5 strips the safety margin so the RL agent hunts the limit and the safety layer clamps it — the reason you never let RL explore in production",
         ],
         accent: "teal",
     },
@@ -73,7 +85,7 @@ const demos = [
                 bearing forward in time and produces predictions you can check against what happens.
             </p>
             <p class="text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl mt-3 text-sm">
-                All three simulators below run entirely in your browser. No build step, no CDN, no network
+                All four simulators below run entirely in your browser. No build step, no CDN, no network
                 calls, no analytics, no storage. They work offline, and they reflow on a phone —
                 though the live monitor computes four FFTs a second, so an older phone will run warm.
             </p>
