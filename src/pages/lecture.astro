@@ -4,9 +4,21 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 
 const title = "AI and Digital Twins in Instrumentation";
-const description = "Two interactive simulators from a guest lecture on AI and digital twins in instrumentation — bearing fault detection by envelope analysis, and a running physics twin of four motors, one of them failing.";
+const description = "Three interactive simulators from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
 
 const demos = [
+    {
+        name: "Bearing Kinematics",
+        href: "/lecture/bearing-kinematics.html",
+        tag: "where the frequencies come from",
+        blurb: "The pedagogical companion to Part 2. A guided six-stage walkthrough that builds up the fault frequencies from geometry — anatomy, the rolling constraint, then FTF, BPFO and BPFI derived one at a time — plus an Explore tab with sliders for RPM, ball count, d/D ratio and contact angle.",
+        points: [
+            "Watch the cage rotate at ~40% of shaft speed — the constraint is visible, not stated",
+            "Turn on the outer spall and count impacts as balls pass 12 o'clock. Compare to n × FTF",
+            "Presets for SKF 6205, SKF 6308, NU 220 — see how BPFO changes with ball count and geometry",
+        ],
+        accent: "teal",
+    },
     {
         name: "Bearing Fault Lab",
         href: "/lecture/bearing-lab.html",
@@ -61,7 +73,7 @@ const demos = [
                 bearing forward in time and produces predictions you can check against what happens.
             </p>
             <p class="text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl mt-3 text-sm">
-                Both simulators below run entirely in your browser. No build step, no CDN, no network
+                All three simulators below run entirely in your browser. No build step, no CDN, no network
                 calls, no analytics, no storage. They work offline, and they reflow on a phone —
                 though the live monitor computes four FFTs a second, so an older phone will run warm.
             </p>

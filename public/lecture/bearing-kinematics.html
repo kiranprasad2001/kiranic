@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bearing Kinematics — where the fault frequencies come from</title>
+<style>
+  :root{
+    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
+    --text:#D8DBE0; --dim:#79808B;
+    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4; --green:#6EBF6A;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--panel);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.5;padding:16px}
+  .silk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  header{border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:16px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between}
+  h1{font-size:19px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em}
+  header p{margin:0;color:var(--dim);font-size:13px;max-width:62ch}
+
+  .tabs{display:flex;gap:2px;background:var(--panel3);border:1px solid var(--rule);border-radius:3px;padding:2px}
+  .tabs button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:transparent;color:var(--dim);border:0;padding:8px 14px;border-radius:2px;cursor:pointer}
+  .tabs button.on{background:var(--panel);color:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px;align-items:start}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;padding:14px}
+  .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);margin:0 0 10px;font-weight:400}
+
+  svg.bearing{display:block;width:100%;height:auto;background:#101216;border:1px solid var(--rule);border-radius:2px}
+
+  /* stage panel (guided mode) */
+  .stage-num{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--amber);margin-bottom:6px}
+  .stage-title{font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
+  .stage-body{color:var(--text);font-size:13.5px;line-height:1.55}
+  .stage-body p{margin:0 0 10px}
+  .stage-body em{color:var(--teal);font-style:normal}
+  .stage-body strong{color:var(--amber);font-weight:600}
+
+  .formula-block{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:14px;margin:12px 0;
+    font-family:var(--mono);font-size:14px;line-height:1.7;color:var(--text)}
+  .formula-block .lbl{color:var(--amber);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:2px}
+  .formula-block .eq{color:var(--text)}
+  .formula-block .note{color:var(--dim);font-family:var(--ui);font-size:12px;margin-top:6px;font-style:italic}
+  .formula-block + .formula-block{margin-top:8px}
+  .formula-block.dim{opacity:.4}
+  .formula-block.dim .lbl{color:var(--dim)}
+
+  .step-nav{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--rule)}
+  .step-nav button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:9px 14px;border-radius:2px;cursor:pointer;min-width:82px}
+  .step-nav button:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+  .step-nav button:disabled{opacity:.35;cursor:not-allowed}
+  .step-dots{display:flex;gap:5px}
+  .step-dots .dot{width:8px;height:8px;border-radius:50%;background:var(--panel3);border:1px solid var(--rule);cursor:pointer}
+  .step-dots .dot.on{background:var(--amber);border-color:var(--amber)}
+  .step-dots .dot.done{background:var(--teal);border-color:var(--teal)}
+
+  /* explore mode */
+  .ctl label{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.06em;color:var(--dim);text-transform:uppercase;margin:14px 0 4px}
+  .ctl label .vl{color:var(--amber);font-family:var(--mono);font-size:13px;letter-spacing:0}
+  .ctl input[type="range"]{width:100%;accent-color:var(--amber)}
+  .ctl .btns{display:flex;gap:6px;margin-top:8px}
+  .ctl .btns button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:7px 11px;border-radius:2px;cursor:pointer;flex:1}
+  .ctl .btns button.on{border-color:var(--amber);color:var(--amber)}
+
+  /* frequency readouts at bottom */
+  .freqs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
+  .freq{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:9px 10px}
+  .freq .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+  .freq .v{font-family:var(--mono);font-size:16px;margin-top:2px}
+  .freq .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:3px}
+  .freq.shaft .v{color:var(--green)}
+  .freq.ftf .v{color:var(--violet)}
+  .freq.bpfo .v{color:var(--amber)}
+  .freq.bpfi .v{color:var(--red)}
+
+  /* impact counter for BPFO/BPFI stages */
+  .counter{display:flex;gap:8px;align-items:center;padding:10px;background:#101216;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
+  .counter .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;flex:1}
+  .counter .n{font-family:var(--mono);font-size:22px;color:var(--amber)}
+  .counter .rate{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+  /* speed slider on visual */
+  .visual-controls{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+  .visual-controls label{display:flex;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.1em}
+  .visual-controls input[type="range"]{width:120px;accent-color:var(--teal)}
+  .visual-controls button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:6px 12px;border-radius:2px;cursor:pointer}
+  .visual-controls button.on{border-color:var(--teal);color:var(--teal)}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <p class="silk">Guest lecture · Part 2 · §2.2</p>
+    <h1>Bearing Kinematics — where the fault frequencies come from</h1>
+    <p>Balls roll, they do not slide. That one constraint fixes the cage speed as a fraction of shaft speed — and everything else follows by counting how often a ball passes a defect.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button id="tab-guided" class="on" role="tab">Guided walkthrough</button>
+    <button id="tab-explore" role="tab">Explore</button>
+  </div>
+</header>
+
+<div class="grid">
+  <!-- LEFT: the visual -->
+  <div class="card">
+    <h2>The bearing</h2>
+    <svg class="bearing" viewBox="0 0 540 480" xmlns="http://www.w3.org/2000/svg" id="svg">
+      <!-- Housing (outer box hint) -->
+      <g id="g-housing" opacity="0">
+        <rect x="30" y="50" width="480" height="420" fill="none" stroke="#2F343D" stroke-width="1" stroke-dasharray="3 4"/>
+        <text x="270" y="30" text-anchor="middle" font-family="Courier New" font-size="11" fill="#79808B" letter-spacing="2">FIXED TO HOUSING</text>
+      </g>
+
+      <!-- Outer race -->
+      <g id="g-outer">
+        <circle cx="240" cy="240" r="200" fill="none" stroke="#79808B" stroke-width="18"/>
+        <circle cx="240" cy="240" r="200" fill="none" stroke="#2F343D" stroke-width="1"/>
+        <circle cx="240" cy="240" r="209" fill="none" stroke="#2F343D" stroke-width="1"/>
+        <circle cx="240" cy="240" r="191" fill="none" stroke="#2F343D" stroke-width="1"/>
+      </g>
+
+      <!-- Defect (outer race) -->
+      <g id="g-defect-outer" opacity="0">
+        <circle cx="240" cy="40" r="7" fill="#D14B3C"/>
+        <circle cx="240" cy="40" r="12" fill="none" stroke="#D14B3C" stroke-width="1" opacity=".4"/>
+      </g>
+
+      <!-- Cage (dotted circle at pitch radius, will rotate) -->
+      <g id="g-cage" opacity="0">
+        <circle cx="240" cy="240" r="140" fill="none" stroke="#9B8CD4" stroke-width="1" stroke-dasharray="3 5" opacity=".6"/>
+      </g>
+
+      <!-- Balls (rotate with cage) -->
+      <g id="g-balls"></g>
+
+      <!-- Inner race (rotates with shaft) -->
+      <g id="g-inner">
+        <g id="g-inner-rot">
+          <circle cx="240" cy="240" r="90" fill="#242830" stroke="#79808B" stroke-width="16"/>
+          <circle cx="240" cy="240" r="98" fill="none" stroke="#2F343D" stroke-width="1"/>
+          <circle cx="240" cy="240" r="82" fill="none" stroke="#2F343D" stroke-width="1"/>
+          <!-- keyway mark so you can see it rotate -->
+          <rect x="234" y="152" width="12" height="18" fill="#101216" stroke="#79808B" stroke-width="1"/>
+        </g>
+      </g>
+
+      <!-- Defect (inner race — rotates with shaft) -->
+      <g id="g-defect-inner" opacity="0">
+        <g id="g-defect-inner-rot">
+          <circle cx="240" cy="150" r="6" fill="#D14B3C"/>
+        </g>
+      </g>
+
+      <!-- Shaft center + rotation indicator -->
+      <g id="g-shaft">
+        <circle cx="240" cy="240" r="30" fill="#16181C" stroke="#3FB6A8" stroke-width="1.5"/>
+        <g id="g-shaft-rot">
+          <line x1="240" y1="240" x2="240" y2="215" stroke="#3FB6A8" stroke-width="2"/>
+        </g>
+        <text x="240" y="245" text-anchor="middle" font-family="Courier New" font-size="9" fill="#79808B" letter-spacing="1.5">SHAFT</text>
+      </g>
+
+      <!-- Labels (shown/hidden per stage) -->
+      <g id="lbl-outer" opacity="0">
+        <line x1="380" y1="130" x2="440" y2="90" stroke="#79808B" stroke-width="1"/>
+        <text x="530" y="88" text-anchor="end" font-family="Courier New" font-size="10" fill="#D8DBE0">OUTER RACE</text>
+        <text x="530" y="102" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">fixed</text>
+      </g>
+      <g id="lbl-inner" opacity="0">
+        <line x1="180" y1="200" x2="60" y2="120" stroke="#79808B" stroke-width="1"/>
+        <text x="20" y="115" font-family="Courier New" font-size="10" fill="#D8DBE0">INNER RACE</text>
+        <text x="20" y="128" font-family="Courier New" font-size="9" fill="#79808B">rotates with shaft</text>
+      </g>
+      <g id="lbl-balls" opacity="0">
+        <line x1="360" y1="290" x2="440" y2="330" stroke="#79808B" stroke-width="1"/>
+        <text x="530" y="330" text-anchor="end" font-family="Courier New" font-size="10" fill="#D8DBE0">n = 9 BALLS</text>
+        <text x="530" y="344" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">held by the cage</text>
+      </g>
+      <g id="lbl-cage" opacity="0">
+        <line x1="140" y1="330" x2="55" y2="380" stroke="#9B8CD4" stroke-width="1"/>
+        <text x="20" y="382" font-family="Courier New" font-size="10" fill="#9B8CD4">CAGE</text>
+        <text x="20" y="395" font-family="Courier New" font-size="9" fill="#79808B">rotates at FTF</text>
+      </g>
+      <g id="lbl-defect-outer" opacity="0">
+        <line x1="252" y1="42" x2="380" y2="20" stroke="#D14B3C" stroke-width="1"/>
+        <text x="530" y="18" text-anchor="end" font-family="Courier New" font-size="10" fill="#D14B3C">OUTER SPALL</text>
+        <text x="530" y="31" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">fixed at 12 o&apos;clock</text>
+      </g>
+      <g id="lbl-defect-inner" opacity="0">
+        <line x1="252" y1="150" x2="380" y2="115" stroke="#D14B3C" stroke-width="1"/>
+        <text x="530" y="112" text-anchor="end" font-family="Courier New" font-size="10" fill="#D14B3C">INNER SPALL</text>
+        <text x="530" y="125" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">orbits with shaft</text>
+      </g>
+    </svg>
+
+    <div class="visual-controls">
+      <label>Visual speed <input id="speed" type="range" min="0.05" max="1" step="0.05" value="0.4"><span id="speed-v">0.40×</span></label>
+      <button id="pause">Pause</button>
+    </div>
+
+    <div class="freqs">
+      <div class="freq shaft"><div class="k">Shaft f_r</div><div class="v"><span id="f-shaft">29.95</span><span class="u"> Hz</span></div></div>
+      <div class="freq ftf"><div class="k">Cage FTF</div><div class="v"><span id="f-ftf">11.93</span><span class="u"> Hz</span></div></div>
+      <div class="freq bpfo"><div class="k">Outer BPFO</div><div class="v"><span id="f-bpfo">107.4</span><span class="u"> Hz</span></div></div>
+      <div class="freq bpfi"><div class="k">Inner BPFI</div><div class="v"><span id="f-bpfi">162.2</span><span class="u"> Hz</span></div></div>
+    </div>
+  </div>
+
+  <!-- RIGHT: guided or explore -->
+  <div class="card" id="right">
+    <!-- populated by JS -->
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- state ---------------- */
+var params = { rpm:1797, n:9, dOverD:0.2034, thetaDeg:0 };
+var running = true;
+var visualSpeed = 0.4;   // real Hz * this = animated Hz (much slower for viewing)
+var mode = "guided";
+var stage = 0;
+var showOuterDefect = false, showInnerDefect = false;
+var impactCount = 0, impactStartT = 0;
+
+var shaftAngle = -Math.PI/2;  // start with keyway at 12
+var cageAngle  = -Math.PI/2;  // and balls at 12,+40,+80...
+
+/* ---------------- physics ---------------- */
+function frequencies(){
+  var f_r = params.rpm/60;
+  var k   = (params.dOverD) * Math.cos(params.thetaDeg*Math.PI/180);
+  var ftf  = (f_r/2) * (1 - k);
+  var bpfo = (params.n/2) * f_r * (1 - k);
+  var bpfi = (params.n/2) * f_r * (1 + k);
+  return { f_r:f_r, ftf:ftf, bpfo:bpfo, bpfi:bpfi };
+}
+
+/* ---------------- SVG builders ---------------- */
+var ballsG = document.getElementById("g-balls");
+function buildBalls(){
+  ballsG.innerHTML = "";
+  var pr = 140;
+  for(var i=0;i<params.n;i++){
+    var c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("r","18");
+    c.setAttribute("fill","#3FB6A8");
+    c.setAttribute("stroke","#79808B");
+    c.setAttribute("stroke-width","1");
+    ballsG.appendChild(c);
+  }
+}
+
+function positionBalls(){
+  var pr = 140;
+  var kids = ballsG.children;
+  for(var i=0;i<params.n;i++){
+    var a = cageAngle + (i * 2*Math.PI / params.n);
+    var x = 240 + pr*Math.cos(a);
+    var y = 240 + pr*Math.sin(a);
+    kids[i].setAttribute("cx", x.toFixed(2));
+    kids[i].setAttribute("cy", y.toFixed(2));
+  }
+}
+
+function positionShaftRot(){
+  var g = document.getElementById("g-inner-rot");
+  var d = (shaftAngle + Math.PI/2) * 180/Math.PI;
+  g.setAttribute("transform", "rotate("+d.toFixed(2)+" 240 240)");
+  var g2 = document.getElementById("g-shaft-rot");
+  g2.setAttribute("transform", "rotate("+d.toFixed(2)+" 240 240)");
+  var g3 = document.getElementById("g-defect-inner-rot");
+  g3.setAttribute("transform", "rotate("+d.toFixed(2)+" 240 240)");
+}
+
+/* Impact detection: is any ball crossing the defect angle right now? */
+var wasHit = [];
+function checkImpacts(){
+  if(!showOuterDefect && !showInnerDefect) return;
+  var defAngle;
+  if(showOuterDefect) defAngle = -Math.PI/2;                // fixed at 12
+  else                defAngle = shaftAngle;                // moves with shaft, ball needs to meet it at inner surface
+
+  // for outer, check ball angles vs 12 o'clock; ball hits when angle passes -pi/2
+  for(var i=0;i<params.n;i++){
+    var a = cageAngle + (i * 2*Math.PI / params.n);
+    var da = normalize(a - defAngle);
+    var wasNear = wasHit[i] || false;
+    var isNear = Math.abs(da) < 0.10;   // ~5.7° tolerance
+    if(isNear && !wasNear){
+      impactCount++;
+      // flash the ball
+      var el = ballsG.children[i];
+      if(el){
+        el.setAttribute("fill", "#D14B3C");
+        setTimeout(function(el){return function(){ el.setAttribute("fill","#3FB6A8"); };}(el), 120);
+      }
+      // flash the defect
+      var dfx = showOuterDefect ? document.getElementById("g-defect-outer") : document.getElementById("g-defect-inner");
+      if(dfx){
+        dfx.style.transition="opacity 0.08s";
+        dfx.style.opacity = "0.4";
+        setTimeout(function(){ dfx.style.opacity="1"; }, 100);
+      }
+    }
+    wasHit[i] = isNear;
+  }
+}
+function normalize(a){ while(a>Math.PI) a-=2*Math.PI; while(a<=-Math.PI) a+=2*Math.PI; return a; }
+
+/* ---------------- freq readouts ---------------- */
+function updateFreqs(){
+  var f = frequencies();
+  document.getElementById("f-shaft").textContent = f.f_r.toFixed(2);
+  document.getElementById("f-ftf").textContent   = f.ftf.toFixed(2);
+  document.getElementById("f-bpfo").textContent  = f.bpfo.toFixed(1);
+  document.getElementById("f-bpfi").textContent  = f.bpfi.toFixed(1);
+}
+
+/* ---------------- stages ---------------- */
+var stages = [
+  {
+    num: "STAGE 1 / 6",
+    title: "The anatomy",
+    body: `
+      <p>A rolling-element bearing has three moving groups, one of them not moving at all. Get comfortable with what is what.</p>
+      <p><em>Outer race</em> — the ring fixed to the housing. It does not move.</p>
+      <p><em>Inner race</em> — the ring pressed onto the shaft. It rotates with the shaft at <em>f_r</em>.</p>
+      <p><em>Rolling elements</em> — n balls held between the two races by a cage. Here n = 9.</p>
+      <p><em>Cage</em> — the ring that keeps the balls evenly spaced.</p>`,
+    show: ["housing","outer","inner","balls","cage","lbl-outer","lbl-inner","lbl-balls","lbl-cage"],
+    outerDefect: false, innerDefect: false, resetImpacts: true,
+    formulas: []
+  },
+  {
+    num: "STAGE 2 / 6",
+    title: "The one constraint",
+    body: `
+      <p>Watch the balls. They <em>roll</em> — they do not slide.</p>
+      <p>That single constraint fixes the cage speed as a specific fraction of the shaft speed. If you know the ball diameter d, the pitch diameter D, and the contact angle θ, the cage frequency is forced.</p>
+      <p>Nothing about this is empirical or learned. It is geometry.</p>`,
+    show: ["outer","inner","balls","cage"],
+    outerDefect: false, innerDefect: false, resetImpacts: true,
+    formulas: [
+      { lbl:"FTF — cage rotation", eq:"(f_r / 2) · (1 − (d/D)·cos θ)",
+        note:"For 6205: (29.95/2) × (1 − 0.2034) = 11.93 Hz. The cage turns roughly 40% as fast as the shaft." }
+    ]
+  },
+  {
+    num: "STAGE 3 / 6",
+    title: "Outer race defect — counting impacts",
+    body: `
+      <p>Now put a spall at 12 o'clock on the outer race. It does not move — the outer race is fixed.</p>
+      <p>Every time a ball rolls over the pit, there is a mechanical impact. Watch the counter.</p>
+      <p>In one full cage rotation, all <em>n</em> balls pass that fixed point once. So impacts per second = n × FTF. That is <em>BPFO</em> — Ball Pass Frequency, Outer.</p>`,
+    show: ["outer","inner","balls","cage","defect-outer","lbl-defect-outer"],
+    outerDefect: true, innerDefect: false, resetImpacts: true,
+    formulas: [
+      { lbl:"BPFO — outer race defect", eq:"n · FTF   =   (n/2) · f_r · (1 − (d/D)·cos θ)",
+        note:"For 6205: 9 × 11.93 = 107.4 Hz. Nine impacts per cage rev, cage doing 11.93 revs per second." }
+    ],
+    counterLabel: "IMPACTS ON THE OUTER SPALL"
+  },
+  {
+    num: "STAGE 4 / 6",
+    title: "Inner race defect — a moving target",
+    body: `
+      <p>Move the spall onto the inner race. It now rotates <em>with the shaft</em>.</p>
+      <p>Balls still pass it, but at the <em>relative</em> speed between the balls and the inner race — which is higher than for a fixed outer defect, because the target is running toward the ball.</p>
+      <p>Same counting, sign flipped in the geometry. This is <em>BPFI</em>.</p>`,
+    show: ["outer","inner","balls","cage","defect-inner","lbl-defect-inner"],
+    outerDefect: false, innerDefect: true, resetImpacts: true,
+    formulas: [
+      { lbl:"BPFI — inner race defect", eq:"(n/2) · f_r · (1 + (d/D)·cos θ)",
+        note:"For 6205: (9/2) × 29.95 × 1.2034 = 162.2 Hz. Higher than BPFO — the moving target adds, not subtracts." }
+    ],
+    counterLabel: "IMPACTS ON THE INNER SPALL"
+  },
+  {
+    num: "STAGE 5 / 6",
+    title: "Worked numbers — SKF 6205 at 1797 rpm",
+    body: `
+      <p>The bearing in every published dataset you will meet as a student. SKF 6205, 9 balls, ball diameter 7.94 mm, pitch diameter 39.04 mm, contact angle zero. Motor at 1797 rpm.</p>
+      <p>Plug the numbers in. Notice BPFO is <em>3.585×</em> shaft speed — deliberately not 3, not 4. Manufacturers choose ball counts so defect frequencies cannot hide underneath shaft harmonics.</p>`,
+    show: ["outer","inner","balls","cage"],
+    outerDefect: false, innerDefect: false, resetImpacts: true,
+    formulas: [
+      { lbl:"Shaft f_r",  eq:"1797 / 60   =   29.95 Hz" },
+      { lbl:"Cage FTF",   eq:"(29.95/2) × (1 − 0.2034)   =   11.93 Hz" },
+      { lbl:"Outer BPFO", eq:"(9/2) × 29.95 × 0.7966   =   107.4 Hz" },
+      { lbl:"Inner BPFI", eq:"(9/2) × 29.95 × 1.2034   =   162.2 Hz" }
+    ]
+  },
+  {
+    num: "STAGE 6 / 6",
+    title: "Why this matters",
+    body: `
+      <p>We now know the frequency at which the fault will announce itself <em>before we have measured anything.</em></p>
+      <p>That is not machine learning. It is mechanics. And it is worth more than any model, because it turns an open-ended search problem — "is this machine sick?" — into a targeted question: "what is the energy at exactly 107.4 Hz?"</p>
+      <p>That targeted question is what the Bearing Fault Lab answers. Every other demo in this lecture builds on this slide.</p>`,
+    show: ["outer","inner","balls","cage","defect-outer","lbl-defect-outer"],
+    outerDefect: true, innerDefect: false, resetImpacts: false,
+    formulas: [
+      { lbl:"The BPFO line", eq:"107.4 Hz — and nowhere else",
+        note:"Next: envelope analysis, which extracts exactly this frequency from a signal that is dominated by shaft noise 170× larger. → bearing-lab.html" }
+    ]
+  }
+];
+
+/* ---------------- render right panel ---------------- */
+function render(){
+  var right = document.getElementById("right");
+  if(mode === "guided"){
+    var s = stages[stage];
+
+    // apply visibility
+    applyStageVisibility(s);
+
+    var html = '<div class="stage-num">'+s.num+'</div>';
+    html += '<h2 class="stage-title" style="color:var(--text)">'+s.title+'</h2>';
+    html += '<div class="stage-body">'+s.body+'</div>';
+    for(var i=0;i<s.formulas.length;i++){
+      var f = s.formulas[i];
+      html += '<div class="formula-block">';
+      html += '<span class="lbl">'+f.lbl+'</span>';
+      html += '<span class="eq">'+f.eq+'</span>';
+      if(f.note) html += '<div class="note">'+f.note+'</div>';
+      html += '</div>';
+    }
+    if(s.counterLabel){
+      html += '<div class="counter"><span class="lbl">'+s.counterLabel+'</span>';
+      html += '<span class="n" id="impact-n">0</span>';
+      html += '<span class="rate" id="impact-rate">— /s</span></div>';
+    }
+
+    html += '<div class="step-nav">';
+    html += '<button id="prev" '+(stage===0?"disabled":"")+'>← Prev</button>';
+    html += '<div class="step-dots">';
+    for(var j=0;j<stages.length;j++){
+      var cls = "dot";
+      if(j===stage) cls+=" on"; else if(j<stage) cls+=" done";
+      html += '<div class="'+cls+'" data-j="'+j+'"></div>';
+    }
+    html += '</div>';
+    html += '<button id="next" '+(stage===stages.length-1?"disabled":"")+'>Next →</button>';
+    html += '</div>';
+
+    right.innerHTML = html;
+
+    document.getElementById("prev").onclick = function(){ if(stage>0){ stage--; render(); }};
+    document.getElementById("next").onclick = function(){ if(stage<stages.length-1){ stage++; render(); }};
+    var dots = right.querySelectorAll(".step-dots .dot");
+    for(var k=0;k<dots.length;k++){
+      (function(el){ el.onclick = function(){ stage = +el.getAttribute("data-j"); render(); }; })(dots[k]);
+    }
+
+  } else {
+    // Explore mode
+    applyStageVisibility({ show:["outer","inner","balls","cage"], outerDefect:showOuterDefect, innerDefect:showInnerDefect, resetImpacts:false });
+
+    var html = '<div class="stage-num">EXPLORE</div>';
+    html += '<h2 class="stage-title" style="color:var(--text)">Change anything, watch what moves</h2>';
+    html += '<div class="stage-body"><p>The four frequencies at the bottom update from these controls. Compare a 6205 to a different geometry, or try a variable-speed drive by dragging the RPM slider.</p></div>';
+    html += '<div class="ctl">';
+    html += '<label><span>Shaft RPM</span><span class="vl" id="v-rpm">'+params.rpm+'</span></label>';
+    html += '<input id="s-rpm" type="range" min="300" max="3600" step="1" value="'+params.rpm+'">';
+    html += '<label><span>Ball count n</span><span class="vl" id="v-n">'+params.n+'</span></label>';
+    html += '<input id="s-n" type="range" min="6" max="16" step="1" value="'+params.n+'">';
+    html += '<label><span>d / D ratio</span><span class="vl" id="v-dd">'+params.dOverD.toFixed(3)+'</span></label>';
+    html += '<input id="s-dd" type="range" min="0.10" max="0.35" step="0.005" value="'+params.dOverD+'">';
+    html += '<label><span>Contact angle θ</span><span class="vl" id="v-th">'+params.thetaDeg+'°</span></label>';
+    html += '<input id="s-th" type="range" min="0" max="45" step="1" value="'+params.thetaDeg+'">';
+    html += '<label style="margin-top:18px"><span>Show defect</span><span class="vl"></span></label>';
+    html += '<div class="btns"><button id="d-none" class="'+((!showOuterDefect&&!showInnerDefect)?"on":"")+'">None</button>';
+    html += '<button id="d-outer" class="'+(showOuterDefect?"on":"")+'">Outer race</button>';
+    html += '<button id="d-inner" class="'+(showInnerDefect?"on":"")+'">Inner race</button></div>';
+    html += '<div class="counter" style="margin-top:12px"><span class="lbl">IMPACTS OBSERVED</span><span class="n" id="impact-n">0</span><span class="rate" id="impact-rate">— /s</span></div>';
+    html += '<label style="margin-top:18px"><span>Presets</span><span class="vl"></span></label>';
+    html += '<div class="btns"><button id="p-6205">SKF 6205</button><button id="p-6308">SKF 6308</button><button id="p-nu220">NU 220 roller</button></div>';
+    html += '</div>';
+    right.innerHTML = html;
+
+    wireExploreControls();
+  }
+
+  updateFreqs();
+  impactCount = 0; impactStartT = performance.now();
+  wasHit = [];
+}
+
+function applyStageVisibility(s){
+  var groups = ["housing","outer","inner","balls","cage",
+    "defect-outer","defect-inner",
+    "lbl-outer","lbl-inner","lbl-balls","lbl-cage","lbl-defect-outer","lbl-defect-inner"];
+  for(var i=0;i<groups.length;i++){
+    var g = document.getElementById("g-"+groups[i]) || document.getElementById(groups[i]);
+    if(!g) continue;
+    var visible = s.show.indexOf(groups[i]) >= 0;
+    g.style.transition = "opacity 0.35s";
+    g.style.opacity = visible ? 1 : 0;
+  }
+  // outer/inner races always visible in guided (they're the anatomy), but override for cleanliness
+  showOuterDefect = !!s.outerDefect;
+  showInnerDefect = !!s.innerDefect;
+  if(s.resetImpacts){ impactCount = 0; impactStartT = performance.now(); wasHit = []; }
+}
+
+function wireExploreControls(){
+  var byId = function(id){ return document.getElementById(id); };
+  byId("s-rpm").addEventListener("input", function(){ params.rpm = +this.value; byId("v-rpm").textContent = params.rpm; updateFreqs(); });
+  byId("s-n").addEventListener("input",   function(){ params.n = +this.value; byId("v-n").textContent = params.n; buildBalls(); wasHit=[]; updateFreqs(); });
+  byId("s-dd").addEventListener("input",  function(){ params.dOverD = +this.value; byId("v-dd").textContent = params.dOverD.toFixed(3); updateFreqs(); });
+  byId("s-th").addEventListener("input",  function(){ params.thetaDeg = +this.value; byId("v-th").textContent = params.thetaDeg+"°"; updateFreqs(); });
+
+  var setDefect = function(mode){
+    showOuterDefect = (mode==="outer");
+    showInnerDefect = (mode==="inner");
+    document.getElementById("g-defect-outer").style.opacity = showOuterDefect?1:0;
+    document.getElementById("g-defect-inner").style.opacity = showInnerDefect?1:0;
+    byId("d-none").classList.toggle("on", mode==="none");
+    byId("d-outer").classList.toggle("on", mode==="outer");
+    byId("d-inner").classList.toggle("on", mode==="inner");
+    impactCount = 0; impactStartT = performance.now(); wasHit=[];
+  };
+  byId("d-none").onclick  = function(){ setDefect("none"); };
+  byId("d-outer").onclick = function(){ setDefect("outer"); };
+  byId("d-inner").onclick = function(){ setDefect("inner"); };
+
+  var applyPreset = function(rpm,n,dd,th){
+    params.rpm=rpm; params.n=n; params.dOverD=dd; params.thetaDeg=th;
+    byId("s-rpm").value=rpm; byId("v-rpm").textContent=rpm;
+    byId("s-n").value=n; byId("v-n").textContent=n;
+    byId("s-dd").value=dd; byId("v-dd").textContent=dd.toFixed(3);
+    byId("s-th").value=th; byId("v-th").textContent=th+"°";
+    buildBalls(); wasHit=[]; updateFreqs();
+  };
+  byId("p-6205").onclick  = function(){ applyPreset(1797,9,0.2034,0); };
+  byId("p-6308").onclick  = function(){ applyPreset(1500,8,0.2450,0); };
+  byId("p-nu220").onclick = function(){ applyPreset(1200,14,0.1600,0); };
+}
+
+/* ---------------- animation loop ---------------- */
+var lastMs = 0;
+function loop(ms){
+  var dt = lastMs ? Math.min(0.1, (ms-lastMs)/1000) : 0.016;
+  lastMs = ms;
+  if(running){
+    var f = frequencies();
+    shaftAngle += 2*Math.PI * f.f_r  * visualSpeed * dt;
+    cageAngle  += 2*Math.PI * f.ftf  * visualSpeed * dt;
+    positionBalls();
+    positionShaftRot();
+    checkImpacts();
+    // update impact counter if visible
+    var el = document.getElementById("impact-n");
+    if(el){
+      el.textContent = impactCount;
+      var elapsed = (performance.now() - impactStartT)/1000;
+      var rateEl = document.getElementById("impact-rate");
+      if(rateEl && elapsed > 0.5){
+        var rateVisual = impactCount / elapsed;                    // impacts/sec in visual time
+        var rateReal   = rateVisual / visualSpeed;                 // scale back to real Hz
+        rateEl.textContent = rateReal.toFixed(1) + " Hz (real)";
+      }
+    }
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ---------------- init ---------------- */
+buildBalls();
+positionBalls();
+positionShaftRot();
+render();
+
+document.getElementById("speed").addEventListener("input", function(){
+  visualSpeed = +this.value;
+  document.getElementById("speed-v").textContent = visualSpeed.toFixed(2)+"×";
+  impactCount = 0; impactStartT = performance.now(); wasHit=[];
+});
+document.getElementById("pause").addEventListener("click", function(){
+  running = !running;
+  this.textContent = running ? "Pause" : "Run";
+  this.classList.toggle("on", !running);
+});
+
+document.getElementById("tab-guided").addEventListener("click", function(){
+  if(mode==="guided") return;
+  mode="guided";
+  this.classList.add("on"); document.getElementById("tab-explore").classList.remove("on");
+  render();
+});
+document.getElementById("tab-explore").addEventListener("click", function(){
+  if(mode==="explore") return;
+  mode="explore";
+  this.classList.add("on"); document.getElementById("tab-guided").classList.remove("on");
+  render();
+});
+
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
