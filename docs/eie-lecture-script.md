@@ -1,8 +1,24 @@
-# From Sensor to Decision: What AI Actually Does in Instrumentation
+# AI and Digital Twins in Instrumentation
 
 **Guest lecture — 60 minutes**
-**Audience: mostly current EIE students**
-**Delivery: ~53 minutes of content, 7 minutes Q&A**
+**Audience: mostly current EIE students, VRSEC**
+**Delivery: ~54 minutes of content, 6 minutes Q&A**
+
+| Part | Minutes | |
+|---|---|---|
+| 0 | 5 | Open |
+| 1 | 8 | The stack, honestly |
+| 2 | 18 | One failure, all the way down — the bearing spine |
+| 3 | 6 | Demo one: Bearing Fault Lab |
+| **4** | **11** | **Digital twins** — named part, with demo two inside it |
+| 5 | 6 | What to learn, and what the jobs are |
+| — | 6 | Q&A |
+
+**On the balance.** The talk is advertised as *AI and Digital Twins in Instrumentation*, so
+twins are a named part with their own eleven minutes, not an aside. The time came out of the
+opening, the stack section and the career close — not out of Part 2. Part 2 is still the spine:
+the bearing is what makes the twins section land, because by the time you get there the room
+already knows what a bearing physics model actually contains.
 
 ---
 
@@ -26,7 +42,7 @@ students, that is the most valuable thing you can model.
 
 ---
 
-# PART 0 — Open (0:00 – 0:07)
+# PART 0 — Open (0:00 – 0:05)
 
 ## 0.1 Cold open
 
@@ -79,14 +95,22 @@ students, that is the most valuable thing you can model.
 
 `[Slide: agenda. Keep this to twenty seconds.]`
 
-> Four parts. What the instrumentation stack actually looks like today. Then one worked
-> example in real detail, a bearing failure, because I would rather you leave understanding
-> one thing completely than four things vaguely. Then a live demo you can run yourselves.
-> Then what to actually learn, and what the jobs actually are.
+> Five parts. What the instrumentation stack actually looks like today. Then one worked
+> example in real detail — a bearing failure — because I would rather you leave understanding
+> one thing completely than four things vaguely. Then a demo of that. Then digital twins, which
+> is the part the title promised and the part where I will be most sceptical. Then what to
+> actually learn, and what the jobs actually are.
+>
+> `[The bearing is not a detour from the twins material. It is the setup for it. A twin of a
+> rotating machine IS a bearing physics model run forward in time — so the room has to know
+> what is inside that model before the twins section can mean anything.]`
 
 ---
 
-# PART 1 — The stack, honestly (0:07 – 0:18)
+# PART 1 — The stack, honestly (0:05 – 0:13)
+
+`[COMPRESSED to 8 minutes to fund Part 4. Do not linger on any single slide here; the value
+of this part is orientation, not depth.]`
 
 ## 1.1 The measurement chain has not changed
 
@@ -199,7 +223,7 @@ OPC UA and MQTT Sparkplug as genuinely new — because for this cohort they are.
 
 ---
 
-# PART 2 — One failure, all the way down (0:18 – 0:36)
+# PART 2 — One failure, all the way down (0:13 – 0:31)
 
 `[This is the heart of the lecture. Slow down. Do not rush the derivation.]`
 
@@ -490,59 +514,39 @@ OPC UA and MQTT Sparkplug as genuinely new — because for this cohort they are.
 > decision.** I have watched this exact argument play out in fraud detection at banks. It is
 > the same mathematics and the same organizational failure.
 
-## 2.8 Two more things, briefly
+## 2.8 Control, briefly (2.5 min)
 
-`[Slide: digital twins and control. Keep this tight — five minutes maximum.]`
+`[Digital twins used to live here. They are now Part 4 — do not preview them, you will spend
+eleven minutes on them shortly. Keep this to control only.]`
 
-> **Digital twins.** The term is badly abused, so here is a taxonomy that will let you cut
-> through a vendor pitch. There are three levels.
->
-> 1. A **physics model** — first principles, differential equations, finite element. Accurate
->    where your equations are right. Slow.
-> 2. A **data-driven surrogate** — a model trained to mimic the plant's behaviour. Fast,
->    interpolates well, extrapolates terribly, which is a serious problem because faults
->    *are* extrapolation.
-> 3. A **hybrid** — physics model with parameters continuously re-estimated from live data.
->    This is the interesting one and the hardest to build.
->
-> If you are shown a 3D model on a dashboard with live sensor values on it, that is a
-> visualization. It might be a genuinely useful visualization. It is not a twin, because it
-> cannot answer "what happens if I raise the feed rate by ten percent."
->
-> The honest test to ask a vendor: **what does your twin predict that a human could not, and
-> how was that prediction validated?** If there is no answer, it is a dashboard.
->
-> **Control.** You have all learned PID. Where does AI go?
+> You have all learned PID. Where does AI go?
 >
 > Mostly, it does not go inside the loop. The workhorse for hard multivariable, constrained
-> control is **model predictive control**, MPC, which has been standard in refineries since
-> the 1980s. MPC solves a constrained optimization at every step over a prediction horizon.
-> It handles the things PID cannot: interacting variables, hard constraints, dead time. MPC
-> is not machine learning, though its internal model can be learned.
+> control is **model predictive control**, MPC, standard in refineries since the 1980s. It
+> solves a constrained optimization at every step over a prediction horizon, and it handles
+> what PID cannot: interacting variables, hard constraints, dead time. MPC is not machine
+> learning — though its internal model can be learned.
 >
-> `[Strong anchor — use it. VR20 Computer Control of Processes (Semester VII, program core)
-> devotes Unit IV to Model Predictive Control: block diagram, objective functions, finite step
-> and finite impulse response models, Dynamic Matrix Control. So MPC is coursework, not news —
-> though it lands in Semester VII, so a third-year room has not reached it. Say: "MPC is
-> coming in Computer Control of Processes. That course is teaching you the thing that actually
-> runs in industry. Here is why the newer, louder technique has not displaced it."]`
+> `[Strong anchor. VR20 Computer Control of Processes (Sem VII, core) devotes Unit IV to MPC:
+> block diagram, objective functions, finite step and impulse response models, Dynamic Matrix
+> Control. Say: "MPC is coming in Computer Control of Processes — that course is teaching you
+> the thing that actually runs." Note it lands in Sem VII, so a third-year room has not met it.]`
 >
-> Reinforcement learning gets a great deal of press here. Be careful. RL learns by trying
-> things and seeing what happens. In a live process, "trying things" means potentially
-> driving a reactor somewhere it should not go. The well-known industrial success is Google
-> using RL for data centre cooling, and note carefully how they did it: it ran in an
-> advisory mode first, it operated inside hard constraints, and operators could override it
-> at any time. It is a supervisory optimizer choosing setpoints, not a controller
-> manipulating valves directly.
+> `[Also worth planting one sentence for Part 4: MPC needs an internal model of the process to
+> predict forward with. Hold that thought — we come back to it when we ask what a twin is for.]`
+>
+> Reinforcement learning gets a great deal of press. Be careful. RL learns by trying things.
+> In a live process, "trying things" means potentially driving a reactor somewhere it should
+> not go. The well-known success is Google's data centre cooling, and note how: advisory mode
+> first, hard constraints, operator override at any time. A supervisory optimizer choosing
+> setpoints, not a controller moving valves.
 >
 > The honest state of the art: **RL sets targets, conventional control hits them.**
 >
-> `[One more anchor, and be precise about who in the room has what. VR20 puts neural networks
-> in two ELECTIVES only: Intelligent Systems and Control (PE4, Sem VII) treats them as
-> controllers and for system identification; AI and Machine Learning in Healthcare (OE2,
-> Sem VI) is the only place anyone meets ML properly — UCI datasets, Tom Mitchell, diagnosis
-> problems. Both are electives, so assume a minority. And note the framing gap: neither teaches
-> ML on a signal you measured yourself. Ask for a show of hands rather than guessing.]`
+> `[VR20: neural networks appear in two ELECTIVES only — Intelligent Systems and Control
+> (PE4) as controllers and for system identification, and AI/ML in Healthcare (OE2), the only
+> place anyone meets ML properly. Assume a minority. Neither teaches ML on a signal the student
+> measured themselves. Ask for hands rather than guessing.]`
 
 ## 2.9 The thing I most want you to remember
 
@@ -580,13 +584,13 @@ OPC UA and MQTT Sparkplug as genuinely new — because for this cohort they are.
 
 ---
 
-# PART 3 — Demo (0:36 – 0:46)
+# PART 3 — Demo one: Bearing Fault Lab (0:31 – 0:37)
 
 `[Open kiranic.com/lecture/bearing-lab.html — or the local copy of bearing-lab.html, which
 is a single file and runs with no internet at all. Have it open in a second tab before you
 start. Do not rely on venue WiFi; keep the local file as your fallback.]`
 
-## 3.1 Orientation (1 min)
+## 3.1 Orientation (45 sec)
 
 > This is a simulation, not real data, but every number in it is computed from the equations
 > we just derived. It runs entirely in the browser and I will share the file, so you can
@@ -596,7 +600,7 @@ start. Do not rely on venue WiFi; keep the local file as your fallback.]`
 > each time a ball rolls over it. The orbit is slowed about seventeen times so you can see
 > it. Right: three plots. Raw waveform, raw spectrum, envelope spectrum.
 
-## 3.2 Healthy baseline (1 min)
+## 3.2 Healthy baseline (45 sec)
 
 `[Click "Healthy".]`
 
@@ -604,7 +608,7 @@ start. Do not rely on venue WiFi; keep the local file as your fallback.]`
 > harmonics. Textbook. Envelope spectrum at the bottom is grass. Nothing at 107 Hz.
 > Kurtosis is low, the BPFO index sits around **0.3**, annunciator reads Normal.
 
-## 3.3 Early defect — the key moment (4 min)
+## 3.3 Early defect — the key moment (2.5 min)
 
 `[Click "Early defect". Severity 22%.]`
 
@@ -626,7 +630,7 @@ start. Do not rely on venue WiFi; keep the local file as your fallback.]`
 > Same data. Same measurement. The only difference is that we processed it in a way informed
 > by the physics.
 
-## 3.4 Change the speed (1 min)
+## 3.4 Change the speed (30 sec)  **CUT IF LONG**
 
 `[Drag the RPM slider.]`
 
@@ -639,7 +643,7 @@ start. Do not rely on venue WiFi; keep the local file as your fallback.]`
 > signal. In practice you resample the signal against shaft angle instead of time. That is
 > called order tracking, and it is the standard answer.
 
-## 3.5 Advanced, then the honest one (3 min)
+## 3.5 Advanced, then the honest one (2.5 min)
 
 `[Click "Advanced".]`
 
@@ -671,75 +675,166 @@ start. Do not rely on venue WiFi; keep the local file as your fallback.]`
 
 ---
 
-# PART 3B — Live condition monitoring (add 5 min, or swap for §3.5)
+# PART 4 — Digital twins (0:37 – 0:48)
 
-`[Second demo: kiranic.com/lecture/live-monitor.html, or the local live-monitor.html. Open it
-BEFORE the lecture and leave it running in a third tab from the moment you start Part 1 — by
-the time you reach it, roughly 40 simulated days of trend will have accumulated and the chart
-will already look like a real plant. If you open it cold you will stand in silence watching an
-empty chart.]`
+`[This is the part the title sold. Eleven minutes, named on the agenda, with the second demo
+inside it. Do not apologise for being sceptical — scepticism delivered with a working demo is
+the most credible position in the room.]`
 
-## 3B.1 What it is (1 min)
+## 4.1 What the word is supposed to mean (2 min)
 
-> The last demo was one measurement. This is a plant.
+> The title of this talk promises digital twins, so let us be precise about what one is, because
+> the term is abused harder than almost anything else in industrial software.
 >
-> Four identical motors on a simulated clock. One reading every four simulated hours from each.
-> One of them, MTR-402, has a spall that started on day 18 and is growing. The other three are
-> healthy.
+> A digital twin is **a model of a physical asset that is kept current by that asset's own data,
+> and that you can ask questions of.** Two conditions. Kept current — otherwise it is a
+> simulation you built once. And you can ask it questions — otherwise it is a dashboard.
 >
-> Every point on that chart was computed the way we just did it by hand — synthesise the
-> vibration, band-pass the resonance, Hilbert envelope, FFT, measure the energy at BPFO. Nothing
-> here is replayed from a table.
-
-## 3B.2 The trend (1 min)
-
-`[Point at the red trace.]`
-
-> The red trace is MTR-402. Flat, flat, flat, and then it starts to climb around day 40. The
-> grey traces are the healthy machines.
+> Here is the taxonomy that lets you cut through a vendor pitch. Three levels.
 >
-> Notice the shape. It is not linear. Nothing about degradation is linear — a spall spreads
-> faster as it gets bigger, because a rougher surface hammers harder. That curve shape is why
-> you get a usable warning at all: the signal moves long before the machine does.
-
-## 3B.3 The moment that matters (3 min)
-
-`[Now drag the threshold slider. This is the whole reason the demo exists.]`
-
-> Watch the two counters on the left while I move this.
+> 1. **Physics model.** First principles — differential equations, finite element, kinematics.
+>    Accurate exactly where your equations are right. Slow, and it needs someone who understands
+>    the machine.
+> 2. **Data-driven surrogate.** A model trained to mimic the plant's behaviour from its history.
+>    Fast, and it interpolates well. It extrapolates terribly. Hold that thought.
+> 3. **Hybrid.** A physics model whose parameters are continuously re-estimated from live data.
+>    The interesting one, and by far the hardest to build.
 >
-> **Drag it down to 2.** `[Do it.]` Now look — we would have caught MTR-402 around day 40,
-> which is nearly forty days of warning. Excellent. And now watch the false alarm counter climb,
-> because those three healthy machines keep getting knocked. Something strikes the frame, a load
-> steps, a sensor glitches. Those knocks ring the same resonance the defect does, and because
-> they are not periodic their energy smears across every band, including BPFO.
->
-> **Now drag it up to 8.** `[Do it.]` False alarms stop dead. And our warning has collapsed from
-> forty days to about twenty.
->
-> `[Stop. Let it sit.]`
->
-> There is no setting on this slider that gives you both. That is not a limitation of my
-> simulation and it is not a modelling problem waiting for a better algorithm. It is the shape
-> of the problem. Every condition monitoring system ever deployed lives somewhere on this slider,
-> and where it sits is a business decision about what a false inspection costs against what a
-> failure costs — capped by how many investigations your team can actually run in a week.
->
-> The engineer who understands that is more useful than the one with the better model.
+> `[Anchor to Part 2 explicitly: "You already built a level-one twin this morning. When we
+> derived BPFO from ball count and pitch diameter, we built a physics model of a bearing that
+> predicts what the sensor will see. That is a twin component."]`
 
-## 3B.4 Two more things if you have time  **CUT IF LONG**
+## 4.2 The vendor test (1 min)
 
-> **The plant noise slider.** Push it up. The baseline of every machine lifts, including the
-> healthy ones, and your margin disappears. A noisy plant does not just make detection harder —
-> it moves the threshold you are allowed to use.
+`[Slide: the test, large. Tell them to write this one down.]`
+
+> If you take one sentence from this part, take this one. When somebody shows you a digital
+> twin, ask:
 >
-> **The projection box.** It reports days-to-fault from a straight-line fit. Watch it early: it
-> is confidently wrong, swinging between numbers. It only settles once the trend is well
-> established — by which point you already knew. I left it deliberately crude because that is
-> the honest state of most remaining-life numbers in the field, and I would rather you distrust
-> them for the right reason.
+> **What does your twin predict that a human could not — and how was that prediction validated?**
+>
+> If there is no answer to the first half, it is a visualization. If there is no answer to the
+> second half, it is a guess with good graphics.
+>
+> A 3D model on a screen with live sensor values painted on it fails both. It may be a genuinely
+> useful thing to have. It is not a twin, because it cannot answer "what happens if I raise the
+> feed rate ten percent."
 
----
+## 4.3 The extrapolation trap (3 min)
+
+`[Slow down. This is the intellectual core of the part and the thing that will still be true in
+ten years when today's tools are gone.]`
+
+> Now the hard part, and this is the reason I am sceptical rather than enthusiastic.
+>
+> Level two, the data-driven surrogate, is what almost everybody actually builds, because it is
+> the cheapest. You take five years of historian data, you train a model to reproduce the plant's
+> behaviour, and it works beautifully.
+>
+> Ask yourself what is in those five years of data.
+>
+> `[Wait. Let someone answer.]`
+>
+> Normal operation. Overwhelmingly, almost entirely, normal operation. A plant that runs well
+> generates data about running well. If it failed often enough to give you a rich failure
+> dataset, it would not be a plant, it would be a scrapyard.
+>
+> So your surrogate has learned the mapping from inputs to outputs **in the region where the
+> machine is healthy.** Inside that region it interpolates, and interpolation is what these
+> models are good at.
+>
+> And now the sentence I want you to leave with:
+>
+> **A fault is, by definition, the machine leaving that region.** A fault is extrapolation. It
+> is the machine doing something it has not done before. That is what the word means.
+>
+> So the model is excellent everywhere except the one place you bought it for. It will predict
+> a normal Tuesday to four decimal places and tell you nothing whatsoever about the event you
+> actually wanted warning of.
+
+`[The kicker. Deliver this separately, it is the part that surprises people.]`
+
+> And here is why this trap is so hard to see from the inside. **Your validation set is also
+> normal.** You hold out twenty percent of five years of healthy data, you test on it, your R²
+> comes back at 0.99, and every number on your dashboard says the model is excellent.
+>
+> The metric that tells you it works is computed on the data that cannot tell you it works.
+>
+> That is not a bug in anyone's code. It is structural, and no amount of model architecture
+> fixes it.
+
+## 4.4 So look at one honestly — demo two (3 min)
+
+`[Open kiranic.com/lecture/live-monitor.html, which should have been running since Part 1 and
+will now have 40+ simulated days of trend on it. Frame it AS A TWIN from the first sentence —
+this is not a second condition-monitoring demo, it is the worked example for this part.]`
+
+> Let me show you a twin and hold it to my own test.
+>
+> This is four motors on a plant clock. And it is a twin — a level one, physics-model twin.
+> There is no training data anywhere in it. It runs the bearing model we derived in Part 2
+> forward in time: ball count and pitch diameter give BPFO, the impacts ring the housing
+> resonance, the spall grows, and it computes what the accelerometer would see. Every point on
+> that chart came out of the physics, not out of a table.
+>
+> **Now apply my own test to it.** What does it predict that a human could not?
+>
+> `[Point at the projection box.]`
+>
+> That. It says days-to-fault for MTR-402. That is a falsifiable claim about the future, and it
+> is checkable — you wait, and you see whether the machine failed when it said.
+>
+> And how well does it do? Watch it. Early on it is confidently wrong, swinging between numbers
+> from one reading to the next. It only settles once the trend is well established — by which
+> point you had already worked it out from the chart.
+>
+> I left it crude deliberately. That is the honest state of most remaining-life numbers in the
+> field, and I would rather you distrust them for the right reason than trust them for the
+> wrong one.
+
+`[Now the threshold slider — same demonstration as before, but framed as what you DO with a
+twin's output rather than as a condition-monitoring aside.]`
+
+> One more thing, because a prediction is only worth what you do with it. Watch both counters.
+>
+> **Threshold down to 2.** Forty days of warning — and the false alarm count climbs, because
+> healthy machines take knocks and those knocks ring the same resonance.
+>
+> **Threshold up to 8.** False alarms stop. Warning collapses to about twenty days.
+>
+> No setting gives you both. Your twin can be perfect and you still have to make this decision.
+
+## 4.5 I hit this wall in my own house (2 min)
+
+`[Personal anchor. Deliver as yourself. This is the most credible thirty seconds in the talk
+because it is the only place you have done the thing rather than described it.]`
+
+> I should tell you that I am building one of these, badly, and I hit exactly this wall.
+>
+> I have a Raspberry Pi at home reading light, motion, temperature and proximity sensors, driving
+> the automation for the house. Sensors, a controller, actuators — that is instrumentation, at
+> domestic scale. And I am exploring a data-driven surrogate on the history it produces.
+>
+> Which means I have years of normal and not one failure. My model can tell you what my hallway
+> does on an ordinary Wednesday evening with real precision. It cannot tell me anything about
+> the pump that is about to seize, because it has never seen a pump seize.
+>
+> Same wall. Same wall the vendors do not mention in the brochure.
+
+`[The turn. Do not end on the problem — end on the response, and connect it back to §2.6.]`
+
+> So what is the honest response? It is not a better surrogate. It is to stop trying to model
+> the fault at all.
+>
+> Model **normal**. Learn what healthy looks like, in detail, from the data you actually have —
+> which is all healthy. Then measure distance from it, and alarm on the distance.
+>
+> You do not need to have seen a failure to know that today does not look like any day you have
+> seen before. That is Framing B from earlier, and this is why it wins: it is the framing that
+> matches the data that exists rather than the data you wish you had.
+>
+> A twin that says "this is not normal, and here is which sensor is furthest out" is worth more
+> than one that claims to predict a failure mode it has never observed.
 
 # Hosting both demos on your own site
 
@@ -761,9 +856,9 @@ student can leave with is a copy of the simulator they can pull apart.]`
 
 ---
 
-# PART 4 — What to actually do (0:46 – 0:53)
+# PART 5 — What to actually do (0:48 – 0:54)
 
-## 4.1 What to learn, in order
+## 5.1 What to learn, in order
 
 `[Slide: a list they can photograph. Say explicitly that they should photograph it.]`
 
@@ -800,7 +895,7 @@ student can leave with is a copy of the simulator they can pull apart.]`
 > PCA, gradient boosting. Note this only exists in your syllabus inside one elective, and that
 > one is framed entirely around healthcare.
 
-## 4.1b Choose your electives deliberately
+## 5.2 Choose your electives deliberately
 
 `[Slide: elective map. This is specific to VR20 and it is the most actionable thing you can
 give them. Thirty seconds, then move.]`
@@ -824,7 +919,7 @@ give them. Thirty seconds, then move.]`
 > so you must choose. If you are asking me: take the safety one, and learn the ML yourself.
 > The safety material is much harder to self-teach and much harder to fake in an interview.
 
-## 4.2 A project you can start this week
+## 5.3 A project you can start this week
 
 `[Slide: the project.]`
 
@@ -847,11 +942,14 @@ give them. Thirty seconds, then move.]`
 > If you want more: NASA IMS and FEMTO/PRONOSTIA for run-to-failure data, C-MAPSS for
 > turbofan remaining useful life.
 
-## 4.3 The career part, honestly
+## 5.4 The career part, honestly (2 min)
 
 `[Slide: dark, minimal.]`
 
-> Last three minutes, and I promised to be straight with you.
+> Two minutes, and I promised to be straight with you.
+>
+> `[TRIMMED to fund Part 4. Do not extend this. If you are running late, the paragraph about
+> your own path is the cut — the job-titles point and the closing three sentences are not.]`
 >
 > **The job title "AI engineer" is mostly not where these jobs are.** The roles that actually
 > exist are: controls or instrumentation engineer who can also code. Reliability engineer who
@@ -882,7 +980,7 @@ give them. Thirty seconds, then move.]`
 
 ---
 
-# PART 5 — Q&A (0:53 – 1:00)
+# PART 6 — Q&A (0:54 – 1:00)
 
 ## Prepared answers
 
@@ -908,6 +1006,20 @@ give them. Thirty seconds, then move.]`
 > Linear algebra and probability, solidly. Enough calculus to follow an optimization. You do
 > not need measure theory. You do need to genuinely understand what a covariance matrix is
 > and what a p-value does and does not tell you.
+
+**"Is a digital twin worth building for a small plant?"**
+> Ask what decision it would change. If nobody would act differently on its output, the answer
+> is no regardless of cost. If there is a decision — when to take a machine down, whether to run
+> another month — then start with the cheapest thing that informs that decision, which is almost
+> never a twin. It is usually a trend on three well-placed sensors. Build the twin when the trend
+> stops being enough to answer the question.
+
+**"You were quite negative about digital twins."**
+> `[Expect this one. Answer it squarely rather than softening.]`
+> I was negative about one specific and very common failure: training a surrogate on healthy
+> data and claiming it predicts faults. I am not negative about physics-model twins, which are
+> genuinely useful and which several of you will build. The demo I showed you is one, and it
+> works. The distinction is whether the model knows the mechanism or has only seen the history.
 
 **"What about LLMs in industry?"**
 > Different job. They are useful for unstructured text — maintenance logs, operator shift

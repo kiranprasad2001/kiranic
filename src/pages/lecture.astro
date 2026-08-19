@@ -23,12 +23,12 @@ const demos = [
     {
         name: "Live Condition Monitor",
         href: "/lecture/live-monitor.html",
-        tag: "a running twin",
-        blurb: "Four motors on a simulated clock, one reading each per four simulated hours. MTR-402 develops an outer-race spall on day 18 and it grows. Nothing is replayed — the bearing physics runs forward in time and every point on the trend is computed from it, the same way you'd do it by hand.",
+        tag: "the twin, running now",
+        blurb: "A level-one physics twin. Four identical motors on a simulated clock, one reading each per four simulated hours. MTR-402 develops an outer-race spall on day 18 and it grows. Every point on the trend is computed from the twin — synthesise, band-pass, Hilbert envelope, FFT — not replayed from a table.",
         points: [
-            "Health index = BPFO band energy ÷ overall RMS. Healthy sits at 0.3–0.6, defect climbs to 9.4",
-            "False alarms come from random non-periodic knocks, not a faked small defect",
-            "Threshold 8 → zero false alarms, 22 days warning. Threshold 2–3 → 38–46 days warning, 4–5 false alarms a month. No setting gives you both",
+            "Health index = 30·√(BPFO band energy) ÷ RMS. Healthy ≈ 0.36, defect climbs to ~7.7",
+            "False alarms come from random non-periodic knocks a healthy machine actually takes, not a faked small defect",
+            "The twin's falsifiable prediction: days-to-fault. It's confidently wrong early — that's the honest thing to show",
         ],
         accent: "ochre",
     },
@@ -49,8 +49,9 @@ const demos = [
             </h1>
             <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
                 What AI and digital twins actually do in instrumentation — and what they don't.
-                Sixty minutes for Electronics &amp; Instrumentation students, built around a single
-                bearing failure traced from the physics to the alarm nobody trusts.
+                Sixty minutes for Electronics &amp; Instrumentation students. A single bearing failure
+                traced from the physics to the alarm nobody trusts, then twins as their own eleven-minute
+                part with the second simulator as its demo.
             </p>
             <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mt-3">
                 The useful test for anything sold to you as a twin: <em>what does it predict that a
