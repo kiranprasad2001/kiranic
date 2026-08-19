@@ -6,9 +6,9 @@
 <title>Live Condition Monitoring — four motors, one of them failing</title>
 <style>
   :root{
-    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
-    --text:#D8DBE0; --dim:#79808B;
-    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4;
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#CFCCC4;
+    --text:#111318; --dim:#5A5D63;
+    --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -36,10 +36,10 @@
   .card{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;padding:13px}
   .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--dim);margin:0 0 10px;font-weight:400}
-  canvas{display:block;width:100%;background:#101216;border:1px solid var(--rule);border-radius:2px}
+  canvas{display:block;width:100%;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px}
 
   .asset{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--rule);
-    background:#101216;border-radius:2px;margin-bottom:7px;cursor:pointer}
+    background:#FAFAF8;border-radius:2px;margin-bottom:7px;cursor:pointer}
   .asset:hover{border-color:var(--dim)}
   .asset.sel{border-color:var(--amber)}
   .asset .lamp{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}
@@ -49,7 +49,7 @@
   .asset .vl{font-family:var(--mono);font-size:13px;color:var(--dim)}
   .asset .vl.warn{color:var(--amber)} .asset .vl.trip{color:var(--red)}
 
-  .ro{background:#101216;padding:8px 10px;border:1px solid var(--rule);border-radius:2px}
+  .ro{background:#FAFAF8;padding:8px 10px;border:1px solid var(--rule);border-radius:2px}
   .ros{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}
   .ro .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
   .ro .v{font-family:var(--mono);font-size:16px;margin-top:2px}
@@ -66,9 +66,9 @@
   input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:20px;background:var(--amber);border:0;border-radius:1px;margin-top:-9px}
   input[type=range]::-moz-range-thumb{width:12px;height:20px;background:var(--amber);border:0;border-radius:1px}
 
-  .log{height:132px;overflow-y:auto;background:#101216;border:1px solid var(--rule);border-radius:2px;padding:8px}
+  .log{height:132px;overflow-y:auto;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:8px}
   .log div{font-family:var(--mono);font-size:11px;margin-bottom:4px;color:var(--dim)}
-  .log div .t{color:#5C636D}
+  .log div .t{color:#5A5D63}
   .log div.true{color:var(--red)} .log div.false{color:var(--amber)}
 
   .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:8px}
@@ -136,7 +136,7 @@
       <canvas id="cvTrend" height="290"></canvas>
       <div class="legend">
         <span><i class="sw" style="background:var(--red)"></i>MTR-402 (has the defect)</span>
-        <span><i class="sw" style="background:#4A525E"></i>MTR-401 / 403 / 404</span>
+        <span><i class="sw" style="background:#5A5D63"></i>MTR-401 / 403 / 404</span>
         <span><i class="sw" style="background:var(--amber)"></i>Alarm threshold</span>
       </div>
     </div>
@@ -411,7 +411,7 @@ function drawTrend(){
       if(assets[i].hist[k] > maxV) maxV = assets[i].hist[k];
   maxV *= 1.08;
 
-  g.strokeStyle = "#1C2027"; g.lineWidth = 1;
+  g.strokeStyle = "#F5F5F4"; g.lineWidth = 1;
   for(i=1;i<6;i++){ var x = pad.l + w*i/6; g.beginPath(); g.moveTo(x+0.5,pad.t); g.lineTo(x+0.5,pad.t+h); g.stroke(); }
 
   /* threshold band */
@@ -425,7 +425,7 @@ function drawTrend(){
   for(i=0;i<assets.length;i++){
     var a = assets[i];
     if(a.hist.length < 2) continue;
-    g.strokeStyle = a.faulty ? css("--red") : "#4A525E";
+    g.strokeStyle = a.faulty ? css("--red") : "#5A5D63";
     g.lineWidth = a.faulty ? 1.8 : 1;
     g.beginPath();
     for(k=0;k<a.hist.length;k++){

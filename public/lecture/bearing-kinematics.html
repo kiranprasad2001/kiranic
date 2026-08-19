@@ -6,9 +6,9 @@
 <title>Bearing Kinematics — where the fault frequencies come from</title>
 <style>
   :root{
-    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
-    --text:#D8DBE0; --dim:#79808B;
-    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4; --green:#6EBF6A;
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#CFCCC4;
+    --text:#111318; --dim:#5A5D63;
+    --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0; --green:#2E7A2A;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -34,7 +34,7 @@
   .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--dim);margin:0 0 10px;font-weight:400}
 
-  svg.bearing{display:block;width:100%;height:auto;background:#101216;border:1px solid var(--rule);border-radius:2px}
+  svg.bearing{display:block;width:100%;height:auto;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px}
 
   /* stage panel (guided mode) */
   .stage-num{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--amber);margin-bottom:6px}
@@ -44,7 +44,7 @@
   .stage-body em{color:var(--teal);font-style:normal}
   .stage-body strong{color:var(--amber);font-weight:600}
 
-  .formula-block{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:14px;margin:12px 0;
+  .formula-block{background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:14px;margin:12px 0;
     font-family:var(--mono);font-size:14px;line-height:1.7;color:var(--text)}
   .formula-block .lbl{color:var(--amber);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:2px}
   .formula-block .eq{color:var(--text)}
@@ -75,7 +75,7 @@
 
   /* frequency readouts at bottom */
   .freqs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px}
-  .freq{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:9px 10px}
+  .freq{background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:9px 10px}
   .freq .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
   .freq .v{font-family:var(--mono);font-size:16px;margin-top:2px}
   .freq .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:3px}
@@ -85,7 +85,7 @@
   .freq.bpfi .v{color:var(--red)}
 
   /* impact counter for BPFO/BPFI stages */
-  .counter{display:flex;gap:8px;align-items:center;padding:10px;background:#101216;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
+  .counter{display:flex;gap:8px;align-items:center;padding:10px;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
   .counter .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;flex:1}
   .counter .n{font-family:var(--mono);font-size:22px;color:var(--amber)}
   .counter .rate{font-family:var(--mono);font-size:11px;color:var(--dim)}
@@ -120,27 +120,27 @@
     <svg class="bearing" viewBox="0 0 540 480" xmlns="http://www.w3.org/2000/svg" id="svg">
       <!-- Housing (outer box hint) -->
       <g id="g-housing" opacity="0">
-        <rect x="30" y="50" width="480" height="420" fill="none" stroke="#2F343D" stroke-width="1" stroke-dasharray="3 4"/>
-        <text x="270" y="30" text-anchor="middle" font-family="Courier New" font-size="11" fill="#79808B" letter-spacing="2">FIXED TO HOUSING</text>
+        <rect x="30" y="50" width="480" height="420" fill="none" stroke="#CFCCC4" stroke-width="1" stroke-dasharray="3 4"/>
+        <text x="270" y="30" text-anchor="middle" font-family="Courier New" font-size="11" fill="#5A5D63" letter-spacing="2">FIXED TO HOUSING</text>
       </g>
 
       <!-- Outer race -->
       <g id="g-outer">
-        <circle cx="240" cy="240" r="200" fill="none" stroke="#79808B" stroke-width="18"/>
-        <circle cx="240" cy="240" r="200" fill="none" stroke="#2F343D" stroke-width="1"/>
-        <circle cx="240" cy="240" r="209" fill="none" stroke="#2F343D" stroke-width="1"/>
-        <circle cx="240" cy="240" r="191" fill="none" stroke="#2F343D" stroke-width="1"/>
+        <circle cx="240" cy="240" r="200" fill="none" stroke="#5A5D63" stroke-width="18"/>
+        <circle cx="240" cy="240" r="200" fill="none" stroke="#CFCCC4" stroke-width="1"/>
+        <circle cx="240" cy="240" r="209" fill="none" stroke="#CFCCC4" stroke-width="1"/>
+        <circle cx="240" cy="240" r="191" fill="none" stroke="#CFCCC4" stroke-width="1"/>
       </g>
 
       <!-- Defect (outer race) -->
       <g id="g-defect-outer" opacity="0">
-        <circle cx="240" cy="40" r="7" fill="#D14B3C"/>
-        <circle cx="240" cy="40" r="12" fill="none" stroke="#D14B3C" stroke-width="1" opacity=".4"/>
+        <circle cx="240" cy="40" r="7" fill="#A62A1F"/>
+        <circle cx="240" cy="40" r="12" fill="none" stroke="#A62A1F" stroke-width="1" opacity=".4"/>
       </g>
 
       <!-- Cage (dotted circle at pitch radius, will rotate) -->
       <g id="g-cage" opacity="0">
-        <circle cx="240" cy="240" r="140" fill="none" stroke="#9B8CD4" stroke-width="1" stroke-dasharray="3 5" opacity=".6"/>
+        <circle cx="240" cy="240" r="140" fill="none" stroke="#5D4EA0" stroke-width="1" stroke-dasharray="3 5" opacity=".6"/>
       </g>
 
       <!-- Balls (rotate with cage) -->
@@ -149,60 +149,60 @@
       <!-- Inner race (rotates with shaft) -->
       <g id="g-inner">
         <g id="g-inner-rot">
-          <circle cx="240" cy="240" r="90" fill="#242830" stroke="#79808B" stroke-width="16"/>
-          <circle cx="240" cy="240" r="98" fill="none" stroke="#2F343D" stroke-width="1"/>
-          <circle cx="240" cy="240" r="82" fill="none" stroke="#2F343D" stroke-width="1"/>
+          <circle cx="240" cy="240" r="90" fill="#E9E7E1" stroke="#5A5D63" stroke-width="16"/>
+          <circle cx="240" cy="240" r="98" fill="none" stroke="#CFCCC4" stroke-width="1"/>
+          <circle cx="240" cy="240" r="82" fill="none" stroke="#CFCCC4" stroke-width="1"/>
           <!-- keyway mark so you can see it rotate -->
-          <rect x="234" y="152" width="12" height="18" fill="#101216" stroke="#79808B" stroke-width="1"/>
+          <rect x="234" y="152" width="12" height="18" fill="#FAFAF8" stroke="#5A5D63" stroke-width="1"/>
         </g>
       </g>
 
       <!-- Defect (inner race — rotates with shaft) -->
       <g id="g-defect-inner" opacity="0">
         <g id="g-defect-inner-rot">
-          <circle cx="240" cy="150" r="6" fill="#D14B3C"/>
+          <circle cx="240" cy="150" r="6" fill="#A62A1F"/>
         </g>
       </g>
 
       <!-- Shaft center + rotation indicator -->
       <g id="g-shaft">
-        <circle cx="240" cy="240" r="30" fill="#16181C" stroke="#3FB6A8" stroke-width="1.5"/>
+        <circle cx="240" cy="240" r="30" fill="#FFFFFF" stroke="#0E7A70" stroke-width="1.5"/>
         <g id="g-shaft-rot">
-          <line x1="240" y1="240" x2="240" y2="215" stroke="#3FB6A8" stroke-width="2"/>
+          <line x1="240" y1="240" x2="240" y2="215" stroke="#0E7A70" stroke-width="2"/>
         </g>
-        <text x="240" y="245" text-anchor="middle" font-family="Courier New" font-size="9" fill="#79808B" letter-spacing="1.5">SHAFT</text>
+        <text x="240" y="245" text-anchor="middle" font-family="Courier New" font-size="9" fill="#5A5D63" letter-spacing="1.5">SHAFT</text>
       </g>
 
       <!-- Labels (shown/hidden per stage) -->
       <g id="lbl-outer" opacity="0">
-        <line x1="380" y1="130" x2="440" y2="90" stroke="#79808B" stroke-width="1"/>
-        <text x="530" y="88" text-anchor="end" font-family="Courier New" font-size="10" fill="#D8DBE0">OUTER RACE</text>
-        <text x="530" y="102" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">fixed</text>
+        <line x1="380" y1="130" x2="440" y2="90" stroke="#5A5D63" stroke-width="1"/>
+        <text x="530" y="88" text-anchor="end" font-family="Courier New" font-size="10" fill="#111318">OUTER RACE</text>
+        <text x="530" y="102" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">fixed</text>
       </g>
       <g id="lbl-inner" opacity="0">
-        <line x1="180" y1="200" x2="60" y2="120" stroke="#79808B" stroke-width="1"/>
-        <text x="20" y="115" font-family="Courier New" font-size="10" fill="#D8DBE0">INNER RACE</text>
-        <text x="20" y="128" font-family="Courier New" font-size="9" fill="#79808B">rotates with shaft</text>
+        <line x1="180" y1="200" x2="60" y2="120" stroke="#5A5D63" stroke-width="1"/>
+        <text x="20" y="115" font-family="Courier New" font-size="10" fill="#111318">INNER RACE</text>
+        <text x="20" y="128" font-family="Courier New" font-size="9" fill="#5A5D63">rotates with shaft</text>
       </g>
       <g id="lbl-balls" opacity="0">
-        <line x1="360" y1="290" x2="440" y2="330" stroke="#79808B" stroke-width="1"/>
-        <text x="530" y="330" text-anchor="end" font-family="Courier New" font-size="10" fill="#D8DBE0">n = 9 BALLS</text>
-        <text x="530" y="344" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">held by the cage</text>
+        <line x1="360" y1="290" x2="440" y2="330" stroke="#5A5D63" stroke-width="1"/>
+        <text x="530" y="330" text-anchor="end" font-family="Courier New" font-size="10" fill="#111318">n = 9 BALLS</text>
+        <text x="530" y="344" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">held by the cage</text>
       </g>
       <g id="lbl-cage" opacity="0">
-        <line x1="140" y1="330" x2="55" y2="380" stroke="#9B8CD4" stroke-width="1"/>
-        <text x="20" y="382" font-family="Courier New" font-size="10" fill="#9B8CD4">CAGE</text>
-        <text x="20" y="395" font-family="Courier New" font-size="9" fill="#79808B">rotates at FTF</text>
+        <line x1="140" y1="330" x2="55" y2="380" stroke="#5D4EA0" stroke-width="1"/>
+        <text x="20" y="382" font-family="Courier New" font-size="10" fill="#5D4EA0">CAGE</text>
+        <text x="20" y="395" font-family="Courier New" font-size="9" fill="#5A5D63">rotates at FTF</text>
       </g>
       <g id="lbl-defect-outer" opacity="0">
-        <line x1="252" y1="42" x2="380" y2="20" stroke="#D14B3C" stroke-width="1"/>
-        <text x="530" y="18" text-anchor="end" font-family="Courier New" font-size="10" fill="#D14B3C">OUTER SPALL</text>
-        <text x="530" y="31" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">fixed at 12 o&apos;clock</text>
+        <line x1="252" y1="42" x2="380" y2="20" stroke="#A62A1F" stroke-width="1"/>
+        <text x="530" y="18" text-anchor="end" font-family="Courier New" font-size="10" fill="#A62A1F">OUTER SPALL</text>
+        <text x="530" y="31" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">fixed at 12 o&apos;clock</text>
       </g>
       <g id="lbl-defect-inner" opacity="0">
-        <line x1="252" y1="150" x2="380" y2="115" stroke="#D14B3C" stroke-width="1"/>
-        <text x="530" y="112" text-anchor="end" font-family="Courier New" font-size="10" fill="#D14B3C">INNER SPALL</text>
-        <text x="530" y="125" text-anchor="end" font-family="Courier New" font-size="9" fill="#79808B">orbits with shaft</text>
+        <line x1="252" y1="150" x2="380" y2="115" stroke="#A62A1F" stroke-width="1"/>
+        <text x="530" y="112" text-anchor="end" font-family="Courier New" font-size="10" fill="#A62A1F">INNER SPALL</text>
+        <text x="530" y="125" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">orbits with shaft</text>
       </g>
     </svg>
 
@@ -259,8 +259,8 @@ function buildBalls(){
   for(var i=0;i<params.n;i++){
     var c = document.createElementNS("http://www.w3.org/2000/svg","circle");
     c.setAttribute("r","18");
-    c.setAttribute("fill","#3FB6A8");
-    c.setAttribute("stroke","#79808B");
+    c.setAttribute("fill","#0E7A70");
+    c.setAttribute("stroke","#5A5D63");
     c.setAttribute("stroke-width","1");
     ballsG.appendChild(c);
   }
@@ -307,8 +307,8 @@ function checkImpacts(){
       // flash the ball
       var el = ballsG.children[i];
       if(el){
-        el.setAttribute("fill", "#D14B3C");
-        setTimeout(function(el){return function(){ el.setAttribute("fill","#3FB6A8"); };}(el), 120);
+        el.setAttribute("fill", "#A62A1F");
+        setTimeout(function(el){return function(){ el.setAttribute("fill","#0E7A70"); };}(el), 120);
       }
       // flash the defect
       var dfx = showOuterDefect ? document.getElementById("g-defect-outer") : document.getElementById("g-defect-inner");

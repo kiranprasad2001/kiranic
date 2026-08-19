@@ -6,9 +6,9 @@
 <title>Data-centre cooling with RL — how the 40% figure was earned</title>
 <style>
   :root{
-    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
-    --text:#D8DBE0; --dim:#79808B;
-    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4; --green:#6EBF6A; --blue:#5D8FBF;
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#CFCCC4;
+    --text:#111318; --dim:#5A5D63;
+    --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0; --green:#2E7A2A; --blue:#215F9E;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -35,8 +35,8 @@
   .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
     color:var(--dim);margin:0 0 10px;font-weight:400}
 
-  svg.plant{display:block;width:100%;height:auto;background:#101216;border:1px solid var(--rule);border-radius:2px}
-  canvas.chart{display:block;width:100%;height:220px;background:#101216;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
+  svg.plant{display:block;width:100%;height:auto;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px}
+  canvas.chart{display:block;width:100%;height:220px;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
 
   .clock-row{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-family:var(--mono);font-size:11px;color:var(--dim)}
   .clock-row .clk{color:var(--amber);font-size:14px}
@@ -47,7 +47,7 @@
   .clock-row button.on{border-color:var(--teal);color:var(--teal)}
 
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
-  .kpi{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:9px 10px}
+  .kpi{background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:9px 10px}
   .kpi .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
   .kpi .v{font-family:var(--mono);font-size:16px;margin-top:2px}
   .kpi .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:3px}
@@ -66,7 +66,7 @@
   .stage-body strong{color:var(--amber);font-weight:600}
   .stage-body .warn{color:var(--red)}
 
-  .formula-block{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:12px 14px;margin:10px 0;
+  .formula-block{background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:12px 14px;margin:10px 0;
     font-family:var(--mono);font-size:13px;line-height:1.6;color:var(--text)}
   .formula-block .lbl{color:var(--amber);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
   .formula-block .note{color:var(--dim);font-family:var(--ui);font-size:12px;margin-top:6px;font-style:italic}
@@ -92,7 +92,7 @@
   .ctl .btns button.on{border-color:var(--amber);color:var(--amber)}
 
   .setpoints{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
-  .sp{background:#101216;border:1px solid var(--rule);border-radius:2px;padding:8px 9px}
+  .sp{background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:8px 9px}
   .sp .k{font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase}
   .sp .v{font-family:var(--mono);font-size:13px;color:var(--amber);margin-top:2px}
   .sp .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:2px}
@@ -121,96 +121,96 @@
     <svg class="plant" viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" id="svg">
       <!-- Sun / weather -->
       <g id="g-weather">
-        <circle cx="60" cy="45" r="18" fill="#242830" stroke="#79808B" stroke-width="1"/>
-        <text x="60" y="49" text-anchor="middle" font-family="Courier New" font-size="10" fill="#E8A33D" id="wb-icon">☀</text>
-        <text x="60" y="80" text-anchor="middle" font-family="Courier New" font-size="9" fill="#79808B" letter-spacing="1">WET-BULB</text>
-        <text x="60" y="94" text-anchor="middle" font-family="Courier New" font-size="14" fill="#E8A33D" id="wb-val">15.0 °C</text>
+        <circle cx="60" cy="45" r="18" fill="#E9E7E1" stroke="#5A5D63" stroke-width="1"/>
+        <text x="60" y="49" text-anchor="middle" font-family="Courier New" font-size="10" fill="#B87209" id="wb-icon">☀</text>
+        <text x="60" y="80" text-anchor="middle" font-family="Courier New" font-size="9" fill="#5A5D63" letter-spacing="1">WET-BULB</text>
+        <text x="60" y="94" text-anchor="middle" font-family="Courier New" font-size="14" fill="#B87209" id="wb-val">15.0 °C</text>
       </g>
 
       <!-- IT hall -->
       <g id="g-it">
-        <rect x="130" y="30" width="150" height="240" fill="#1E2127" stroke="#79808B" stroke-width="1.5"/>
-        <text x="205" y="20" text-anchor="middle" font-family="Courier New" font-size="10" fill="#D8DBE0" letter-spacing="1.5">IT HALL</text>
+        <rect x="130" y="30" width="150" height="240" fill="#F5F5F4" stroke="#5A5D63" stroke-width="1.5"/>
+        <text x="205" y="20" text-anchor="middle" font-family="Courier New" font-size="10" fill="#111318" letter-spacing="1.5">IT HALL</text>
         <!-- server racks -->
         <g id="racks">
-          <rect x="145" y="55"  width="30" height="200" fill="#242830" stroke="#3FB6A8" stroke-width="1" id="rack-1"/>
-          <rect x="188" y="55"  width="30" height="200" fill="#242830" stroke="#3FB6A8" stroke-width="1" id="rack-2"/>
-          <rect x="231" y="55"  width="30" height="200" fill="#242830" stroke="#3FB6A8" stroke-width="1" id="rack-3"/>
+          <rect x="145" y="55"  width="30" height="200" fill="#E9E7E1" stroke="#0E7A70" stroke-width="1" id="rack-1"/>
+          <rect x="188" y="55"  width="30" height="200" fill="#E9E7E1" stroke="#0E7A70" stroke-width="1" id="rack-2"/>
+          <rect x="231" y="55"  width="30" height="200" fill="#E9E7E1" stroke="#0E7A70" stroke-width="1" id="rack-3"/>
           <!-- LED strips on each rack -->
-          <line x1="150" y1="65"  x2="170" y2="65"  stroke="#6EBF6A" stroke-width="1.5"/>
-          <line x1="150" y1="75"  x2="170" y2="75"  stroke="#6EBF6A" stroke-width="1.5"/>
-          <line x1="193" y1="65"  x2="213" y2="65"  stroke="#6EBF6A" stroke-width="1.5"/>
-          <line x1="193" y1="75"  x2="213" y2="75"  stroke="#6EBF6A" stroke-width="1.5"/>
-          <line x1="236" y1="65"  x2="256" y2="65"  stroke="#6EBF6A" stroke-width="1.5"/>
-          <line x1="236" y1="75"  x2="256" y2="75"  stroke="#6EBF6A" stroke-width="1.5"/>
+          <line x1="150" y1="65"  x2="170" y2="65"  stroke="#2E7A2A" stroke-width="1.5"/>
+          <line x1="150" y1="75"  x2="170" y2="75"  stroke="#2E7A2A" stroke-width="1.5"/>
+          <line x1="193" y1="65"  x2="213" y2="65"  stroke="#2E7A2A" stroke-width="1.5"/>
+          <line x1="193" y1="75"  x2="213" y2="75"  stroke="#2E7A2A" stroke-width="1.5"/>
+          <line x1="236" y1="65"  x2="256" y2="65"  stroke="#2E7A2A" stroke-width="1.5"/>
+          <line x1="236" y1="75"  x2="256" y2="75"  stroke="#2E7A2A" stroke-width="1.5"/>
         </g>
         <!-- IT inlet temp badge -->
-        <rect x="145" y="270" width="120" height="18" fill="#101216" stroke="#2F343D"/>
-        <text x="150" y="283" font-family="Courier New" font-size="9" fill="#79808B" letter-spacing="1">INLET</text>
-        <text x="260" y="283" text-anchor="end" font-family="Courier New" font-size="10" fill="#6EBF6A" id="inlet-val">22.0 °C</text>
+        <rect x="145" y="270" width="120" height="18" fill="#FAFAF8" stroke="#CFCCC4"/>
+        <text x="150" y="283" font-family="Courier New" font-size="9" fill="#5A5D63" letter-spacing="1">INLET</text>
+        <text x="260" y="283" text-anchor="end" font-family="Courier New" font-size="10" fill="#2E7A2A" id="inlet-val">22.0 °C</text>
       </g>
 
       <!-- Chiller -->
       <g id="g-chiller">
-        <rect x="330" y="90" width="90" height="120" fill="#1E2127" stroke="#79808B" stroke-width="1.5"/>
-        <text x="375" y="80" text-anchor="middle" font-family="Courier New" font-size="10" fill="#D8DBE0" letter-spacing="1.5">CHILLER</text>
+        <rect x="330" y="90" width="90" height="120" fill="#F5F5F4" stroke="#5A5D63" stroke-width="1.5"/>
+        <text x="375" y="80" text-anchor="middle" font-family="Courier New" font-size="10" fill="#111318" letter-spacing="1.5">CHILLER</text>
         <!-- compressor icon -->
-        <circle cx="375" cy="130" r="18" fill="#242830" stroke="#5D8FBF" stroke-width="1.5"/>
-        <text x="375" y="134" text-anchor="middle" font-family="Courier New" font-size="14" fill="#5D8FBF">C</text>
+        <circle cx="375" cy="130" r="18" fill="#E9E7E1" stroke="#215F9E" stroke-width="1.5"/>
+        <text x="375" y="134" text-anchor="middle" font-family="Courier New" font-size="14" fill="#215F9E">C</text>
         <!-- power badge -->
-        <rect x="335" y="180" width="80" height="24" fill="#101216" stroke="#2F343D"/>
-        <text x="340" y="192" font-family="Courier New" font-size="8" fill="#79808B" letter-spacing="1">CHILLER</text>
-        <text x="410" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#5D8FBF" id="chiller-kw">285 kW</text>
+        <rect x="335" y="180" width="80" height="24" fill="#FAFAF8" stroke="#CFCCC4"/>
+        <text x="340" y="192" font-family="Courier New" font-size="8" fill="#5A5D63" letter-spacing="1">CHILLER</text>
+        <text x="410" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#215F9E" id="chiller-kw">285 kW</text>
       </g>
 
       <!-- Cooling tower -->
       <g id="g-tower">
-        <path d="M 480 240 L 490 100 L 570 100 L 580 240 Z" fill="#1E2127" stroke="#79808B" stroke-width="1.5"/>
-        <text x="530" y="90" text-anchor="middle" font-family="Courier New" font-size="10" fill="#D8DBE0" letter-spacing="1.5">COOLING TOWER</text>
+        <path d="M 480 240 L 490 100 L 570 100 L 580 240 Z" fill="#F5F5F4" stroke="#5A5D63" stroke-width="1.5"/>
+        <text x="530" y="90" text-anchor="middle" font-family="Courier New" font-size="10" fill="#111318" letter-spacing="1.5">COOLING TOWER</text>
         <!-- fan -->
-        <circle cx="530" cy="130" r="16" fill="#242830" stroke="#3FB6A8" stroke-width="1.5"/>
-        <line x1="530" y1="114" x2="530" y2="146" stroke="#3FB6A8" stroke-width="1.5" id="fan-blade-a"/>
-        <line x1="514" y1="130" x2="546" y2="130" stroke="#3FB6A8" stroke-width="1.5" id="fan-blade-b"/>
+        <circle cx="530" cy="130" r="16" fill="#E9E7E1" stroke="#0E7A70" stroke-width="1.5"/>
+        <line x1="530" y1="114" x2="530" y2="146" stroke="#0E7A70" stroke-width="1.5" id="fan-blade-a"/>
+        <line x1="514" y1="130" x2="546" y2="130" stroke="#0E7A70" stroke-width="1.5" id="fan-blade-b"/>
         <!-- fan badge -->
-        <rect x="490" y="180" width="80" height="24" fill="#101216" stroke="#2F343D"/>
-        <text x="495" y="192" font-family="Courier New" font-size="8" fill="#79808B" letter-spacing="1">FAN</text>
-        <text x="565" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#3FB6A8" id="fan-kw">31 kW</text>
+        <rect x="490" y="180" width="80" height="24" fill="#FAFAF8" stroke="#CFCCC4"/>
+        <text x="495" y="192" font-family="Courier New" font-size="8" fill="#5A5D63" letter-spacing="1">FAN</text>
+        <text x="565" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#0E7A70" id="fan-kw">31 kW</text>
         <!-- evap plume -->
         <g id="g-plume" opacity=".4">
-          <ellipse cx="510" cy="70" rx="12" ry="18" fill="#79808B"/>
-          <ellipse cx="530" cy="55" rx="14" ry="22" fill="#79808B"/>
-          <ellipse cx="550" cy="70" rx="12" ry="18" fill="#79808B"/>
+          <ellipse cx="510" cy="70" rx="12" ry="18" fill="#5A5D63"/>
+          <ellipse cx="530" cy="55" rx="14" ry="22" fill="#5A5D63"/>
+          <ellipse cx="550" cy="70" rx="12" ry="18" fill="#5A5D63"/>
         </g>
       </g>
 
       <!-- Pipes: IT ← chiller ← tower -->
       <!-- chilled water supply (cold, blue) — chiller → IT -->
-      <line x1="330" y1="150" x2="280" y2="150" stroke="#5D8FBF" stroke-width="3"/>
-      <text x="305" y="144" text-anchor="middle" font-family="Courier New" font-size="8" fill="#79808B">CHW</text>
-      <text x="305" y="164" text-anchor="middle" font-family="Courier New" font-size="10" fill="#5D8FBF" id="chw-val">7 °C</text>
+      <line x1="330" y1="150" x2="280" y2="150" stroke="#215F9E" stroke-width="3"/>
+      <text x="305" y="144" text-anchor="middle" font-family="Courier New" font-size="8" fill="#5A5D63">CHW</text>
+      <text x="305" y="164" text-anchor="middle" font-family="Courier New" font-size="10" fill="#215F9E" id="chw-val">7 °C</text>
       <!-- return warm from IT to chiller (top) -->
-      <line x1="280" y1="115" x2="330" y2="115" stroke="#D14B3C" stroke-width="3"/>
-      <text x="305" y="109" text-anchor="middle" font-family="Courier New" font-size="8" fill="#79808B">RETURN</text>
+      <line x1="280" y1="115" x2="330" y2="115" stroke="#A62A1F" stroke-width="3"/>
+      <text x="305" y="109" text-anchor="middle" font-family="Courier New" font-size="8" fill="#5A5D63">RETURN</text>
       <!-- condenser water: chiller → tower -->
-      <line x1="420" y1="115" x2="490" y2="115" stroke="#D14B3C" stroke-width="3" opacity=".7"/>
-      <line x1="420" y1="150" x2="490" y2="150" stroke="#5D8FBF" stroke-width="3" opacity=".7"/>
+      <line x1="420" y1="115" x2="490" y2="115" stroke="#A62A1F" stroke-width="3" opacity=".7"/>
+      <line x1="420" y1="150" x2="490" y2="150" stroke="#215F9E" stroke-width="3" opacity=".7"/>
 
       <!-- Free-cooling bypass (only shown when active) -->
       <g id="g-free" opacity="0">
-        <path d="M 375 210 Q 375 240 450 240 Q 530 240 530 210" stroke="#3FB6A8" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
-        <text x="450" y="260" text-anchor="middle" font-family="Courier New" font-size="9" fill="#3FB6A8" letter-spacing="1.5">FREE-COOLING BYPASS</text>
+        <path d="M 375 210 Q 375 240 450 240 Q 530 240 530 210" stroke="#0E7A70" stroke-width="2" fill="none" stroke-dasharray="4 3"/>
+        <text x="450" y="260" text-anchor="middle" font-family="Courier New" font-size="9" fill="#0E7A70" letter-spacing="1.5">FREE-COOLING BYPASS</text>
       </g>
 
       <!-- Policy badge (top-right) -->
       <g id="g-policy">
-        <rect x="450" y="15" width="160" height="26" fill="#101216" stroke="#E8A33D" stroke-width="1"/>
-        <text x="530" y="32" text-anchor="middle" font-family="Courier New" font-size="10" fill="#E8A33D" letter-spacing="1.5" id="policy-lbl">POLICY : BASELINE</text>
+        <rect x="450" y="15" width="160" height="26" fill="#FAFAF8" stroke="#B87209" stroke-width="1"/>
+        <text x="530" y="32" text-anchor="middle" font-family="Courier New" font-size="10" fill="#B87209" letter-spacing="1.5" id="policy-lbl">POLICY : BASELINE</text>
       </g>
 
       <!-- Safety trip banner (hidden unless triggered) -->
       <g id="g-trip" opacity="0">
-        <rect x="130" y="30" width="150" height="240" fill="#D14B3C" opacity=".18"/>
-        <rect x="145" y="140" width="120" height="20" fill="#D14B3C"/>
+        <rect x="130" y="30" width="150" height="240" fill="#A62A1F" opacity=".18"/>
+        <rect x="145" y="140" width="120" height="20" fill="#A62A1F"/>
         <text x="205" y="154" text-anchor="middle" font-family="Courier New" font-size="10" fill="#fff" letter-spacing="1.5" font-weight="bold">SAFETY CLAMP</text>
       </g>
     </svg>
@@ -492,20 +492,20 @@ function updateSVG(t_wb, sp, r_active, r_baseline){
   document.getElementById("chiller-kw").textContent = Math.round(r_active.p_chiller) + " kW";
   document.getElementById("fan-kw").textContent    = Math.round(r_active.p_fan) + " kW";
   document.getElementById("inlet-val").textContent = r_active.t_inlet.toFixed(1) + " °C";
-  document.getElementById("inlet-val").style.fill  = r_active.t_inlet > 26 ? "#D14B3C" : r_active.t_inlet > 24 ? "#E8A33D" : "#6EBF6A";
+  document.getElementById("inlet-val").style.fill  = r_active.t_inlet > 26 ? "#A62A1F" : r_active.t_inlet > 24 ? "#B87209" : "#2E7A2A";
 
   document.getElementById("g-free").style.opacity  = sp.free ? 1 : 0;
   document.getElementById("g-plume").style.opacity = sp.free ? 0.15 : 0.5;
 
   // rack color reflects inlet temp
-  var stroke = r_active.t_inlet > 26 ? "#D14B3C" : r_active.t_inlet > 24 ? "#E8A33D" : "#3FB6A8";
+  var stroke = r_active.t_inlet > 26 ? "#A62A1F" : r_active.t_inlet > 24 ? "#B87209" : "#0E7A70";
   ["rack-1","rack-2","rack-3"].forEach(function(id){ document.getElementById(id).setAttribute("stroke", stroke); });
 
   document.getElementById("policy-lbl").textContent = "POLICY : " + sp.name;
   document.getElementById("g-policy").querySelector("rect").setAttribute("stroke",
-    currentPolicy === "unsafe" ? "#D14B3C" : currentPolicy === "smart" ? "#3FB6A8" : "#E8A33D");
+    currentPolicy === "unsafe" ? "#A62A1F" : currentPolicy === "smart" ? "#0E7A70" : "#B87209");
   document.getElementById("policy-lbl").setAttribute("fill",
-    currentPolicy === "unsafe" ? "#D14B3C" : currentPolicy === "smart" ? "#3FB6A8" : "#E8A33D");
+    currentPolicy === "unsafe" ? "#A62A1F" : currentPolicy === "smart" ? "#0E7A70" : "#B87209");
 
   // spin fan
   fanAngle = (fanAngle + sp.fan/8) % 360;
@@ -516,7 +516,7 @@ function updateSVG(t_wb, sp, r_active, r_baseline){
   document.getElementById("sp-chw").textContent = sp.t_chw.toFixed(1);
   document.getElementById("sp-fan").textContent = sp.fan;
   document.getElementById("sp-mode").textContent = sp.free ? "FREE-COOLING" : "CHILLED";
-  document.getElementById("sp-mode").style.color = sp.free ? "#3FB6A8" : "#5D8FBF";
+  document.getElementById("sp-mode").style.color = sp.free ? "#0E7A70" : "#215F9E";
 
   // safety trip
   if(!r_active.safe){
@@ -532,10 +532,10 @@ function drawChart(){
   ctx.clearRect(0,0,W,H);
 
   // background grid
-  ctx.strokeStyle = "#2F343D";
+  ctx.strokeStyle = "#CFCCC4";
   ctx.lineWidth = 1;
   ctx.font = "11px 'Courier New'";
-  ctx.fillStyle = "#79808B";
+  ctx.fillStyle = "#5A5D63";
 
   var padL = 60, padR = 20, padT = 24, padB = 34;
   var innerW = W - padL - padR;
@@ -562,18 +562,18 @@ function drawChart(){
 
   // day markers
   var days = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  ctx.strokeStyle = "#242830";
+  ctx.strokeStyle = "#E9E7E1";
   for(var d=0; d<7; d++){
     var x = padL + innerW * (d*24)/seriesLen;
     ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+innerH); ctx.stroke();
-    ctx.fillStyle = "#79808B";
+    ctx.fillStyle = "#5A5D63";
     ctx.textAlign = "left";
     ctx.fillText(days[d], x+4, padT + 12);
   }
 
   // wet-bulb trace (small, top)
   if(trendWB.length > 1){
-    ctx.strokeStyle = "#E8A33D";
+    ctx.strokeStyle = "#B87209";
     ctx.lineWidth = 1;
     ctx.beginPath();
     for(var i=0; i<trendWB.length; i++){
@@ -586,7 +586,7 @@ function drawChart(){
 
   // baseline (grey)
   if(showBaseline && trendBase.length > 1){
-    ctx.strokeStyle = "#79808B";
+    ctx.strokeStyle = "#5A5D63";
     ctx.lineWidth = 2;
     ctx.beginPath();
     for(var i=0; i<trendBase.length; i++){
@@ -599,7 +599,7 @@ function drawChart(){
 
   // smart (teal or red-if-unsafe)
   if(showSmart && trendSmart.length > 1){
-    ctx.strokeStyle = currentPolicy === "unsafe" ? "#D14B3C" : "#3FB6A8";
+    ctx.strokeStyle = currentPolicy === "unsafe" ? "#A62A1F" : "#0E7A70";
     ctx.lineWidth = 2;
     ctx.beginPath();
     for(var i=0; i<trendSmart.length; i++){
@@ -616,12 +616,12 @@ function drawChart(){
   var lx = padL + innerW - 220, ly = padT + 8;
   var box = function(color, label){
     ctx.fillStyle = color; ctx.fillRect(lx, ly-8, 12, 3);
-    ctx.fillStyle = "#D8DBE0"; ctx.fillText(label, lx+18, ly-3);
+    ctx.fillStyle = "#111318"; ctx.fillText(label, lx+18, ly-3);
     ly += 14;
   };
-  if(showBaseline) box("#79808B", "baseline cooling power");
-  if(showSmart)    box(currentPolicy === "unsafe" ? "#D14B3C" : "#3FB6A8", "RL cooling power");
-  box("#E8A33D", "wet-bulb °C  (scaled)");
+  if(showBaseline) box("#5A5D63", "baseline cooling power");
+  if(showSmart)    box(currentPolicy === "unsafe" ? "#A62A1F" : "#0E7A70", "RL cooling power");
+  box("#B87209", "wet-bulb °C  (scaled)");
 }
 
 /* ============ main loop ============ */

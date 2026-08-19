@@ -6,16 +6,16 @@
 <title>Bearing Fault Lab — why envelope analysis beats a raw FFT</title>
 <style>
   :root{
-    --panel:#16181C;
-    --panel2:#1E2127;
-    --panel3:#242830;
-    --rule:#2F343D;
-    --text:#D8DBE0;
-    --dim:#79808B;
-    --amber:#E8A33D;
-    --teal:#3FB6A8;
-    --red:#D14B3C;
-    --violet:#9B8CD4;
+    --panel:#FFFFFF;
+    --panel2:#F5F5F4;
+    --panel3:#E9E7E1;
+    --rule:#CFCCC4;
+    --text:#111318;
+    --dim:#5A5D63;
+    --amber:#B87209;
+    --teal:#0E7A70;
+    --red:#A62A1F;
+    --violet:#5D4EA0;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   }
@@ -64,9 +64,9 @@
     color:var(--dim);
     border-radius:2px;
   }
-  .lamp.on-ok{color:var(--teal);border-color:#2A5F59;background:#14231F;box-shadow:inset 0 0 12px #0f2a25}
-  .lamp.on-warn{color:var(--amber);border-color:#6B5223;background:#251D0F;box-shadow:inset 0 0 12px #2a2010}
-  .lamp.on-trip{color:#FFD9D2;border-color:#7A2E24;background:#33140F;box-shadow:inset 0 0 14px #4a1a13}
+  .lamp.on-ok{color:var(--teal);border-color:#0E7A70;background:#E3F1EF;box-shadow:inset 0 0 12px #C7E4DF}
+  .lamp.on-warn{color:var(--amber);border-color:#B87209;background:#FBF0DA;box-shadow:inset 0 0 12px #F5E4C7}
+  .lamp.on-trip{color:#A62A1F;border-color:#A62A1F;background:#FBE4E0;box-shadow:inset 0 0 14px #F5CFC7}
 
   .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
   @media (max-width:1000px){.grid{grid-template-columns:1fr}}
@@ -86,7 +86,7 @@
     margin:0 0 10px;
     font-weight:400;
   }
-  canvas{display:block;width:100%;background:#101216;border:1px solid var(--rule);border-radius:2px}
+  canvas{display:block;width:100%;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px}
 
   .ctl{margin:14px 0 0}
   .ctl label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
@@ -104,7 +104,7 @@
   input[type=range]:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
 
   .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px}
-  .ro{background:#101216;padding:9px 11px}
+  .ro{background:#FAFAF8;padding:9px 11px}
   .ro .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
   .ro .v{font-family:var(--mono);font-size:17px;color:var(--text);margin-top:2px}
   .ro .v.hot{color:var(--red)}
@@ -435,7 +435,7 @@ function axis(g, x0, y0, w, h){
   g.strokeRect(x0 + 0.5, y0 + 0.5, w, h);
 }
 function gridlines(g, x0, y0, w, h, n){
-  g.strokeStyle = '#1C2027'; g.lineWidth = 1;
+  g.strokeStyle = '#F5F5F4'; g.lineWidth = 1;
   for(var i = 1; i < n; i++){
     var x = x0 + w * i / n;
     g.beginPath(); g.moveTo(x + 0.5, y0); g.lineTo(x + 0.5, y0 + h); g.stroke();
@@ -460,7 +460,7 @@ function drawTime(){
   for(i = 0; i < show; i++) if(Math.abs(sig[i]) > maxA) maxA = Math.abs(sig[i]);
   maxA *= 1.12;
 
-  g.strokeStyle = '#2A3038';
+  g.strokeStyle = '#CFCCC4';
   g.beginPath(); g.moveTo(pad.l, pad.t + h / 2); g.lineTo(pad.l + w, pad.t + h / 2); g.stroke();
 
   /* impact markers behind the trace */
@@ -568,18 +568,18 @@ function drawBearing(dt){
 
   /* outer race */
   g.beginPath(); g.arc(0, 0, R, 0, 2 * Math.PI);
-  g.strokeStyle = '#3A414C'; g.lineWidth = 2; g.stroke();
+  g.strokeStyle = '#5A5D63'; g.lineWidth = 2; g.stroke();
   g.beginPath(); g.arc(0, 0, rOuterIn, 0, 2 * Math.PI);
-  g.strokeStyle = '#3A414C'; g.stroke();
+  g.strokeStyle = '#5A5D63'; g.stroke();
 
   /* inner race, spins at shaft rate (scaled) */
   var shaftAng = phase * (d.fr / Math.max(d.ftf, 0.001));
   g.beginPath(); g.arc(0, 0, rInnerOut, 0, 2 * Math.PI);
-  g.strokeStyle = '#3A414C'; g.stroke();
+  g.strokeStyle = '#5A5D63'; g.stroke();
   g.beginPath(); g.arc(0, 0, rInnerOut * 0.55, 0, 2 * Math.PI);
-  g.fillStyle = '#181B21'; g.fill(); g.strokeStyle = '#3A414C'; g.stroke();
+  g.fillStyle = '#F5F5F4'; g.fill(); g.strokeStyle = '#5A5D63'; g.stroke();
   g.save(); g.rotate(shaftAng);
-  g.strokeStyle = '#4B5361'; g.lineWidth = 2;
+  g.strokeStyle = '#5A5D63'; g.lineWidth = 2;
   g.beginPath(); g.moveTo(-rInnerOut * 0.55, 0); g.lineTo(rInnerOut * 0.55, 0); g.stroke();
   g.restore();
 
@@ -601,10 +601,10 @@ function drawBearing(dt){
     if(near && sev > 0.01) hitThisFrame = true;
     var bx = Math.cos(a) * rPitch, by = Math.sin(a) * rPitch;
     g.beginPath(); g.arc(bx, by, rBall, 0, 2 * Math.PI);
-    g.fillStyle = (near && sev > 0.01) ? css('--red') : '#2A3038';
+    g.fillStyle = (near && sev > 0.01) ? css('--red') : '#8A8D93';
     g.fill();
-    g.strokeStyle = (near && sev > 0.01) ? '#FFB9AE' : css('--amber');
-    g.lineWidth = 1.5; g.stroke();
+    g.strokeStyle = (near && sev > 0.01) ? '#A62A1F' : '#3F4247';
+    g.lineWidth = 2; g.stroke();
   }
   if(hitThisFrame) flash = 1;
   flash *= 0.90;
