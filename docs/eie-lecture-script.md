@@ -238,7 +238,7 @@ OPC UA and MQTT Sparkplug as genuinely new — because for this cohort they are.
 
 ## 2.2 The physics gives you the answer before you look
 
-`[Slide: bearing cross-section with the four frequencies.]`
+`[Slide: bearing kinematics — three frequencies from the rolling constraint.]`
 
 > Here is a deep-groove ball bearing. Outer race, fixed to the housing. Inner race, rotating
 > with the shaft at frequency f-r. Nine balls held by a cage between them.
