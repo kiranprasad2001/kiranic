@@ -16,7 +16,7 @@ const demos = [
             "BPFO derived from bearing geometry: 107.4 Hz, before anything is measured",
             "Raw spectrum vs. band-pass → Hilbert envelope → FFT, computed live in the browser",
             "Envelope BPFO index: 0.36 healthy → 3.2 early defect (Alert) → 7.7 advanced (Fault)",
-            "<em>Noisy plant</em> keeps the same 22% defect but drops it to ~1.7, back under the alert line. That's not a narrowed margin, it's a <strong class=\"font-medium\">missed detection</strong> — and a missed detection is silent",
+            "<em>Noisy plant</em> keeps the same 22% defect but drops the index to ~1.7, back under the alert line — a missed detection",
         ],
         accent: "teal",
     },
@@ -28,7 +28,7 @@ const demos = [
         points: [
             "Health index = 30·√(BPFO band energy) ÷ RMS. Healthy ≈ 0.36, defect climbs to ~7.7",
             "False alarms come from random non-periodic knocks a healthy machine actually takes, not a faked small defect",
-            "The twin's falsifiable prediction: days-to-fault. It's confidently wrong early — that's the honest thing to show",
+            "The twin makes a falsifiable prediction: days-to-fault. It's confidently wrong early on",
         ],
         accent: "ochre",
     },
@@ -49,9 +49,8 @@ const demos = [
             </h1>
             <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
                 What AI and digital twins actually do in instrumentation — and what they don't.
-                Sixty minutes for Electronics &amp; Instrumentation students. A single bearing failure
-                traced from the physics to the alarm nobody trusts, then twins as their own eleven-minute
-                part with the second simulator as its demo.
+                Sixty minutes for Electronics &amp; Instrumentation students, tracing a single bearing
+                failure from the physics to the alarm nobody trusts.
             </p>
             <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mt-3">
                 The useful test for anything sold to you as a twin: <em>what does it predict that a
@@ -114,8 +113,8 @@ const demos = [
             </div>
             <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mb-5">
                 It needs about forty simulated days before the trend chart says anything, so leave it
-                running while you read. Drag the threshold slider once the defect takes hold — that's
-                the whole argument.
+                running while you read. Once the defect takes hold, the threshold slider shows the
+                trade-off between warning time and false alarm rate.
             </p>
             <div class="rounded-lg border border-slate-200 dark:border-slate-700/50 overflow-hidden bg-[#16181C]">
                 <iframe
@@ -148,10 +147,10 @@ const demos = [
                     nothing about the one event you actually wanted warning of.
                 </p>
                 <p>
-                    I hit this in my own house. A Raspberry Pi reading light, motion, temperature and proximity
-                    sensors has given me years of normal and essentially no failures, which is the same wall the
-                    vendors don't mention. The honest response isn't a better fault model — you have no faults to
-                    train on. It's to model normal and measure distance from it.
+                    My own Raspberry Pi rig — light, motion, temperature and proximity sensors driving the
+                    home automation — has years of normal readings and essentially no failures. So does most
+                    industrial data. Without faults to train on, the useful approach is to model normal and
+                    measure distance from it.
                 </p>
             </div>
         </section>
@@ -162,7 +161,7 @@ const demos = [
                 Both simulators are single self-contained HTML files —
                 <a href="/lecture/bearing-lab.html" class="text-brand-teal dark:text-brand-teal-light hover:underline">bearing lab</a>,
                 <a href="/lecture/live-monitor.html" class="text-brand-teal dark:text-brand-teal-light hover:underline">live monitor</a>.
-                Save the page and they still work offline. Pull them apart.
+                Save the page and they still work offline.
             </p>
         </section>
     </main>
