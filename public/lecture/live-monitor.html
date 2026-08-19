@@ -6,8 +6,8 @@
 <title>Live Condition Monitoring — four motors, one of them failing</title>
 <style>
   :root{
-    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#CFCCC4;
-    --text:#111318; --dim:#5A5D63;
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#A8A49A;
+    --text:#111318; --dim:#2E3036;
     --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -68,7 +68,7 @@
 
   .log{height:132px;overflow-y:auto;background:#FAFAF8;border:1px solid var(--rule);border-radius:2px;padding:8px}
   .log div{font-family:var(--mono);font-size:11px;margin-bottom:4px;color:var(--dim)}
-  .log div .t{color:#5A5D63}
+  .log div .t{color:#2E3036}
   .log div.true{color:var(--red)} .log div.false{color:var(--amber)}
 
   .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:8px}
@@ -136,7 +136,7 @@
       <canvas id="cvTrend" height="290"></canvas>
       <div class="legend">
         <span><i class="sw" style="background:var(--red)"></i>MTR-402 (has the defect)</span>
-        <span><i class="sw" style="background:#5A5D63"></i>MTR-401 / 403 / 404</span>
+        <span><i class="sw" style="background:#2E3036"></i>MTR-401 / 403 / 404</span>
         <span><i class="sw" style="background:var(--amber)"></i>Alarm threshold</span>
       </div>
     </div>
@@ -425,7 +425,7 @@ function drawTrend(){
   for(i=0;i<assets.length;i++){
     var a = assets[i];
     if(a.hist.length < 2) continue;
-    g.strokeStyle = a.faulty ? css("--red") : "#5A5D63";
+    g.strokeStyle = a.faulty ? css("--red") : "#2E3036";
     g.lineWidth = a.faulty ? 1.8 : 1;
     g.beginPath();
     for(k=0;k<a.hist.length;k++){

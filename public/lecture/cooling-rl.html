@@ -6,8 +6,8 @@
 <title>Data-centre cooling with RL — how the 40% figure was earned</title>
 <style>
   :root{
-    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#CFCCC4;
-    --text:#111318; --dim:#5A5D63;
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#A8A49A;
+    --text:#111318; --dim:#2E3036;
     --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0; --green:#2E7A2A; --blue:#215F9E;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -121,15 +121,15 @@
     <svg class="plant" viewBox="0 0 620 300" xmlns="http://www.w3.org/2000/svg" id="svg">
       <!-- Sun / weather -->
       <g id="g-weather">
-        <circle cx="60" cy="45" r="18" fill="#E9E7E1" stroke="#5A5D63" stroke-width="1"/>
+        <circle cx="60" cy="45" r="18" fill="#E9E7E1" stroke="#2E3036" stroke-width="1"/>
         <text x="60" y="49" text-anchor="middle" font-family="Courier New" font-size="10" fill="#B87209" id="wb-icon">☀</text>
-        <text x="60" y="80" text-anchor="middle" font-family="Courier New" font-size="9" fill="#5A5D63" letter-spacing="1">WET-BULB</text>
+        <text x="60" y="80" text-anchor="middle" font-family="Courier New" font-size="9" fill="#2E3036" letter-spacing="1">WET-BULB</text>
         <text x="60" y="94" text-anchor="middle" font-family="Courier New" font-size="14" fill="#B87209" id="wb-val">15.0 °C</text>
       </g>
 
       <!-- IT hall -->
       <g id="g-it">
-        <rect x="130" y="30" width="150" height="240" fill="#F5F5F4" stroke="#5A5D63" stroke-width="1.5"/>
+        <rect x="130" y="30" width="150" height="240" fill="#F5F5F4" stroke="#2E3036" stroke-width="1.5"/>
         <text x="205" y="20" text-anchor="middle" font-family="Courier New" font-size="10" fill="#111318" letter-spacing="1.5">IT HALL</text>
         <!-- server racks -->
         <g id="racks">
@@ -145,52 +145,52 @@
           <line x1="236" y1="75"  x2="256" y2="75"  stroke="#2E7A2A" stroke-width="1.5"/>
         </g>
         <!-- IT inlet temp badge -->
-        <rect x="145" y="270" width="120" height="18" fill="#FAFAF8" stroke="#CFCCC4"/>
-        <text x="150" y="283" font-family="Courier New" font-size="9" fill="#5A5D63" letter-spacing="1">INLET</text>
+        <rect x="145" y="270" width="120" height="18" fill="#FAFAF8" stroke="#A8A49A"/>
+        <text x="150" y="283" font-family="Courier New" font-size="9" fill="#2E3036" letter-spacing="1">INLET</text>
         <text x="260" y="283" text-anchor="end" font-family="Courier New" font-size="10" fill="#2E7A2A" id="inlet-val">22.0 °C</text>
       </g>
 
       <!-- Chiller -->
       <g id="g-chiller">
-        <rect x="330" y="90" width="90" height="120" fill="#F5F5F4" stroke="#5A5D63" stroke-width="1.5"/>
+        <rect x="330" y="90" width="90" height="120" fill="#F5F5F4" stroke="#2E3036" stroke-width="1.5"/>
         <text x="375" y="80" text-anchor="middle" font-family="Courier New" font-size="10" fill="#111318" letter-spacing="1.5">CHILLER</text>
         <!-- compressor icon -->
         <circle cx="375" cy="130" r="18" fill="#E9E7E1" stroke="#215F9E" stroke-width="1.5"/>
         <text x="375" y="134" text-anchor="middle" font-family="Courier New" font-size="14" fill="#215F9E">C</text>
         <!-- power badge -->
-        <rect x="335" y="180" width="80" height="24" fill="#FAFAF8" stroke="#CFCCC4"/>
-        <text x="340" y="192" font-family="Courier New" font-size="8" fill="#5A5D63" letter-spacing="1">CHILLER</text>
+        <rect x="335" y="180" width="80" height="24" fill="#FAFAF8" stroke="#A8A49A"/>
+        <text x="340" y="192" font-family="Courier New" font-size="8" fill="#2E3036" letter-spacing="1">CHILLER</text>
         <text x="410" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#215F9E" id="chiller-kw">285 kW</text>
       </g>
 
       <!-- Cooling tower -->
       <g id="g-tower">
-        <path d="M 480 240 L 490 100 L 570 100 L 580 240 Z" fill="#F5F5F4" stroke="#5A5D63" stroke-width="1.5"/>
+        <path d="M 480 240 L 490 100 L 570 100 L 580 240 Z" fill="#F5F5F4" stroke="#2E3036" stroke-width="1.5"/>
         <text x="530" y="90" text-anchor="middle" font-family="Courier New" font-size="10" fill="#111318" letter-spacing="1.5">COOLING TOWER</text>
         <!-- fan -->
         <circle cx="530" cy="130" r="16" fill="#E9E7E1" stroke="#0E7A70" stroke-width="1.5"/>
         <line x1="530" y1="114" x2="530" y2="146" stroke="#0E7A70" stroke-width="1.5" id="fan-blade-a"/>
         <line x1="514" y1="130" x2="546" y2="130" stroke="#0E7A70" stroke-width="1.5" id="fan-blade-b"/>
         <!-- fan badge -->
-        <rect x="490" y="180" width="80" height="24" fill="#FAFAF8" stroke="#CFCCC4"/>
-        <text x="495" y="192" font-family="Courier New" font-size="8" fill="#5A5D63" letter-spacing="1">FAN</text>
+        <rect x="490" y="180" width="80" height="24" fill="#FAFAF8" stroke="#A8A49A"/>
+        <text x="495" y="192" font-family="Courier New" font-size="8" fill="#2E3036" letter-spacing="1">FAN</text>
         <text x="565" y="200" text-anchor="end" font-family="Courier New" font-size="12" fill="#0E7A70" id="fan-kw">31 kW</text>
         <!-- evap plume -->
         <g id="g-plume" opacity=".4">
-          <ellipse cx="510" cy="70" rx="12" ry="18" fill="#5A5D63"/>
-          <ellipse cx="530" cy="55" rx="14" ry="22" fill="#5A5D63"/>
-          <ellipse cx="550" cy="70" rx="12" ry="18" fill="#5A5D63"/>
+          <ellipse cx="510" cy="70" rx="12" ry="18" fill="#2E3036"/>
+          <ellipse cx="530" cy="55" rx="14" ry="22" fill="#2E3036"/>
+          <ellipse cx="550" cy="70" rx="12" ry="18" fill="#2E3036"/>
         </g>
       </g>
 
       <!-- Pipes: IT ← chiller ← tower -->
       <!-- chilled water supply (cold, blue) — chiller → IT -->
       <line x1="330" y1="150" x2="280" y2="150" stroke="#215F9E" stroke-width="3"/>
-      <text x="305" y="144" text-anchor="middle" font-family="Courier New" font-size="8" fill="#5A5D63">CHW</text>
+      <text x="305" y="144" text-anchor="middle" font-family="Courier New" font-size="8" fill="#2E3036">CHW</text>
       <text x="305" y="164" text-anchor="middle" font-family="Courier New" font-size="10" fill="#215F9E" id="chw-val">7 °C</text>
       <!-- return warm from IT to chiller (top) -->
       <line x1="280" y1="115" x2="330" y2="115" stroke="#A62A1F" stroke-width="3"/>
-      <text x="305" y="109" text-anchor="middle" font-family="Courier New" font-size="8" fill="#5A5D63">RETURN</text>
+      <text x="305" y="109" text-anchor="middle" font-family="Courier New" font-size="8" fill="#2E3036">RETURN</text>
       <!-- condenser water: chiller → tower -->
       <line x1="420" y1="115" x2="490" y2="115" stroke="#A62A1F" stroke-width="3" opacity=".7"/>
       <line x1="420" y1="150" x2="490" y2="150" stroke="#215F9E" stroke-width="3" opacity=".7"/>
@@ -532,10 +532,10 @@ function drawChart(){
   ctx.clearRect(0,0,W,H);
 
   // background grid
-  ctx.strokeStyle = "#CFCCC4";
+  ctx.strokeStyle = "#A8A49A";
   ctx.lineWidth = 1;
   ctx.font = "11px 'Courier New'";
-  ctx.fillStyle = "#5A5D63";
+  ctx.fillStyle = "#2E3036";
 
   var padL = 60, padR = 20, padT = 24, padB = 34;
   var innerW = W - padL - padR;
@@ -566,7 +566,7 @@ function drawChart(){
   for(var d=0; d<7; d++){
     var x = padL + innerW * (d*24)/seriesLen;
     ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+innerH); ctx.stroke();
-    ctx.fillStyle = "#5A5D63";
+    ctx.fillStyle = "#2E3036";
     ctx.textAlign = "left";
     ctx.fillText(days[d], x+4, padT + 12);
   }
@@ -586,7 +586,7 @@ function drawChart(){
 
   // baseline (grey)
   if(showBaseline && trendBase.length > 1){
-    ctx.strokeStyle = "#5A5D63";
+    ctx.strokeStyle = "#2E3036";
     ctx.lineWidth = 2;
     ctx.beginPath();
     for(var i=0; i<trendBase.length; i++){
@@ -619,7 +619,7 @@ function drawChart(){
     ctx.fillStyle = "#111318"; ctx.fillText(label, lx+18, ly-3);
     ly += 14;
   };
-  if(showBaseline) box("#5A5D63", "baseline cooling power");
+  if(showBaseline) box("#2E3036", "baseline cooling power");
   if(showSmart)    box(currentPolicy === "unsafe" ? "#A62A1F" : "#0E7A70", "RL cooling power");
   box("#B87209", "wet-bulb °C  (scaled)");
 }

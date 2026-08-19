@@ -9,9 +9,9 @@
     --panel:#FFFFFF;
     --panel2:#F5F5F4;
     --panel3:#E9E7E1;
-    --rule:#CFCCC4;
+    --rule:#A8A49A;
     --text:#111318;
-    --dim:#5A5D63;
+    --dim:#2E3036;
     --amber:#B87209;
     --teal:#0E7A70;
     --red:#A62A1F;
@@ -460,7 +460,7 @@ function drawTime(){
   for(i = 0; i < show; i++) if(Math.abs(sig[i]) > maxA) maxA = Math.abs(sig[i]);
   maxA *= 1.12;
 
-  g.strokeStyle = '#CFCCC4';
+  g.strokeStyle = '#A8A49A';
   g.beginPath(); g.moveTo(pad.l, pad.t + h / 2); g.lineTo(pad.l + w, pad.t + h / 2); g.stroke();
 
   /* impact markers behind the trace */
@@ -568,18 +568,18 @@ function drawBearing(dt){
 
   /* outer race */
   g.beginPath(); g.arc(0, 0, R, 0, 2 * Math.PI);
-  g.strokeStyle = '#5A5D63'; g.lineWidth = 2; g.stroke();
+  g.strokeStyle = '#2E3036'; g.lineWidth = 2; g.stroke();
   g.beginPath(); g.arc(0, 0, rOuterIn, 0, 2 * Math.PI);
-  g.strokeStyle = '#5A5D63'; g.stroke();
+  g.strokeStyle = '#2E3036'; g.stroke();
 
   /* inner race, spins at shaft rate (scaled) */
   var shaftAng = phase * (d.fr / Math.max(d.ftf, 0.001));
   g.beginPath(); g.arc(0, 0, rInnerOut, 0, 2 * Math.PI);
-  g.strokeStyle = '#5A5D63'; g.stroke();
+  g.strokeStyle = '#2E3036'; g.stroke();
   g.beginPath(); g.arc(0, 0, rInnerOut * 0.55, 0, 2 * Math.PI);
-  g.fillStyle = '#F5F5F4'; g.fill(); g.strokeStyle = '#5A5D63'; g.stroke();
+  g.fillStyle = '#F5F5F4'; g.fill(); g.strokeStyle = '#2E3036'; g.stroke();
   g.save(); g.rotate(shaftAng);
-  g.strokeStyle = '#5A5D63'; g.lineWidth = 2;
+  g.strokeStyle = '#2E3036'; g.lineWidth = 2;
   g.beginPath(); g.moveTo(-rInnerOut * 0.55, 0); g.lineTo(rInnerOut * 0.55, 0); g.stroke();
   g.restore();
 
@@ -601,9 +601,9 @@ function drawBearing(dt){
     if(near && sev > 0.01) hitThisFrame = true;
     var bx = Math.cos(a) * rPitch, by = Math.sin(a) * rPitch;
     g.beginPath(); g.arc(bx, by, rBall, 0, 2 * Math.PI);
-    g.fillStyle = (near && sev > 0.01) ? css('--red') : '#8A8D93';
+    g.fillStyle = (near && sev > 0.01) ? css('--red') : '#525459';
     g.fill();
-    g.strokeStyle = (near && sev > 0.01) ? '#A62A1F' : '#3F4247';
+    g.strokeStyle = (near && sev > 0.01) ? '#A62A1F' : '#1D1F23';
     g.lineWidth = 2; g.stroke();
   }
   if(hitThisFrame) flash = 1;

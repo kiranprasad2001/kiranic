@@ -6,8 +6,8 @@
 <title>Bearing Kinematics — where the fault frequencies come from</title>
 <style>
   :root{
-    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#CFCCC4;
-    --text:#111318; --dim:#5A5D63;
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#A8A49A;
+    --text:#111318; --dim:#2E3036;
     --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0; --green:#2E7A2A;
     --mono:"Courier New",Courier,monospace;
     --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
@@ -120,16 +120,16 @@
     <svg class="bearing" viewBox="0 0 540 480" xmlns="http://www.w3.org/2000/svg" id="svg">
       <!-- Housing (outer box hint) -->
       <g id="g-housing" opacity="0">
-        <rect x="30" y="50" width="480" height="420" fill="none" stroke="#CFCCC4" stroke-width="1" stroke-dasharray="3 4"/>
-        <text x="270" y="30" text-anchor="middle" font-family="Courier New" font-size="11" fill="#5A5D63" letter-spacing="2">FIXED TO HOUSING</text>
+        <rect x="30" y="50" width="480" height="420" fill="none" stroke="#A8A49A" stroke-width="1" stroke-dasharray="3 4"/>
+        <text x="270" y="30" text-anchor="middle" font-family="Courier New" font-size="11" fill="#2E3036" letter-spacing="2">FIXED TO HOUSING</text>
       </g>
 
       <!-- Outer race -->
       <g id="g-outer">
-        <circle cx="240" cy="240" r="200" fill="none" stroke="#5A5D63" stroke-width="18"/>
-        <circle cx="240" cy="240" r="200" fill="none" stroke="#CFCCC4" stroke-width="1"/>
-        <circle cx="240" cy="240" r="209" fill="none" stroke="#CFCCC4" stroke-width="1"/>
-        <circle cx="240" cy="240" r="191" fill="none" stroke="#CFCCC4" stroke-width="1"/>
+        <circle cx="240" cy="240" r="200" fill="none" stroke="#2E3036" stroke-width="18"/>
+        <circle cx="240" cy="240" r="200" fill="none" stroke="#A8A49A" stroke-width="1"/>
+        <circle cx="240" cy="240" r="209" fill="none" stroke="#A8A49A" stroke-width="1"/>
+        <circle cx="240" cy="240" r="191" fill="none" stroke="#A8A49A" stroke-width="1"/>
       </g>
 
       <!-- Defect (outer race) -->
@@ -149,11 +149,11 @@
       <!-- Inner race (rotates with shaft) -->
       <g id="g-inner">
         <g id="g-inner-rot">
-          <circle cx="240" cy="240" r="90" fill="#E9E7E1" stroke="#5A5D63" stroke-width="16"/>
-          <circle cx="240" cy="240" r="98" fill="none" stroke="#CFCCC4" stroke-width="1"/>
-          <circle cx="240" cy="240" r="82" fill="none" stroke="#CFCCC4" stroke-width="1"/>
+          <circle cx="240" cy="240" r="90" fill="#E9E7E1" stroke="#2E3036" stroke-width="16"/>
+          <circle cx="240" cy="240" r="98" fill="none" stroke="#A8A49A" stroke-width="1"/>
+          <circle cx="240" cy="240" r="82" fill="none" stroke="#A8A49A" stroke-width="1"/>
           <!-- keyway mark so you can see it rotate -->
-          <rect x="234" y="152" width="12" height="18" fill="#FAFAF8" stroke="#5A5D63" stroke-width="1"/>
+          <rect x="234" y="152" width="12" height="18" fill="#FAFAF8" stroke="#2E3036" stroke-width="1"/>
         </g>
       </g>
 
@@ -170,39 +170,39 @@
         <g id="g-shaft-rot">
           <line x1="240" y1="240" x2="240" y2="215" stroke="#0E7A70" stroke-width="2"/>
         </g>
-        <text x="240" y="245" text-anchor="middle" font-family="Courier New" font-size="9" fill="#5A5D63" letter-spacing="1.5">SHAFT</text>
+        <text x="240" y="245" text-anchor="middle" font-family="Courier New" font-size="9" fill="#2E3036" letter-spacing="1.5">SHAFT</text>
       </g>
 
       <!-- Labels (shown/hidden per stage) -->
       <g id="lbl-outer" opacity="0">
-        <line x1="380" y1="130" x2="440" y2="90" stroke="#5A5D63" stroke-width="1"/>
+        <line x1="380" y1="130" x2="440" y2="90" stroke="#2E3036" stroke-width="1"/>
         <text x="530" y="88" text-anchor="end" font-family="Courier New" font-size="10" fill="#111318">OUTER RACE</text>
-        <text x="530" y="102" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">fixed</text>
+        <text x="530" y="102" text-anchor="end" font-family="Courier New" font-size="9" fill="#2E3036">fixed</text>
       </g>
       <g id="lbl-inner" opacity="0">
-        <line x1="180" y1="200" x2="60" y2="120" stroke="#5A5D63" stroke-width="1"/>
+        <line x1="180" y1="200" x2="60" y2="120" stroke="#2E3036" stroke-width="1"/>
         <text x="20" y="115" font-family="Courier New" font-size="10" fill="#111318">INNER RACE</text>
-        <text x="20" y="128" font-family="Courier New" font-size="9" fill="#5A5D63">rotates with shaft</text>
+        <text x="20" y="128" font-family="Courier New" font-size="9" fill="#2E3036">rotates with shaft</text>
       </g>
       <g id="lbl-balls" opacity="0">
-        <line x1="360" y1="290" x2="440" y2="330" stroke="#5A5D63" stroke-width="1"/>
+        <line x1="360" y1="290" x2="440" y2="330" stroke="#2E3036" stroke-width="1"/>
         <text x="530" y="330" text-anchor="end" font-family="Courier New" font-size="10" fill="#111318">n = 9 BALLS</text>
-        <text x="530" y="344" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">held by the cage</text>
+        <text x="530" y="344" text-anchor="end" font-family="Courier New" font-size="9" fill="#2E3036">held by the cage</text>
       </g>
       <g id="lbl-cage" opacity="0">
         <line x1="140" y1="330" x2="55" y2="380" stroke="#5D4EA0" stroke-width="1"/>
         <text x="20" y="382" font-family="Courier New" font-size="10" fill="#5D4EA0">CAGE</text>
-        <text x="20" y="395" font-family="Courier New" font-size="9" fill="#5A5D63">rotates at FTF</text>
+        <text x="20" y="395" font-family="Courier New" font-size="9" fill="#2E3036">rotates at FTF</text>
       </g>
       <g id="lbl-defect-outer" opacity="0">
         <line x1="252" y1="42" x2="380" y2="20" stroke="#A62A1F" stroke-width="1"/>
         <text x="530" y="18" text-anchor="end" font-family="Courier New" font-size="10" fill="#A62A1F">OUTER SPALL</text>
-        <text x="530" y="31" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">fixed at 12 o&apos;clock</text>
+        <text x="530" y="31" text-anchor="end" font-family="Courier New" font-size="9" fill="#2E3036">fixed at 12 o&apos;clock</text>
       </g>
       <g id="lbl-defect-inner" opacity="0">
         <line x1="252" y1="150" x2="380" y2="115" stroke="#A62A1F" stroke-width="1"/>
         <text x="530" y="112" text-anchor="end" font-family="Courier New" font-size="10" fill="#A62A1F">INNER SPALL</text>
-        <text x="530" y="125" text-anchor="end" font-family="Courier New" font-size="9" fill="#5A5D63">orbits with shaft</text>
+        <text x="530" y="125" text-anchor="end" font-family="Courier New" font-size="9" fill="#2E3036">orbits with shaft</text>
       </g>
     </svg>
 
@@ -260,7 +260,7 @@ function buildBalls(){
     var c = document.createElementNS("http://www.w3.org/2000/svg","circle");
     c.setAttribute("r","18");
     c.setAttribute("fill","#0E7A70");
-    c.setAttribute("stroke","#5A5D63");
+    c.setAttribute("stroke","#2E3036");
     c.setAttribute("stroke-width","1");
     ballsG.appendChild(c);
   }
