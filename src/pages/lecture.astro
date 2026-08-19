@@ -1,0 +1,191 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+const title = "AI and Digital Twins in Instrumentation";
+const description = "Two interactive simulators from a guest lecture on AI and digital twins in instrumentation — bearing fault detection by envelope analysis, and a running physics twin of four motors, one of them failing.";
+
+const demos = [
+    {
+        name: "Bearing Fault Lab",
+        href: "/lecture/bearing-lab.html",
+        tag: "one measurement",
+        blurb: "A single vibration snapshot from an SKF 6205 bearing at 1797 rpm. The defect is invisible in the raw FFT and obvious in the envelope spectrum. Four presets — start on <em>Early defect</em> and try to find the fault before switching views.",
+        points: [
+            "BPFO derived from bearing geometry: 107.4 Hz, before anything is measured",
+            "Raw spectrum vs. band-pass → Hilbert envelope → FFT, computed live in the browser",
+            "Envelope BPFO index: 0.36 healthy → 3.2 early defect (Alert) → 7.7 advanced (Fault)",
+            "<em>Noisy plant</em> keeps the same 22% defect but drops it to ~1.7, back under the alert line. That's not a narrowed margin, it's a <strong class=\"font-medium\">missed detection</strong> — and a missed detection is silent",
+        ],
+        accent: "teal",
+    },
+    {
+        name: "Live Condition Monitor",
+        href: "/lecture/live-monitor.html",
+        tag: "a running twin",
+        blurb: "Four motors on a simulated clock, one reading each per four simulated hours. MTR-402 develops an outer-race spall on day 18 and it grows. Nothing is replayed — the bearing physics runs forward in time and every point on the trend is computed from it, the same way you'd do it by hand.",
+        points: [
+            "Health index = BPFO band energy ÷ overall RMS. Healthy sits at 0.3–0.6, defect climbs to 9.4",
+            "False alarms come from random non-periodic knocks, not a faked small defect",
+            "Threshold 8 → zero false alarms, 22 days warning. Threshold 2–3 → 38–46 days warning, 4–5 false alarms a month. No setting gives you both",
+        ],
+        accent: "ochre",
+    },
+];
+---
+
+<BaseLayout title={title} description={description}>
+    <Navbar />
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 py-16 w-full">
+        {/* Header */}
+        <div class="mb-12">
+            <p class="font-mono text-sm text-brand-teal dark:text-brand-teal-light mb-3 tracking-wide">
+                guest lecture · V. R. Siddhartha Engineering College
+            </p>
+            <h1 class="font-mono text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-3">
+                AI and Digital Twins in Instrumentation
+            </h1>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
+                What AI and digital twins actually do in instrumentation — and what they don't.
+                Sixty minutes for Electronics &amp; Instrumentation students, built around a single
+                bearing failure traced from the physics to the alarm nobody trusts.
+            </p>
+            <p class="text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl mt-3">
+                The useful test for anything sold to you as a twin: <em>what does it predict that a
+                human could not, and how was that prediction validated?</em> A 3D model with live
+                sensor values painted on it is a visualization. It might be a good one. It is not a
+                twin, because it cannot answer "what happens if I raise the feed rate by ten percent."
+                The second simulator below is a twin by that test — it runs a physics model of a
+                bearing forward in time and produces predictions you can check against what happens.
+            </p>
+            <p class="text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl mt-3 text-sm">
+                Both simulators below run entirely in your browser. No build step, no CDN, no network
+                calls, no analytics, no storage. They work offline, and they reflow on a phone —
+                though the live monitor computes four FFTs a second, so an older phone will run warm.
+            </p>
+        </div>
+
+        {/* Demo cards */}
+        <div class="grid gap-6 lg:grid-cols-2 mb-16">
+            {demos.map((d) => (
+                <div class="flex flex-col rounded-lg border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-brand-bg p-6">
+                    <div class="flex items-baseline justify-between gap-3 mb-3">
+                        <h2 class="font-mono font-semibold text-slate-900 dark:text-white">{d.name}</h2>
+                        <span class:list={[
+                            "font-mono text-[10px] uppercase tracking-widest",
+                            d.accent === "teal" ? "text-brand-teal dark:text-brand-teal-light" : "text-brand-ochre"
+                        ]}>{d.tag}</span>
+                    </div>
+
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-4" set:html={d.blurb} />
+
+                    <ul class="space-y-2 mb-6 flex-grow">
+                        {d.points.map((p) => (
+                            <li class="flex gap-2.5 text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+                                <span class:list={[
+                                    "mt-[0.45rem] inline-block w-1 h-1 rounded-full shrink-0",
+                                    d.accent === "teal" ? "bg-brand-teal" : "bg-brand-ochre"
+                                ]} />
+                                <span set:html={p} />
+                            </li>
+                        ))}
+                    </ul>
+
+                    <a
+                        href={d.href}
+                        class="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 dark:border-slate-600 px-4 py-2.5 font-mono text-xs uppercase tracking-widest text-slate-700 dark:text-slate-200 hover:border-brand-teal hover:text-brand-teal dark:hover:border-brand-teal-light dark:hover:text-brand-teal-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-teal"
+                    >
+                        Open full screen →
+                    </a>
+                </div>
+            ))}
+        </div>
+
+        {/* Embedded live monitor */}
+        <section class="mb-16">
+            <div class="flex items-baseline gap-3 mb-4">
+                <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                    The twin, running now
+                </h2>
+                <span class="text-xs text-slate-400 dark:text-slate-600">MTR-402 fails on day 18</span>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed max-w-2xl mb-5">
+                It needs about forty simulated days before the trend chart says anything, so leave it
+                running while you read. Drag the threshold slider once the defect takes hold — that's
+                the whole argument.
+            </p>
+            <div class="rounded-lg border border-slate-200 dark:border-slate-700/50 overflow-hidden bg-[#16181C]">
+                <iframe
+                    src="/lecture/live-monitor.html"
+                    title="Live condition monitoring simulator — four motors, one of them failing"
+                    loading="lazy"
+                    class="block w-full h-[900px] border-0"
+                ></iframe>
+            </div>
+        </section>
+
+        {/* Where twins stop */}
+        <section class="border-t border-slate-200 dark:border-slate-700/50 pt-10 mb-12">
+            <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-5">
+                Where a twin stops working
+            </h2>
+            <div class="max-w-2xl space-y-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                <p>
+                    Three things get sold under the name. A <strong class="font-medium text-slate-800 dark:text-slate-200">physics
+                    model</strong> — first principles, accurate where your equations are right, slow. A
+                    <strong class="font-medium text-slate-800 dark:text-slate-200">data-driven surrogate</strong> — trained to
+                    mimic the plant, fast, interpolates well, extrapolates terribly. And a
+                    <strong class="font-medium text-slate-800 dark:text-slate-200">hybrid</strong>, a physics model whose
+                    parameters are continuously re-estimated from live data. That last one is the interesting
+                    one and the hardest to build.
+                </p>
+                <p>
+                    The trap is in the second. Faults <em>are</em> extrapolation — that's what makes them faults.
+                    A surrogate trained on a healthy plant will predict a normal Tuesday beautifully and tell you
+                    nothing about the one event you actually wanted warning of.
+                </p>
+                <p>
+                    I hit this in my own house. A Raspberry Pi reading light, motion, temperature and proximity
+                    sensors has given me years of normal and essentially no failures, which is the same wall the
+                    vendors don't mention. The honest response isn't a better fault model — you have no faults to
+                    train on. It's to model normal and measure distance from it.
+                </p>
+            </div>
+        </section>
+
+        {/* Notes */}
+        <section class="border-t border-slate-200 dark:border-slate-700/50 pt-10">
+            <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-5">
+                Two things I got wrong first
+            </h2>
+            <div class="grid gap-6 sm:grid-cols-2 max-w-3xl">
+                <div>
+                    <p class="font-mono text-xs text-brand-teal dark:text-brand-teal-light mb-2">the index that reversed</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        The health index originally normalised against the contemporaneous noise floor.
+                        Past about 60% severity it <em>fell</em> as the defect got worse, because the defect
+                        raises the floor it's being divided by. Fine for a snapshot, useless for a trend.
+                    </p>
+                </div>
+                <div>
+                    <p class="font-mono text-xs text-brand-ochre mb-2">the false alarms that weren't</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                        Healthy machines were being given a small pretend defect. That's not why real
+                        systems cry wolf. They now take random non-periodic knocks that ring the same
+                        resonance at no fixed rate, so the energy smears into every band including BPFO.
+                    </p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl mt-8">
+                Both are single self-contained HTML files. Save the page and they still work —
+                <a href="/lecture/bearing-lab.html" class="text-brand-teal dark:text-brand-teal-light hover:underline">bearing lab</a>,
+                <a href="/lecture/live-monitor.html" class="text-brand-teal dark:text-brand-teal-light hover:underline">live monitor</a>.
+                Pull them apart; that's the point.
+            </p>
+        </section>
+    </main>
+
+    <Footer />
+</BaseLayout>
