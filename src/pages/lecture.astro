@@ -156,34 +156,13 @@ const demos = [
             </div>
         </section>
 
-        {/* Notes */}
+        {/* Take a copy */}
         <section class="border-t border-slate-200 dark:border-slate-700/50 pt-10">
-            <h2 class="font-mono text-sm font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-5">
-                Two things I got wrong first
-            </h2>
-            <div class="grid gap-6 sm:grid-cols-2 max-w-3xl">
-                <div>
-                    <p class="font-mono text-xs text-brand-teal dark:text-brand-teal-light mb-2">the index that reversed</p>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                        The health index originally normalised against the contemporaneous noise floor.
-                        Past about 60% severity it <em>fell</em> as the defect got worse, because the defect
-                        raises the floor it's being divided by. Fine for a snapshot, useless for a trend.
-                    </p>
-                </div>
-                <div>
-                    <p class="font-mono text-xs text-brand-ochre mb-2">the false alarms that weren't</p>
-                    <p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
-                        Healthy machines were being given a small pretend defect. That's not why real
-                        systems cry wolf. They now take random non-periodic knocks that ring the same
-                        resonance at no fixed rate, so the energy smears into every band including BPFO.
-                    </p>
-                </div>
-            </div>
-            <p class="text-sm text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl mt-8">
-                Both are single self-contained HTML files. Save the page and they still work —
+            <p class="text-sm text-slate-500 dark:text-slate-500 leading-relaxed max-w-2xl">
+                Both simulators are single self-contained HTML files —
                 <a href="/lecture/bearing-lab.html" class="text-brand-teal dark:text-brand-teal-light hover:underline">bearing lab</a>,
                 <a href="/lecture/live-monitor.html" class="text-brand-teal dark:text-brand-teal-light hover:underline">live monitor</a>.
-                Pull them apart; that's the point.
+                Save the page and they still work offline. Pull them apart.
             </p>
         </section>
     </main>
