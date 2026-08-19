@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Run of Show — AI &amp; Digital Twins in Instrumentation</title>
+<style>
+  @page { size: A4 portrait; margin: 14mm 12mm; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: "Helvetica Neue", Arial, sans-serif; color: #111; font-size: 9.2pt; line-height: 1.35; }
+  h1 { font-size: 15pt; margin: 0 0 2mm; letter-spacing: -0.01em; }
+  h1 .sub { font-size: 9pt; color: #666; font-weight: 400; letter-spacing: 0; margin-left: 6px; }
+  h2 { font-size: 10pt; margin: 4mm 0 1.5mm; padding-bottom: 1mm; border-bottom: 1px solid #333; text-transform: uppercase; letter-spacing: 0.06em; }
+  .lead { font-size: 8.5pt; color: #444; margin: 0 0 3mm; }
+  .setup { background: #f4f4f4; border-left: 3px solid #c88a2e; padding: 2.5mm 3mm; margin-bottom: 3mm; }
+  .setup strong { display: block; margin-bottom: 1mm; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 3mm; font-size: 8.5pt; }
+  th { background: #222; color: #fff; padding: 1.5mm 2mm; text-align: left; font-weight: 600; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 1.8mm 2mm; border-bottom: 1px solid #ddd; vertical-align: top; }
+  td.slides { white-space: nowrap; font-weight: 600; font-family: "Courier New", monospace; }
+  td.time { white-space: nowrap; font-family: "Courier New", monospace; color: #666; font-size: 8pt; }
+  td.title { font-weight: 600; }
+  td.tab { white-space: nowrap; font-family: "Courier New", monospace; font-size: 8pt; }
+  .moments { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm; margin-bottom: 3mm; }
+  .moment { border: 1px solid #ccc; padding: 2mm 2.5mm; }
+  .moment .num { font-weight: 700; color: #c88a2e; font-family: "Courier New", monospace; }
+  .moment strong { display: block; margin: 0.5mm 0; }
+  ul.tight { margin: 0 0 3mm; padding-left: 4mm; }
+  ul.tight li { margin-bottom: 1mm; }
+  .callout { background: #fff8e6; border: 1px solid #d9a63a; padding: 2.5mm 3mm; margin-bottom: 3mm; }
+  .callout strong { color: #a06600; }
+  .final { background: #222; color: #fff; padding: 3mm; margin-top: 4mm; }
+  .final h2 { color: #fff; border-color: #666; margin-top: 0; }
+  .kbd { font-family: "Courier New", monospace; background: #e8e8e8; padding: 0 3px; border-radius: 2px; font-size: 8pt; }
+  .qa { columns: 2; column-gap: 4mm; font-size: 8pt; }
+  .qa p { margin: 0 0 1.2mm; break-inside: avoid; }
+  .qa strong { display: block; }
+  hr { border: 0; border-top: 1px solid #ccc; margin: 3mm 0; }
+  .headline { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3mm; }
+  .headline .meta { font-size: 8pt; color: #666; font-family: "Courier New", monospace; text-transform: uppercase; letter-spacing: 0.08em; }
+</style>
+</head>
+<body>
+
+<div class="headline">
+  <h1>Run of Show <span class="sub">AI &amp; Digital Twins in Instrumentation · VRSEC · 60 min</span></h1>
+  <div class="meta">Kiran Prasad Gorli</div>
+</div>
+
+<div class="setup">
+  <strong>Before you walk in</strong>
+  Open <span class="kbd">kiranic.com/lecture/live-monitor.html</span> <em>first</em> — the trend needs ~40 sim-days (5–8 real min) before it means anything. Then open <span class="kbd">kiranic.com/lecture/bearing-lab.html</span> in a second tab. Local HTML copies on a USB stick as WiFi backup. Deck open. Script printed.
+</div>
+
+<div class="callout">
+  <strong>Calibration moment — slide 4, before anything else:</strong>
+  “Show of hands — who has finished Digital Signal Processing?”<br>
+  <span style="font-size:8pt">3rd years won't have; 4th years will. If mostly 3rd year, add <strong>5 min</strong> to slide 15 (envelope-from-scratch), Q&amp;A shrinks. On slide 21 (MPC): 4th years — “you're doing this now.” 3rd years — “this is what Sem VII will teach you.”</span>
+</div>
+
+<h2>The 34 slides, mapped</h2>
+<table>
+  <thead><tr><th>Slides</th><th>Time</th><th>Title</th><th>What you do</th><th>Browser</th></tr></thead>
+  <tbody>
+    <tr><td class="slides">1–5</td><td class="time">0:00–0:05</td><td class="title">Open</td><td>Cold open (thermocouple/strain-gauge show of hands). Disclaimer: never commissioned a control loop. Agenda + <strong>DSP show of hands</strong></td><td class="tab">monitor hidden</td></tr>
+    <tr><td class="slides">6–10</td><td class="time">0:05–0:13</td><td class="title">Part 1 · The stack</td><td>Move briskly. Slide 9: kill the microsecond-AI myth (off by 10,000×). Slide 10 is the rule</td><td class="tab">—</td></tr>
+    <tr><td class="slides">11–13</td><td class="time">0:13–0:17</td><td class="title">Part 2 setup</td><td><strong>Derive BPFO = 107.4 Hz out loud.</strong> Numbers before measurement — this is the whole point</td><td class="tab">—</td></tr>
+    <tr><td class="slides">14–15</td><td class="time">0:17–0:23</td><td class="title">Why FFT fails + envelope</td><td>Slide 14: shaft line is 170× the defect. Slide 15: 4-min build (<em>+5 if 3rd-year</em>). Delete negative freqs → transform back → magnitude. Land on: “you already designed this filter in DSP, you were just never told what it was for”</td><td class="tab">—</td></tr>
+    <tr><td class="slides">16</td><td class="time">0:23–0:25</td><td class="title">The technique</td><td>Say the 4-step pipeline out loud once</td><td class="tab">—</td></tr>
+    <tr><td class="slides">17</td><td class="time">0:25–0:27</td><td class="title">The model, tiny</td><td>The ratio (ML section &lt;&lt; signal processing) is the point. Framing B wins because it's the only data you have</td><td class="tab">—</td></tr>
+    <tr><td class="slides">18–20</td><td class="time">0:27–0:31</td><td class="title">Why projects fail</td><td><strong>Slide 19 is a set piece.</strong> Do the 500-asset × 1% × 3-hrs arithmetic. Watch the number get uncomfortable. Slide 20: threshold is capacity planning, not stats</td><td class="tab">—</td></tr>
+    <tr><td class="slides">21–22</td><td class="time">0:31–0:33</td><td class="title">Control + SIL</td><td>Slide 22 is the darkest slide. <em>Slow completely down.</em> “You cannot assign a SIL rating to a neural network.” Pause</td><td class="tab">—</td></tr>
+    <tr><td class="slides">23</td><td class="time">0:33–0:39</td><td class="title">Demo one · Bearing Fault Lab</td><td>Switch to bearing-lab. Healthy (~0.3) → <strong>Early defect: ask them to find it in the raw spectrum, let them fail, then show envelope (~3.1)</strong> → Advanced (~7.6) → Noisy plant (~1.6, back to Normal, false negative)</td><td class="tab">bearing-lab</td></tr>
+    <tr><td class="slides">24–28</td><td class="time">0:39–0:50</td><td class="title">Part 4 · Digital twins</td><td>Slide 24: taxonomy + “you built one this morning.” Slide 25: <strong>the vendor test — tell them to write it down.</strong> Slide 26: extrapolation trap + kicker (“your validation set is also normal, R² = 0.99, the metric that tells you it works is computed on data that can't”). Slide 27: <strong>switch to live-monitor</strong> — frame as twin from first sentence, hold to your own test. Threshold slider: 2→8 shows warning vs false-alarms, no free lunch. Slide 28: Pi rig → model normal, measure distance</td><td class="tab">live-monitor</td></tr>
+    <tr><td class="slides">29–31</td><td class="time">0:50–0:54</td><td class="title">Part 5 · What to learn</td><td>Slide 29 “photograph this” — statistics is #1. Slide 30: <strong>Safety Instrumentation Systems vs AI/ML Healthcare are both OE2, they must choose — take safety.</strong> Slide 31: CWRU dataset project</td><td class="tab">—</td></tr>
+    <tr><td class="slides">32</td><td class="time">0:54–0:56</td><td class="title">Career close</td><td>2 min. Scarce person = knows the physical process AND the software. That's them in 2 yrs and they don't know it's valuable</td><td class="tab">—</td></tr>
+    <tr><td class="slides">33–34</td><td class="time">0:56–1:00</td><td class="title">Cheat sheet + Q&amp;A</td><td>Cheat sheet is for photos, not narration. Slide 34: both sims are theirs, ~400 lines</td><td class="tab">live-monitor</td></tr>
+  </tbody>
+</table>
+
+<h2>Four moments the whole talk hinges on</h2>
+<div class="moments">
+  <div class="moment"><span class="num">1 · SLIDE 13</span><strong>The BPFO derivation</strong>Rushing kills the “we knew the frequency before we measured” moment, and everything after loses foundation.</div>
+  <div class="moment"><span class="num">2 · SLIDE 15</span><strong>Envelope from scratch</strong>VR20 stripped Signals &amp; Systems and doesn't teach Hilbert. This <em>is</em> the value-add. Don't say “you know AM.”</div>
+  <div class="moment"><span class="num">3 · SLIDE 23</span><strong>Early defect on bearing-lab</strong>Wait. Let them fail to see the fault in the raw spectrum. Rushing here kills the pedagogy.</div>
+  <div class="moment"><span class="num">4 · SLIDE 25</span><strong>The vendor test</strong>The sentence that survives the talk. Tell them to write it down. Slow down for four beats.</div>
+</div>
+
+<h2>Compressible if running long</h2>
+<ul class="tight">
+  <li><strong>§2.5</strong> — sampling / resolution detail (~90 s)</li>
+  <li><strong>§3.4</strong> — “change the speed” slider (~30 s)</li>
+  <li><strong>§4.4</strong> — last threshold-slider paragraph (~1 min)</li>
+</ul>
+<p style="margin:0 0 3mm; font-size:8.5pt"><strong>Never cut:</strong> Part 2.2 derivation · Slide 22 SIL · The vendor test · The extrapolation kicker.</p>
+
+<h2>Q&amp;A — 8 answers already prepped in the script</h2>
+<div class="qa">
+  <p><strong>Will AI replace instrumentation engineers?</strong>No. Someone has to decide where the sensor goes and what happens when it's wrong.</p>
+  <p><strong>Why not deep learning on raw signal?</strong>You'd need failure data nobody has, and you can't explain it to a maintenance manager.</p>
+  <p><strong>Is my curriculum outdated?</strong>Signal processing and control aren't. The software/data layer is the gap — 40 hrs of work.</p>
+  <p><strong>How much math?</strong>Linear algebra + probability, solidly. Enough calculus for optimization. No measure theory.</p>
+  <p><strong>Twin for a small plant?</strong>Start with the cheapest thing that changes a decision. Usually 3 well-placed sensors, not a twin.</p>
+  <p><strong>You were negative about twins.</strong> <em>Expect this.</em> Negative about surrogates trained on healthy data. Not about physics-model twins — demo two is one.</p>
+  <p><strong>LLMs in industry?</strong>Useful for unstructured text (maintenance logs, procedures). Not for vibration signals.</p>
+  <p><strong>You haven't worked in a plant.</strong> <em>Expect this — take head-on.</em> Check my arithmetic. Organizational patterns transfer. Anything specific to commissioning, ask someone else.</p>
+  <p><strong>If stumped:</strong> “I don't know. That's outside what I've actually done.” Then move on.</p>
+</div>
+
+<div class="final">
+  <h2>Verify tonight</h2>
+  <p style="margin:0">Open <span class="kbd" style="background:#444;color:#fff">kiranic.com/lecture/live-monitor.html</span> on your presentation laptop and let it run for 10 min. Confirm MTR-402 crosses into <strong>ALERT</strong>, then <strong>FAULT</strong>. If it doesn't, fix it before Monday — not at the podium.</p>
+</div>
+
+</body>
+</html>
