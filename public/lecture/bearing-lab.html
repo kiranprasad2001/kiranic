@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bearing Fault Lab — why envelope analysis beats a raw FFT</title>
+<style>
+  :root{
+    --panel:#16181C;
+    --panel2:#1E2127;
+    --panel3:#242830;
+    --rule:#2F343D;
+    --text:#D8DBE0;
+    --dim:#79808B;
+    --amber:#E8A33D;
+    --teal:#3FB6A8;
+    --red:#D14B3C;
+    --violet:#9B8CD4;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--panel);
+    color:var(--text);
+    font-family:var(--ui);
+    font-size:14px;
+    line-height:1.5;
+    padding:18px;
+  }
+  .silk{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--dim);
+  }
+  header{
+    border-bottom:1px solid var(--rule);
+    padding-bottom:14px;
+    margin-bottom:18px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    align-items:flex-end;
+    justify-content:space-between;
+  }
+  h1{
+    font-size:20px;
+    font-weight:600;
+    margin:0 0 4px;
+    letter-spacing:-.01em;
+  }
+  header p{margin:0;color:var(--dim);font-size:13px;max-width:60ch}
+  .annun{display:flex;gap:8px;align-items:center}
+  .lamp{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    padding:7px 14px;
+    border:1px solid var(--rule);
+    background:var(--panel2);
+    color:var(--dim);
+    border-radius:2px;
+  }
+  .lamp.on-ok{color:var(--teal);border-color:#2A5F59;background:#14231F;box-shadow:inset 0 0 12px #0f2a25}
+  .lamp.on-warn{color:var(--amber);border-color:#6B5223;background:#251D0F;box-shadow:inset 0 0 12px #2a2010}
+  .lamp.on-trip{color:#FFD9D2;border-color:#7A2E24;background:#33140F;box-shadow:inset 0 0 14px #4a1a13}
+
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+  @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+
+  .card{
+    background:var(--panel2);
+    border:1px solid var(--rule);
+    border-radius:3px;
+    padding:14px;
+  }
+  .card h2{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--dim);
+    margin:0 0 10px;
+    font-weight:400;
+  }
+  canvas{display:block;width:100%;background:#101216;border:1px solid var(--rule);border-radius:2px}
+
+  .ctl{margin:14px 0 0}
+  .ctl label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .ctl .nm{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .ctl .vl{font-family:var(--mono);font-size:13px;color:var(--amber)}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;margin:0;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--panel3);border:1px solid var(--rule)}
+  input[type=range]::-moz-range-track{height:3px;background:var(--panel3);border:1px solid var(--rule)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:12px;height:20px;background:var(--amber);border:0;border-radius:1px;margin-top:-9px;
+  }
+  input[type=range]::-moz-range-thumb{width:12px;height:20px;background:var(--amber);border:0;border-radius:1px}
+  input[type=range]:focus-visible{outline:2px solid var(--teal);outline-offset:3px}
+
+  .readouts{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:14px}
+  .ro{background:#101216;padding:9px 11px}
+  .ro .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .ro .v{font-family:var(--mono);font-size:17px;color:var(--text);margin-top:2px}
+  .ro .v.hot{color:var(--red)}
+  .ro .v.warm{color:var(--amber)}
+  .ro .v.good{color:var(--teal)}
+  .ro .u{font-size:11px;color:var(--dim)}
+
+  .plots{display:grid;gap:14px}
+  .plotwrap{position:relative}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+  .legend span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:6px}
+  .sw{width:14px;height:3px;display:inline-block}
+
+  .note{
+    margin-top:18px;padding:12px 14px;border:1px solid var(--rule);
+    background:var(--panel2);border-radius:3px;color:var(--dim);font-size:13px;
+  }
+  .note b{color:var(--text);font-weight:600}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  button{
+    font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);
+    padding:9px 12px;border-radius:2px;cursor:pointer;
+  }
+  button:hover{border-color:var(--amber);color:var(--amber)}
+  button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  button.armed{border-color:var(--amber);color:var(--amber)}
+  code{font-family:var(--mono);color:var(--amber);font-size:12px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Bearing Fault Lab</h1>
+    <p>SKF 6205 deep-groove ball bearing, 9 rolling elements. Raise the outer-race defect and watch where it shows up: barely in the raw spectrum, unmistakably in the envelope spectrum.</p>
+  </div>
+  <div class="annun">
+    <div class="lamp" id="lampOk">Normal</div>
+    <div class="lamp" id="lampWarn">Alert</div>
+    <div class="lamp" id="lampTrip">Fault</div>
+  </div>
+</header>
+
+<div class="grid">
+
+  <div>
+    <div class="card">
+      <h2>Bearing — outer race defect at 12 o'clock</h2>
+      <canvas id="cvBearing" width="640" height="440"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--amber)"></i>Rolling element</span>
+        <span><i class="sw" style="background:var(--red)"></i>Defect strike</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Operating conditions</h2>
+
+      <div class="ctl">
+        <label><span class="nm">Shaft speed</span><span class="vl" id="vRpm">1797 rpm</span></label>
+        <input type="range" id="sRpm" min="600" max="3600" step="1" value="1797">
+      </div>
+
+      <div class="ctl">
+        <label><span class="nm">Defect severity</span><span class="vl" id="vSev">0 %</span></label>
+        <input type="range" id="sSev" min="0" max="100" step="1" value="0">
+      </div>
+
+      <div class="ctl">
+        <label><span class="nm">Background noise</span><span class="vl" id="vNoise">18 %</span></label>
+        <input type="range" id="sNoise" min="0" max="60" step="1" value="18">
+      </div>
+
+      <div class="ctl">
+        <label><span class="nm">Shaft imbalance</span><span class="vl" id="vImb">35 %</span></label>
+        <input type="range" id="sImb" min="0" max="100" step="1" value="35">
+      </div>
+
+      <div class="btnrow">
+        <button id="bHealthy">Healthy</button>
+        <button id="bEarly">Early defect</button>
+        <button id="bLate">Advanced</button>
+        <button id="bNoisy">Noisy plant</button>
+      </div>
+
+      <div class="readouts">
+        <div class="ro"><div class="k">Shaft f<sub>r</sub></div><div class="v" id="roFr">29.9<span class="u"> Hz</span></div></div>
+        <div class="ro"><div class="k">BPFO</div><div class="v" id="roBpfo">107.4<span class="u"> Hz</span></div></div>
+        <div class="ro"><div class="k">BPFI</div><div class="v" id="roBpfi">162.2<span class="u"> Hz</span></div></div>
+        <div class="ro"><div class="k">Cage FTF</div><div class="v" id="roFtf">11.9<span class="u"> Hz</span></div></div>
+        <div class="ro"><div class="k">RMS</div><div class="v" id="roRms">0.00<span class="u"> g</span></div></div>
+        <div class="ro"><div class="k">Kurtosis</div><div class="v" id="roKurt">3.0</div></div>
+        <div class="ro"><div class="k">Crest factor</div><div class="v" id="roCrest">3.0</div></div>
+        <div class="ro"><div class="k">Envelope BPFO index</div><div class="v" id="roIdx">0.00</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="plots">
+    <div class="card">
+      <h2>1 — Time waveform, raw accelerometer <span style="color:var(--dim)">(f<sub>s</sub> = 20 480 Hz)</span></h2>
+      <canvas id="cvTime" width="1200" height="220"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--amber)"></i>Acceleration</span>
+        <span><i class="sw" style="background:var(--red)"></i>Defect impact instants</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2 — Raw spectrum <span style="color:var(--dim)">(magnitude FFT, Hann window)</span></h2>
+      <canvas id="cvSpec" width="1200" height="240"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--amber)"></i>Spectrum</span>
+        <span><i class="sw" style="background:var(--teal)"></i>Shaft 1× and harmonics</span>
+        <span><i class="sw" style="background:var(--violet)"></i>Structural resonance band</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>3 — Envelope spectrum <span style="color:var(--dim)">(band-pass 2.4–4.0 kHz → Hilbert → FFT)</span></h2>
+      <canvas id="cvEnv" width="1200" height="240"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--violet)"></i>Envelope spectrum</span>
+        <span><i class="sw" style="background:var(--red)"></i>BPFO and harmonics</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>What to notice.</b> The defect energy is a train of tiny impacts. In plot 2 it is buried: the shaft imbalance at 1× is a hundred times larger, and the impacts smear across a wide resonance band around 3 kHz rather than appearing at 107 Hz. Plot 3 band-passes that resonance, takes the analytic envelope, and transforms again — the impact <i>rate</i> falls out as a clean line at BPFO with harmonics. Nothing here is machine learning yet. This is deterministic signal processing driven by bearing geometry, and it is the feature the model consumes.
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- constants: SKF 6205 geometry (the CWRU test bearing) ------- */
+var NBALLS = 9, BD = 7.94, PD = 39.04, CONTACT = 0;   // mm, degrees
+var RATIO = (BD / PD) * Math.cos(CONTACT * Math.PI / 180);
+var K_BPFO = (NBALLS / 2) * (1 - RATIO);
+var K_BPFI = (NBALLS / 2) * (1 + RATIO);
+var K_FTF  = 0.5 * (1 - RATIO);
+
+var FS = 20480, N = 8192;              // 0.4 s record, 2.5 Hz bin resolution
+var RES_F = 3200, RES_Q = 900;         // structural resonance excited by each impact
+var BP_LO = 2400, BP_HI = 4000;        // envelope band-pass
+
+/* ---------------- tiny radix-2 FFT ----------------------------------------- */
+function fft(re, im, inverse){
+  var n = re.length, i, j, k, m, step, ang, wr, wi, ur, ui, vr, vi;
+  for(i = 1, j = 0; i < n; i++){
+    var bit = n >> 1;
+    for(; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if(i < j){
+      var tr = re[i]; re[i] = re[j]; re[j] = tr;
+      var ti = im[i]; im[i] = im[j]; im[j] = ti;
+    }
+  }
+  for(step = 2; step <= n; step <<= 1){
+    ang = (inverse ? 2 : -2) * Math.PI / step;
+    for(i = 0; i < n; i += step){
+      for(k = 0; k < step / 2; k++){
+        wr = Math.cos(ang * k); wi = Math.sin(ang * k);
+        m = i + k;
+        ur = re[m]; ui = im[m];
+        vr = re[m + step / 2] * wr - im[m + step / 2] * wi;
+        vi = re[m + step / 2] * wi + im[m + step / 2] * wr;
+        re[m] = ur + vr; im[m] = ui + vi;
+        re[m + step / 2] = ur - vr; im[m + step / 2] = ui - vi;
+      }
+    }
+  }
+  if(inverse) for(i = 0; i < n; i++){ re[i] /= n; im[i] /= n; }
+}
+
+/* ---------------- gaussian noise (Box-Muller) ------------------------------- */
+var spare = null;
+function gauss(){
+  if(spare !== null){ var s = spare; spare = null; return s; }
+  var u, v, s2;
+  do { u = Math.random() * 2 - 1; v = Math.random() * 2 - 1; s2 = u * u + v * v; }
+  while(s2 >= 1 || s2 === 0);
+  var f = Math.sqrt(-2 * Math.log(s2) / s2);
+  spare = v * f; return u * f;
+}
+
+/* ---------------- state ------------------------------------------------------ */
+var P = { rpm:1797, sev:0, noise:18, imb:35 };
+var sig = new Float64Array(N);
+var impactTimes = [];
+var spec = null, env = null, stats = null;
+
+function derived(){
+  var fr = P.rpm / 60;
+  return { fr:fr, bpfo:K_BPFO * fr, bpfi:K_BPFI * fr, ftf:K_FTF * fr };
+}
+
+/* ---------------- signal synthesis ------------------------------------------ */
+function synth(){
+  var d = derived();
+  var i, t;
+  var imbAmp = (P.imb / 100) * 1.2;
+  var nAmp   = (P.noise / 100) * 0.35;
+  var sevAmp = Math.pow(P.sev / 100, 1.6) * 2.6;
+
+  for(i = 0; i < N; i++){
+    t = i / FS;
+    sig[i] = imbAmp * Math.sin(2 * Math.PI * d.fr * t)
+           + imbAmp * 0.22 * Math.sin(2 * Math.PI * 2 * d.fr * t + 0.7)
+           + imbAmp * 0.10 * Math.sin(2 * Math.PI * 3 * d.fr * t + 1.9)
+           + nAmp * gauss();
+  }
+
+  /* Impact train at BPFO, each impact ringing the structural resonance down.
+     An OUTER race defect sits at a fixed angular position under a stationary
+     radial load, so every impact carries the same energy: no amplitude
+     modulation, and therefore a clean BPFO line with harmonics and no
+     sidebands. (An inner-race defect would orbit through the load zone once
+     per shaft revolution and produce ±f_r sidebands; a rolling-element defect
+     would modulate at the cage rate.) Only 1-2% random slip is applied. */
+  impactTimes.length = 0;
+  if(sevAmp > 0.001){
+    var period = 1 / d.bpfo;
+    var decay = Math.PI * RES_F / RES_Q;
+    var tk = 0.25 * period;
+    while(tk < N / FS){
+      var jitter = tk * (1 + (Math.random() - 0.5) * 0.02);
+      var amp = sevAmp;
+      var s0 = Math.floor(jitter * FS);
+      impactTimes.push(jitter);
+      var len = Math.min(N - s0, Math.floor(FS * 0.008));
+      for(i = 0; i < len; i++){
+        var tt = i / FS;
+        sig[s0 + i] += amp * Math.exp(-decay * tt) * Math.sin(2 * Math.PI * RES_F * tt);
+      }
+      tk += period;
+    }
+  }
+}
+
+/* ---------------- analysis ---------------------------------------------------- */
+function hann(k){ return 0.5 - 0.5 * Math.cos(2 * Math.PI * k / (N - 1)); }
+
+function analyse(){
+  var i, re = new Float64Array(N), im = new Float64Array(N);
+
+  /* raw spectrum */
+  for(i = 0; i < N; i++) re[i] = sig[i] * hann(i);
+  fft(re, im, false);
+  var half = N / 2, mag = new Float64Array(half);
+  for(i = 0; i < half; i++) mag[i] = 2 * Math.sqrt(re[i]*re[i] + im[i]*im[i]) / N;
+  spec = mag;
+
+  /* band-pass + analytic signal (Hilbert via one-sided spectrum) */
+  var br = new Float64Array(N), bi = new Float64Array(N);
+  for(i = 0; i < N; i++) br[i] = sig[i];
+  fft(br, bi, false);
+  var lo = Math.round(BP_LO * N / FS), hi = Math.round(BP_HI * N / FS);
+  for(i = 0; i < N; i++){
+    if(i > 0 && i < half && i >= lo && i <= hi){ br[i] *= 2; bi[i] *= 2; }
+    else { br[i] = 0; bi[i] = 0; }
+  }
+  fft(br, bi, true);
+
+  var envt = new Float64Array(N), mean = 0;
+  for(i = 0; i < N; i++){ envt[i] = Math.sqrt(br[i]*br[i] + bi[i]*bi[i]); mean += envt[i]; }
+  mean /= N;
+
+  var er = new Float64Array(N), ei = new Float64Array(N);
+  for(i = 0; i < N; i++) er[i] = (envt[i] - mean) * hann(i);
+  fft(er, ei, false);
+  var emag = new Float64Array(half);
+  for(i = 0; i < half; i++) emag[i] = 2 * Math.sqrt(er[i]*er[i] + ei[i]*ei[i]) / N;
+  env = emag;
+
+  /* condition indicators */
+  var m1 = 0, m2 = 0, m4 = 0, peak = 0;
+  for(i = 0; i < N; i++) m1 += sig[i];
+  m1 /= N;
+  for(i = 0; i < N; i++){
+    var dv = sig[i] - m1;
+    m2 += dv * dv; m4 += dv * dv * dv * dv;
+    if(Math.abs(dv) > peak) peak = Math.abs(dv);
+  }
+  m2 /= N; m4 /= N;
+  var rms = Math.sqrt(m2);
+  var kurt = m2 > 1e-12 ? m4 / (m2 * m2) : 3;
+  var crest = rms > 1e-12 ? peak / rms : 0;
+
+  /* BPFO index: envelope energy within ±10 Hz of the first three BPFO harmonics,
+     divided by overall vibration RMS so the number is dimensionless and does not
+     simply track load. Identical definition to the live monitor, so the two demos
+     read on the same scale. */
+  var d = derived(), binHz = FS / N, k, h, band = 0;
+  var wBins = Math.round(10 / binHz);
+  for(h = 1; h <= 3; h++){
+    var c = Math.round(h * d.bpfo / binHz);
+    for(k = c - wBins; k <= c + wBins; k++) if(k > 0 && k < half) band += env[k] * env[k];
+  }
+  var idx = 30 * Math.sqrt(band) / (rms + 1e-9);
+
+  stats = { rms:rms, kurt:kurt, crest:crest, idx:idx };
+}
+
+/* ---------------- plotting helpers -------------------------------------------- */
+function fit(cv){
+  var r = window.devicePixelRatio || 1;
+  /* the intended CSS height lives in data-h: assigning cv.height rewrites the
+     height attribute, so reading it back would compound on every frame */
+  if(!cv.dataset.h) cv.dataset.h = cv.getAttribute('height');
+  var w = cv.clientWidth, h = +cv.dataset.h;
+  if(cv.width !== Math.round(w * r) || cv.height !== Math.round(h * r)){
+    cv.width = Math.round(w * r); cv.height = Math.round(h * r);
+    cv.style.height = h + 'px';
+  }
+  var g = cv.getContext('2d');
+  g.setTransform(r, 0, 0, r, 0, 0);
+  return { g:g, w:w, h:h };
+}
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function axis(g, x0, y0, w, h){
+  g.strokeStyle = css('--rule'); g.lineWidth = 1;
+  g.strokeRect(x0 + 0.5, y0 + 0.5, w, h);
+}
+function gridlines(g, x0, y0, w, h, n){
+  g.strokeStyle = '#1C2027'; g.lineWidth = 1;
+  for(var i = 1; i < n; i++){
+    var x = x0 + w * i / n;
+    g.beginPath(); g.moveTo(x + 0.5, y0); g.lineTo(x + 0.5, y0 + h); g.stroke();
+  }
+}
+function label(g, x, y, txt, col, align){
+  g.fillStyle = col; g.font = '10px "Courier New",monospace';
+  g.textAlign = align || 'left'; g.textBaseline = 'alphabetic';
+  g.fillText(txt, x, y);
+}
+
+/* ---------------- plot: time waveform ----------------------------------------- */
+function drawTime(){
+  var o = fit(document.getElementById('cvTime')), g = o.g;
+  g.clearRect(0, 0, o.w, o.h);
+  var pad = { l:46, r:12, t:10, b:24 };
+  var w = o.w - pad.l - pad.r, h = o.h - pad.t - pad.b;
+  gridlines(g, pad.l, pad.t, w, h, 8);
+
+  var show = Math.min(N, Math.round(FS * 0.10));   // 100 ms window
+  var maxA = 0.001, i;
+  for(i = 0; i < show; i++) if(Math.abs(sig[i]) > maxA) maxA = Math.abs(sig[i]);
+  maxA *= 1.12;
+
+  g.strokeStyle = '#2A3038';
+  g.beginPath(); g.moveTo(pad.l, pad.t + h / 2); g.lineTo(pad.l + w, pad.t + h / 2); g.stroke();
+
+  /* impact markers behind the trace */
+  g.strokeStyle = css('--red'); g.globalAlpha = 0.55; g.lineWidth = 1;
+  for(i = 0; i < impactTimes.length; i++){
+    var tx = impactTimes[i] / 0.10;
+    if(tx > 1) break;
+    var px = pad.l + tx * w;
+    g.beginPath(); g.moveTo(px, pad.t); g.lineTo(px, pad.t + h); g.stroke();
+  }
+  g.globalAlpha = 1;
+
+  g.strokeStyle = css('--amber'); g.lineWidth = 1;
+  g.beginPath();
+  for(i = 0; i < show; i++){
+    var x = pad.l + (i / (show - 1)) * w;
+    var y = pad.t + h / 2 - (sig[i] / maxA) * (h / 2);
+    if(i === 0) g.moveTo(x, y); else g.lineTo(x, y);
+  }
+  g.stroke();
+  axis(g, pad.l, pad.t, w, h);
+
+  label(g, pad.l - 6, pad.t + 9, (+maxA).toFixed(1), css('--dim'), 'right');
+  label(g, pad.l - 6, pad.t + h / 2 + 3, '0', css('--dim'), 'right');
+  label(g, pad.l - 6, pad.t + h, (-maxA).toFixed(1), css('--dim'), 'right');
+  label(g, pad.l - 6, pad.t - 2, 'g', css('--dim'), 'right');
+  for(i = 0; i <= 4; i++)
+    label(g, pad.l + w * i / 4, o.h - 8, (i * 25) + ' ms', css('--dim'), i === 0 ? 'left' : (i === 4 ? 'right' : 'center'));
+}
+
+/* ---------------- plot: spectra ------------------------------------------------ */
+function drawSpectrum(cv, data, fmax, color, marks, resBand){
+  var o = fit(cv), g = o.g;
+  g.clearRect(0, 0, o.w, o.h);
+  var pad = { l:46, r:12, t:10, b:24 };
+  var w = o.w - pad.l - pad.r, h = o.h - pad.t - pad.b;
+  var binHz = FS / N, kmax = Math.min(data.length - 1, Math.round(fmax / binHz));
+  var i, k;
+
+  if(resBand){
+    var xa = pad.l + (BP_LO / fmax) * w, xb = pad.l + (BP_HI / fmax) * w;
+    g.fillStyle = 'rgba(155,140,212,0.10)';
+    g.fillRect(xa, pad.t, Math.max(0, xb - xa), h);
+    label(g, (xa + xb) / 2, pad.t + 13, 'RESONANCE', css('--violet'), 'center');
+  }
+  gridlines(g, pad.l, pad.t, w, h, 8);
+
+  var maxV = 1e-9;
+  for(k = 1; k <= kmax; k++) if(data[k] > maxV) maxV = data[k];
+  maxV *= 1.15;
+
+  if(marks){
+    for(i = 0; i < marks.length; i++){
+      var mx = pad.l + (marks[i].f / fmax) * w;
+      if(mx > pad.l + w) continue;
+      g.strokeStyle = marks[i].c; g.globalAlpha = 0.75;
+      g.setLineDash([3, 3]); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(mx, pad.t); g.lineTo(mx, pad.t + h); g.stroke();
+      g.setLineDash([]); g.globalAlpha = 1;
+      if(marks[i].t) label(g, mx + 4, pad.t + 11, marks[i].t, marks[i].c, 'left');
+    }
+  }
+
+  g.strokeStyle = color; g.lineWidth = 1;
+  g.beginPath();
+  for(k = 1; k <= kmax; k++){
+    var x = pad.l + ((k * binHz) / fmax) * w;
+    var y = pad.t + h - (data[k] / maxV) * h;
+    if(k === 1) g.moveTo(x, pad.t + h);
+    g.lineTo(x, y);
+  }
+  g.stroke();
+  axis(g, pad.l, pad.t, w, h);
+
+  label(g, pad.l - 6, pad.t + 9, maxV.toFixed(2), css('--dim'), 'right');
+  label(g, pad.l - 6, pad.t + h, '0', css('--dim'), 'right');
+  for(i = 0; i <= 4; i++){
+    var f = fmax * i / 4;
+    label(g, pad.l + w * i / 4, o.h - 8, (f >= 1000 ? (f / 1000).toFixed(1) + ' k' : Math.round(f)) + ' Hz',
+          css('--dim'), i === 0 ? 'left' : (i === 4 ? 'right' : 'center'));
+  }
+}
+
+/* ---------------- plot: bearing ------------------------------------------------ */
+var phase = 0, lastT = 0, flash = 0;
+function drawBearing(dt){
+  var cv = document.getElementById('cvBearing');
+  var o = fit(cv), g = o.g;
+  var d = derived();
+  var cx = o.w / 2, cy = o.h / 2;
+  var R = Math.min(o.w, o.h) * 0.40;
+  var rOuterIn = R * 0.86, rInnerOut = R * 0.50, rBall = R * 0.16;
+  var rPitch = (rOuterIn + rInnerOut) / 2;
+  var sev = P.sev / 100;
+
+  g.clearRect(0, 0, o.w, o.h);
+
+  /* cage angle: rolling elements orbit at FTF, scaled down for visibility */
+  var visScale = 0.06;
+  phase += 2 * Math.PI * d.ftf * dt * visScale;
+
+  /* wobble grows with defect severity */
+  var wob = sev * 3.2 * Math.sin(phase * 9);
+  g.save(); g.translate(cx + wob, cy + wob * 0.6);
+
+  /* outer race */
+  g.beginPath(); g.arc(0, 0, R, 0, 2 * Math.PI);
+  g.strokeStyle = '#3A414C'; g.lineWidth = 2; g.stroke();
+  g.beginPath(); g.arc(0, 0, rOuterIn, 0, 2 * Math.PI);
+  g.strokeStyle = '#3A414C'; g.stroke();
+
+  /* inner race, spins at shaft rate (scaled) */
+  var shaftAng = phase * (d.fr / Math.max(d.ftf, 0.001));
+  g.beginPath(); g.arc(0, 0, rInnerOut, 0, 2 * Math.PI);
+  g.strokeStyle = '#3A414C'; g.stroke();
+  g.beginPath(); g.arc(0, 0, rInnerOut * 0.55, 0, 2 * Math.PI);
+  g.fillStyle = '#181B21'; g.fill(); g.strokeStyle = '#3A414C'; g.stroke();
+  g.save(); g.rotate(shaftAng);
+  g.strokeStyle = '#4B5361'; g.lineWidth = 2;
+  g.beginPath(); g.moveTo(-rInnerOut * 0.55, 0); g.lineTo(rInnerOut * 0.55, 0); g.stroke();
+  g.restore();
+
+  /* the defect: a spall on the outer race at 12 o'clock */
+  var defAng = -Math.PI / 2;
+  if(sev > 0.01){
+    g.save(); g.rotate(defAng);
+    g.strokeStyle = css('--red'); g.lineWidth = 2 + sev * 4;
+    g.beginPath(); g.arc(0, 0, (R + rOuterIn) / 2, -0.10 - sev * 0.05, 0.10 + sev * 0.05); g.stroke();
+    g.restore();
+  }
+
+  /* rolling elements */
+  var hitThisFrame = false;
+  for(var b = 0; b < NBALLS; b++){
+    var a = phase + b * 2 * Math.PI / NBALLS;
+    var an = Math.atan2(Math.sin(a - defAng), Math.cos(a - defAng));
+    var near = Math.abs(an) < 0.16;
+    if(near && sev > 0.01) hitThisFrame = true;
+    var bx = Math.cos(a) * rPitch, by = Math.sin(a) * rPitch;
+    g.beginPath(); g.arc(bx, by, rBall, 0, 2 * Math.PI);
+    g.fillStyle = (near && sev > 0.01) ? css('--red') : '#2A3038';
+    g.fill();
+    g.strokeStyle = (near && sev > 0.01) ? '#FFB9AE' : css('--amber');
+    g.lineWidth = 1.5; g.stroke();
+  }
+  if(hitThisFrame) flash = 1;
+  flash *= 0.90;
+
+  if(flash > 0.02 && sev > 0.01){
+    g.save(); g.rotate(defAng);
+    g.globalAlpha = flash * (0.35 + sev * 0.5);
+    g.beginPath(); g.arc(0, -0, (R + rOuterIn) / 2, -0.5, 0.5);
+    g.strokeStyle = css('--red'); g.lineWidth = 12; g.stroke();
+    g.globalAlpha = 1; g.restore();
+  }
+  g.restore();
+
+  label(g, 12, o.h - 12, 'DEFECT PASS RATE = BPFO = ' + derived().bpfo.toFixed(1) + ' Hz', css('--dim'), 'left');
+  label(g, o.w - 12, o.h - 12, 'ORBIT SLOWED ' + Math.round(1 / visScale) + '×', css('--dim'), 'right');
+}
+
+/* ---------------- render ------------------------------------------------------- */
+function refresh(){
+  synth(); analyse();
+  var d = derived();
+
+  document.getElementById('vRpm').textContent   = P.rpm + ' rpm';
+  document.getElementById('vSev').textContent   = P.sev + ' %';
+  document.getElementById('vNoise').textContent = P.noise + ' %';
+  document.getElementById('vImb').textContent   = P.imb + ' %';
+
+  set('roFr',   d.fr.toFixed(1),   ' Hz');
+  set('roBpfo', d.bpfo.toFixed(1), ' Hz');
+  set('roBpfi', d.bpfi.toFixed(1), ' Hz');
+  set('roFtf',  d.ftf.toFixed(1),  ' Hz');
+  set('roRms',  stats.rms.toFixed(2),  ' g');
+  set('roKurt', stats.kurt.toFixed(2), '');
+  set('roCrest',stats.crest.toFixed(2),'');
+  set('roIdx',  stats.idx.toFixed(2),  '');
+
+  tone('roKurt',  stats.kurt,  3.6, 5.0);
+  tone('roCrest', stats.crest, 4.5, 6.5);
+  tone('roIdx',   stats.idx,   1.8, 4.0);
+
+  var trip = stats.idx >= 4.0, warn = !trip && stats.idx >= 1.8;
+  lamp('lampOk',   !trip && !warn, 'on-ok');
+  lamp('lampWarn', warn,           'on-warn');
+  lamp('lampTrip', trip,           'on-trip');
+
+  drawTime();
+  drawSpectrum(document.getElementById('cvSpec'), spec, 5000, css('--amber'), [
+    { f:d.fr,     c:css('--teal'), t:'1×' },
+    { f:2 * d.fr, c:css('--teal'), t:'2×' },
+    { f:3 * d.fr, c:css('--teal'), t:'3×' }
+  ], true);
+  drawSpectrum(document.getElementById('cvEnv'), env, 600, css('--violet'), [
+    { f:d.bpfo,     c:css('--red'), t:'BPFO' },
+    { f:2 * d.bpfo, c:css('--red'), t:'2×' },
+    { f:3 * d.bpfo, c:css('--red'), t:'3×' },
+    { f:d.fr,       c:css('--teal'), t:'1× shaft' }
+  ], false);
+}
+
+function set(id, v, u){
+  document.getElementById(id).innerHTML = v + (u ? '<span class="u">' + u + '</span>' : '');
+}
+function tone(id, v, warnAt, hotAt){
+  var e = document.getElementById(id);
+  e.className = 'v ' + (v >= hotAt ? 'hot' : v >= warnAt ? 'warm' : 'good');
+}
+function lamp(id, on, cls){
+  var e = document.getElementById(id);
+  e.className = 'lamp' + (on ? ' ' + cls : '');
+}
+
+/* ---------------- wiring -------------------------------------------------------- */
+function bind(sliderId, key){
+  var el = document.getElementById(sliderId);
+  el.addEventListener('input', function(){ P[key] = +el.value; refresh(); });
+}
+bind('sRpm','rpm'); bind('sSev','sev'); bind('sNoise','noise'); bind('sImb','imb');
+
+function preset(rpm, sev, noise, imb, btn){
+  document.getElementById('sRpm').value = rpm;
+  document.getElementById('sSev').value = sev;
+  document.getElementById('sNoise').value = noise;
+  document.getElementById('sImb').value = imb;
+  P = { rpm:rpm, sev:sev, noise:noise, imb:imb };
+  var bs = document.querySelectorAll('.btnrow button');
+  for(var i = 0; i < bs.length; i++) bs[i].className = '';
+  if(btn) btn.className = 'armed';
+  refresh();
+}
+document.getElementById('bHealthy').onclick = function(){ preset(1797, 0,  18, 35, this); };
+document.getElementById('bEarly').onclick   = function(){ preset(1797, 22, 18, 35, this); };
+document.getElementById('bLate').onclick    = function(){ preset(1797, 78, 18, 35, this); };
+document.getElementById('bNoisy').onclick   = function(){ preset(1797, 22, 55, 60, this); };
+
+/* redraw only: resizing must not re-roll the noise and make the traces jump */
+window.addEventListener('resize', function(){
+  var d = derived();
+  drawTime();
+  drawSpectrum(document.getElementById('cvSpec'), spec, 5000, css('--amber'), [
+    { f:d.fr,     c:css('--teal'), t:'1×' },
+    { f:2 * d.fr, c:css('--teal'), t:'2×' },
+    { f:3 * d.fr, c:css('--teal'), t:'3×' }
+  ], true);
+  drawSpectrum(document.getElementById('cvEnv'), env, 600, css('--violet'), [
+    { f:d.bpfo,     c:css('--red'), t:'BPFO' },
+    { f:2 * d.bpfo, c:css('--red'), t:'2×' },
+    { f:3 * d.bpfo, c:css('--red'), t:'3×' },
+    { f:d.fr,       c:css('--teal'), t:'1× shaft' }
+  ], false);
+});
+
+function loop(ts){
+  var dt = lastT ? Math.min(0.05, (ts - lastT) / 1000) : 0.016;
+  lastT = ts;
+  drawBearing(dt);
+  requestAnimationFrame(loop);
+}
+
+refresh();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

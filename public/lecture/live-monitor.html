@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Condition Monitoring — four motors, one of them failing</title>
+<style>
+  :root{
+    --panel:#16181C; --panel2:#1E2127; --panel3:#242830; --rule:#2F343D;
+    --text:#D8DBE0; --dim:#79808B;
+    --amber:#E8A33D; --teal:#3FB6A8; --red:#D14B3C; --violet:#9B8CD4;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--panel);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.5;padding:16px}
+  .silk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  header{border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:16px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between}
+  h1{font-size:19px;font-weight:600;margin:0 0 3px}
+  header p{margin:0;color:var(--dim);font-size:13px;max-width:62ch}
+  .clock{font-family:var(--mono);font-size:26px;color:var(--amber);line-height:1.1}
+
+  .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:9px 13px;border-radius:2px;cursor:pointer}
+  button:hover{border-color:var(--amber);color:var(--amber)}
+  button:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+  button.on{border-color:var(--amber);color:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:250px 1fr 330px;gap:14px;align-items:start}
+  @media (max-width:1180px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;padding:13px}
+  .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);margin:0 0 10px;font-weight:400}
+  canvas{display:block;width:100%;background:#101216;border:1px solid var(--rule);border-radius:2px}
+
+  .asset{display:flex;align-items:center;gap:9px;padding:9px 10px;border:1px solid var(--rule);
+    background:#101216;border-radius:2px;margin-bottom:7px;cursor:pointer}
+  .asset:hover{border-color:var(--dim)}
+  .asset.sel{border-color:var(--amber)}
+  .asset .lamp{width:9px;height:9px;border-radius:50%;background:var(--teal);flex:none}
+  .asset .lamp.warn{background:var(--amber)}
+  .asset .lamp.trip{background:var(--red)}
+  .asset .nm{font-family:var(--mono);font-size:12px;flex:1}
+  .asset .vl{font-family:var(--mono);font-size:13px;color:var(--dim)}
+  .asset .vl.warn{color:var(--amber)} .asset .vl.trip{color:var(--red)}
+
+  .ro{background:#101216;padding:8px 10px;border:1px solid var(--rule);border-radius:2px}
+  .ros{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:11px}
+  .ro .k{font-family:var(--mono);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  .ro .v{font-family:var(--mono);font-size:16px;margin-top:2px}
+  .ro .v.good{color:var(--teal)} .ro .v.warn{color:var(--amber)} .ro .v.trip{color:var(--red)}
+  .ro .u{font-size:10px;color:var(--dim)}
+
+  .ctl{margin-top:12px}
+  .ctl label{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .ctl .nm{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+  .ctl .vl{font-family:var(--mono);font-size:13px;color:var(--amber)}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;cursor:pointer;margin:0}
+  input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--panel3);border:1px solid var(--rule)}
+  input[type=range]::-moz-range-track{height:3px;background:var(--panel3);border:1px solid var(--rule)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:20px;background:var(--amber);border:0;border-radius:1px;margin-top:-9px}
+  input[type=range]::-moz-range-thumb{width:12px;height:20px;background:var(--amber);border:0;border-radius:1px}
+
+  .log{height:132px;overflow-y:auto;background:#101216;border:1px solid var(--rule);border-radius:2px;padding:8px}
+  .log div{font-family:var(--mono);font-size:11px;margin-bottom:4px;color:var(--dim)}
+  .log div .t{color:#5C636D}
+  .log div.true{color:var(--red)} .log div.false{color:var(--amber)}
+
+  .legend{display:flex;gap:13px;flex-wrap:wrap;margin-top:8px}
+  .legend span{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:5px}
+  .sw{width:13px;height:3px;display:inline-block}
+  .note{margin-top:16px;padding:11px 13px;border:1px solid var(--rule);background:var(--panel2);
+    border-radius:3px;color:var(--dim);font-size:13px}
+  .note b{color:var(--text);font-weight:600}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Live Condition Monitoring</h1>
+    <p>Four identical motors on a simulated plant clock. One of them has a bearing defect that is growing.
+       Every reading below is computed from a real vibration signal — FFT, band-pass, Hilbert envelope — not replayed from a table.</p>
+  </div>
+  <div style="text-align:right">
+    <div class="silk">PLANT CLOCK</div>
+    <div class="clock" id="clock">Day 0 · 00:00</div>
+  </div>
+</header>
+
+<div class="bar">
+  <button id="bRun" class="on">Pause</button>
+  <button id="bSpeed">Speed 1×</button>
+  <button id="bReset">Restart run</button>
+  <span class="silk" style="margin-left:8px">MEASUREMENT EVERY 4 SIMULATED HOURS PER ASSET</span>
+</div>
+
+<div class="grid">
+
+  <!-- assets + threshold -->
+  <div>
+    <div class="card">
+      <h2>Assets</h2>
+      <div id="assets"></div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Alarm threshold</h2>
+      <div class="ctl">
+        <label><span class="nm">Envelope BPFO index</span><span class="vl" id="vThr">4.0</span></label>
+        <input type="range" id="sThr" min="1.5" max="10" step="0.1" value="4.0">
+      </div>
+      <div class="ctl">
+        <label><span class="nm">Plant noise</span><span class="vl" id="vNoise">20 %</span></label>
+        <input type="range" id="sNoise" min="5" max="70" step="1" value="20">
+      </div>
+      <div class="ros">
+        <div class="ro"><div class="k">True alerts</div><div class="v good" id="roTP">0</div></div>
+        <div class="ro"><div class="k">False alerts</div><div class="v warn" id="roFP">0</div></div>
+        <div class="ro"><div class="k">False rate</div><div class="v" id="roFPR">0<span class="u">/30d</span></div></div>
+        <div class="ro"><div class="k">Warning given</div><div class="v" id="roLead">—</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- trend -->
+  <div>
+    <div class="card">
+      <h2>Envelope BPFO index — all four assets, live</h2>
+      <canvas id="cvTrend" height="290"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--red)"></i>MTR-402 (has the defect)</span>
+        <span><i class="sw" style="background:#4A525E"></i>MTR-401 / 403 / 404</span>
+        <span><i class="sw" style="background:var(--amber)"></i>Alarm threshold</span>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Alarm log</h2>
+      <div class="log" id="log"><div><span class="t">—</span> waiting for first measurements…</div></div>
+    </div>
+  </div>
+
+  <!-- selected asset detail -->
+  <div>
+    <div class="card">
+      <h2>Envelope spectrum — <span id="selName" style="color:var(--amber)">MTR-402</span></h2>
+      <canvas id="cvEnv" height="190"></canvas>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--violet)"></i>Envelope</span>
+        <span><i class="sw" style="background:var(--red)"></i>BPFO 107 Hz + harmonics</span>
+      </div>
+      <div class="ros">
+        <div class="ro"><div class="k">BPFO index</div><div class="v" id="roIdx">0.00</div></div>
+        <div class="ro"><div class="k">Kurtosis</div><div class="v" id="roKurt">0.00</div></div>
+        <div class="ro"><div class="k">RMS</div><div class="v" id="roRms">0.00<span class="u"> g</span></div></div>
+        <div class="ro"><div class="k">Status</div><div class="v" id="roSt">NORMAL</div></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px">
+      <h2>Projection</h2>
+      <div class="ro"><div class="k">Days to fault level, MTR-402</div><div class="v" id="roRUL">insufficient trend</div></div>
+      <p style="margin:9px 0 0;font-size:12px;color:var(--dim)">
+        A straight-line fit through the recent trend. It is deliberately crude, and it is wrong early —
+        which is the honest state of most remaining-life estimates in the field.</p>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <b>What this is for.</b> Drag the alarm threshold and watch both counters at once. Set it low and you catch
+  MTR-402 early — and you also start alarming on three healthy machines, because plant noise and load changes
+  push their index around. Set it high and the false alarms stop, but your warning time collapses. There is no
+  setting that gives you both. That trade is not a modelling problem to be solved; it is a cost decision
+  someone has to own, and the number of investigations your team can absorb per week is usually what really
+  decides it.
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------------- bearing: SKF 6205, the CWRU test bearing ---------------- */
+var NB = 9, BD = 7.94, PD = 39.04;
+var RATIO = BD / PD;
+var K_BPFO = (NB / 2) * (1 - RATIO);          // 3.5848 x shaft
+var FS = 20480, N = 4096;                      // 5 Hz bin resolution
+var RES_F = 3200, RES_Q = 900;
+var BP_LO = 2400, BP_HI = 4000;
+var RPM = 1797, FR = RPM / 60, BPFO = K_BPFO * FR;   // 107.4 Hz
+
+/* ---------------- radix-2 FFT ---------------- */
+function fft(re, im, inv){
+  var n = re.length, i, j, k, m, step, ang, wr, wi, ur, ui, vr, vi;
+  for(i = 1, j = 0; i < n; i++){
+    var bit = n >> 1;
+    for(; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if(i < j){ var tr=re[i];re[i]=re[j];re[j]=tr; var ti=im[i];im[i]=im[j];im[j]=ti; }
+  }
+  for(step = 2; step <= n; step <<= 1){
+    ang = (inv ? 2 : -2) * Math.PI / step;
+    for(i = 0; i < n; i += step){
+      for(k = 0; k < step/2; k++){
+        wr = Math.cos(ang*k); wi = Math.sin(ang*k); m = i + k;
+        ur = re[m]; ui = im[m];
+        vr = re[m+step/2]*wr - im[m+step/2]*wi;
+        vi = re[m+step/2]*wi + im[m+step/2]*wr;
+        re[m]=ur+vr; im[m]=ui+vi; re[m+step/2]=ur-vr; im[m+step/2]=ui-vi;
+      }
+    }
+  }
+  if(inv) for(i=0;i<n;i++){ re[i]/=n; im[i]/=n; }
+}
+var spare = null;
+function gauss(){
+  if(spare !== null){ var s = spare; spare = null; return s; }
+  var u,v,s2;
+  do { u=Math.random()*2-1; v=Math.random()*2-1; s2=u*u+v*v; } while(s2>=1||s2===0);
+  var f = Math.sqrt(-2*Math.log(s2)/s2);
+  spare = v*f; return u*f;
+}
+function hann(k){ return 0.5 - 0.5*Math.cos(2*Math.PI*k/(N-1)); }
+
+/* ---------------- one measurement: synthesise, then analyse for real ------- */
+var sig = new Float64Array(N);
+function measure(sevPct, noisePct, imbPct, transient){
+  var i, imb = (imbPct/100)*1.2, nA = (noisePct/100)*0.35;
+  var sev = Math.pow(Math.max(0,sevPct)/100, 1.6) * 2.6;
+
+  for(i = 0; i < N; i++){
+    var t = i/FS;
+    sig[i] = imb*Math.sin(2*Math.PI*FR*t)
+           + imb*0.22*Math.sin(2*Math.PI*2*FR*t + 0.7)
+           + imb*0.10*Math.sin(2*Math.PI*3*FR*t + 1.9)
+           + nA*gauss();
+  }
+  /* outer-race defect: fixed position under a stationary radial load, so every
+     impact carries equal energy — clean BPFO line, no sidebands. Only slip jitter. */
+  if(sev > 0.001){
+    var per = 1/BPFO, decay = Math.PI*RES_F/RES_Q, tk = 0.25*per;
+    while(tk < N/FS){
+      var jt = tk*(1 + (Math.random()-0.5)*0.02), s0 = Math.floor(jt*FS);
+      var L = Math.min(N-s0, Math.floor(FS*0.008));
+      for(i = 0; i < L; i++){
+        var tt = i/FS;
+        sig[s0+i] += sev*Math.exp(-decay*tt)*Math.sin(2*Math.PI*RES_F*tt);
+      }
+      tk += per;
+    }
+  }
+
+  /* Random non-periodic knocks: load steps, something striking the frame, sensor
+     artefacts. They ring the same resonance but at NO fixed rate, so their energy
+     leaks into every envelope band including BPFO. This is where real false alarms
+     come from, and it is why a low threshold costs you something. */
+  if(transient > 0){
+    var nk = 1 + Math.floor(Math.random()*3), dk = Math.PI*RES_F/RES_Q;
+    for(var q = 0; q < nk; q++){
+      var s1 = Math.floor(Math.random()*(N - FS*0.008)), L1 = Math.floor(FS*0.008);
+      for(i = 0; i < L1; i++){
+        var t1 = i/FS;
+        sig[s1+i] += transient*Math.exp(-dk*t1)*Math.sin(2*Math.PI*RES_F*t1);
+      }
+    }
+  }
+
+  /* band-pass the resonance, take the analytic envelope, transform again */
+  var br = new Float64Array(N), bi = new Float64Array(N);
+  for(i = 0; i < N; i++) br[i] = sig[i];
+  fft(br, bi, false);
+  var half = N/2, lo = Math.round(BP_LO*N/FS), hi = Math.round(BP_HI*N/FS);
+  for(i = 0; i < N; i++){
+    if(i > 0 && i < half && i >= lo && i <= hi){ br[i]*=2; bi[i]*=2; }
+    else { br[i]=0; bi[i]=0; }
+  }
+  fft(br, bi, true);
+  var env = new Float64Array(N), mean = 0;
+  for(i = 0; i < N; i++){ env[i] = Math.sqrt(br[i]*br[i]+bi[i]*bi[i]); mean += env[i]; }
+  mean /= N;
+  var er = new Float64Array(N), ei = new Float64Array(N);
+  for(i = 0; i < N; i++) er[i] = (env[i]-mean)*hann(i);
+  fft(er, ei, false);
+  var emag = new Float64Array(half);
+  for(i = 0; i < half; i++) emag[i] = 2*Math.sqrt(er[i]*er[i]+ei[i]*ei[i])/N;
+
+  /* indicators */
+  var m1=0,m2=0,m4=0;
+  for(i=0;i<N;i++) m1 += sig[i];
+  m1 /= N;
+  for(i=0;i<N;i++){ var d=sig[i]-m1; m2+=d*d; m4+=d*d*d*d; }
+  m2/=N; m4/=N;
+  var rms = Math.sqrt(m2), kurt = m2>1e-12 ? m4/(m2*m2) : 3;
+
+  var binHz = FS/N, band = 0, h, k2;
+  for(h = 1; h <= 3; h++){
+    var c = Math.round(h*BPFO/binHz);
+    for(k2 = c-2; k2 <= c+2; k2++) if(k2>0 && k2<half) band += emag[k2]*emag[k2];
+  }
+  /* Indicator: energy at the BPFO harmonics of the envelope spectrum, divided by
+     overall vibration RMS so the number is dimensionless and does not simply track
+     load. Monotonic with defect size, which is what makes it worth trending. */
+  var idx = 30 * Math.sqrt(band) / (rms + 1e-9);
+
+  return { idx: idx, rms: rms, kurt: kurt, env: emag, binHz: binHz };
+}
+
+/* ---------------- assets ---------------- */
+var HIST = 420;                 // 70 simulated days of 4-hourly readings
+var FAULT_START = 18;           // day the spall initiates on MTR-402
+var FAULT_SPAN  = 62;           // days from initiation to fault level
+
+function makeAsset(name, faulty){
+  return { name:name, faulty:faulty, hist:[], idx:0, rms:0, kurt:0,
+           env:null, binHz:5, status:"NORMAL", nextT:Math.random()*4, imb:28+Math.random()*14 };
+}
+var assets, sel, simHours, thr, noise, running, speedIdx;
+var SPEEDS = [1, 4, 16];
+var tp, fp, firstDetectDay, log;
+
+function reset(){
+  assets = [ makeAsset("MTR-401", false), makeAsset("MTR-402", true),
+             makeAsset("MTR-403", false), makeAsset("MTR-404", false) ];
+  sel = 1; simHours = 0; tp = 0; fp = 0; firstDetectDay = null; log = [];
+  document.getElementById("log").innerHTML = '<div><span class="t">—</span> waiting for first measurements…</div>';
+  document.getElementById("roRUL").textContent = "insufficient trend";
+  render();
+}
+
+function severityFor(a, day){
+  if(!a.faulty) return 0;
+  if(day < FAULT_START) return 0;
+  var x = (day - FAULT_START) / FAULT_SPAN;
+  return Math.min(100, Math.pow(Math.max(0,x), 2.1) * 100);
+}
+
+function addLog(day, hour, asset, isTrue){
+  var d = document.createElement("div");
+  d.className = isTrue ? "true" : "false";
+  d.innerHTML = '<span class="t">D' + day + " " + String(hour).padStart(2,"0") + ':00</span>  ' +
+                asset + (isTrue ? "  BEARING ALERT" : "  alert — no fault present");
+  var box = document.getElementById("log");
+  if(log.length === 0) box.innerHTML = "";
+  box.insertBefore(d, box.firstChild);
+  log.push(1);
+  while(box.childNodes.length > 60) box.removeChild(box.lastChild);
+}
+
+/* ---------------- simulation tick ---------------- */
+function step(dtHours){
+  simHours += dtHours;
+  var day = Math.floor(simHours/24);
+
+  for(var i = 0; i < assets.length; i++){
+    var a = assets[i];
+    if(simHours < a.nextT) continue;
+    a.nextT += 4;                                  // one reading per 4 sim hours
+
+    var sev = severityFor(a, simHours/24);
+    /* Every machine, healthy or not, occasionally takes a knock. These are what
+       trip a low threshold on a perfectly good machine. */
+    var transient = (Math.random() < 0.014) ? 1.2 + Math.random()*1.1 : 0;
+    var m = measure(sev, noise, a.imb, transient);
+
+    a.idx = m.idx; a.rms = m.rms; a.kurt = m.kurt; a.env = m.env; a.binHz = m.binHz;
+    a.hist.push(m.idx);
+    if(a.hist.length > HIST) a.hist.shift();
+
+    var wasAlarm = (a.status === "FAULT");
+    a.status = m.idx >= thr ? "FAULT" : (m.idx >= thr*0.55 ? "ALERT" : "NORMAL");
+
+    if(a.status === "FAULT" && !wasAlarm){
+      var real = a.faulty && sev > 4;
+      if(real){ tp++; if(firstDetectDay === null) firstDetectDay = simHours/24; }
+      else fp++;
+      addLog(day, Math.floor(simHours%24), a.name, real);
+    }
+  }
+}
+
+/* ---------------- drawing ---------------- */
+function fit(cv){
+  var r = window.devicePixelRatio || 1;
+  if(!cv.dataset.h) cv.dataset.h = cv.getAttribute("height");
+  var w = cv.clientWidth, h = +cv.dataset.h;
+  if(cv.width !== Math.round(w*r) || cv.height !== Math.round(h*r)){
+    cv.width = Math.round(w*r); cv.height = Math.round(h*r); cv.style.height = h + "px";
+  }
+  var g = cv.getContext("2d"); g.setTransform(r,0,0,r,0,0);
+  return { g:g, w:w, h:h };
+}
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function lab(g,x,y,t,c,al){ g.fillStyle=c; g.font='10px "Courier New",monospace'; g.textAlign=al||"left"; g.fillText(t,x,y); }
+
+function drawTrend(){
+  var o = fit(document.getElementById("cvTrend")), g = o.g;
+  g.clearRect(0,0,o.w,o.h);
+  var pad = { l:40, r:12, t:12, b:24 };
+  var w = o.w-pad.l-pad.r, h = o.h-pad.t-pad.b;
+
+  var maxV = Math.max(thr*1.4, 6);
+  for(var i=0;i<assets.length;i++)
+    for(var k=0;k<assets[i].hist.length;k++)
+      if(assets[i].hist[k] > maxV) maxV = assets[i].hist[k];
+  maxV *= 1.08;
+
+  g.strokeStyle = "#1C2027"; g.lineWidth = 1;
+  for(i=1;i<6;i++){ var x = pad.l + w*i/6; g.beginPath(); g.moveTo(x+0.5,pad.t); g.lineTo(x+0.5,pad.t+h); g.stroke(); }
+
+  /* threshold band */
+  var ty = pad.t + h - (thr/maxV)*h;
+  g.fillStyle = "rgba(232,163,61,0.07)";
+  g.fillRect(pad.l, pad.t, w, Math.max(0, ty-pad.t));
+  g.strokeStyle = css("--amber"); g.setLineDash([5,4]); g.lineWidth = 1.25;
+  g.beginPath(); g.moveTo(pad.l,ty); g.lineTo(pad.l+w,ty); g.stroke(); g.setLineDash([]);
+  lab(g, pad.l+w-4, ty-5, "THRESHOLD " + thr.toFixed(1), css("--amber"), "right");
+
+  for(i=0;i<assets.length;i++){
+    var a = assets[i];
+    if(a.hist.length < 2) continue;
+    g.strokeStyle = a.faulty ? css("--red") : "#4A525E";
+    g.lineWidth = a.faulty ? 1.8 : 1;
+    g.beginPath();
+    for(k=0;k<a.hist.length;k++){
+      var xx = pad.l + (k/(HIST-1))*w;
+      var yy = pad.t + h - Math.min(1, a.hist[k]/maxV)*h;
+      if(k===0) g.moveTo(xx,yy); else g.lineTo(xx,yy);
+    }
+    g.stroke();
+  }
+
+  g.strokeStyle = css("--rule"); g.strokeRect(pad.l+0.5, pad.t+0.5, w, h);
+  lab(g, pad.l-6, pad.t+9, maxV.toFixed(1), css("--dim"), "right");
+  lab(g, pad.l-6, pad.t+h, "0", css("--dim"), "right");
+  var span = HIST*4/24;
+  for(i=0;i<=3;i++)
+    lab(g, pad.l + w*i/3, o.h-8, "-" + Math.round(span*(3-i)/3) + "d",
+        css("--dim"), i===0?"left":(i===3?"right":"center"));
+}
+
+function drawEnv(){
+  var a = assets[sel];
+  var o = fit(document.getElementById("cvEnv")), g = o.g;
+  g.clearRect(0,0,o.w,o.h);
+  var pad = { l:34, r:10, t:10, b:22 };
+  var w = o.w-pad.l-pad.r, h = o.h-pad.t-pad.b;
+  if(!a.env){ lab(g, pad.l, pad.t+h/2, "awaiting first measurement", css("--dim")); return; }
+
+  var fmax = 600, kmax = Math.min(a.env.length-1, Math.round(fmax/a.binHz)), k;
+  var maxV = 1e-9;
+  for(k=1;k<=kmax;k++) if(a.env[k] > maxV) maxV = a.env[k];
+  maxV *= 1.15;
+
+  for(var hmn=1; hmn<=3; hmn++){
+    var mx = pad.l + (hmn*BPFO/fmax)*w;
+    if(mx > pad.l+w) continue;
+    g.strokeStyle = css("--red"); g.globalAlpha = .7; g.setLineDash([3,3]);
+    g.beginPath(); g.moveTo(mx,pad.t); g.lineTo(mx,pad.t+h); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+    if(hmn===1) lab(g, mx+4, pad.t+11, "BPFO", css("--red"));
+  }
+
+  g.strokeStyle = css("--violet"); g.lineWidth = 1;
+  g.beginPath();
+  for(k=1;k<=kmax;k++){
+    var x = pad.l + ((k*a.binHz)/fmax)*w;
+    var y = pad.t + h - (a.env[k]/maxV)*h;
+    if(k===1) g.moveTo(x, pad.t+h);
+    g.lineTo(x,y);
+  }
+  g.stroke();
+  g.strokeStyle = css("--rule"); g.strokeRect(pad.l+0.5, pad.t+0.5, w, h);
+  lab(g, pad.l-5, pad.t+9, maxV.toFixed(2), css("--dim"), "right");
+  for(var i=0;i<=3;i++)
+    lab(g, pad.l+w*i/3, o.h-7, Math.round(fmax*i/3)+" Hz", css("--dim"),
+        i===0?"left":(i===3?"right":"center"));
+}
+
+/* ---------------- projection: straight line through recent trend ---------- */
+function projection(){
+  var a = assets[1];
+  var n = a.hist.length;
+  if(n < 40) return "insufficient trend";
+  var take = Math.min(60, n), s0 = n - take;
+  var sx=0, sy=0, sxx=0, sxy=0;
+  for(var i=0;i<take;i++){
+    var x = i*4/24, y = a.hist[s0+i];
+    sx+=x; sy+=y; sxx+=x*x; sxy+=x*y;
+  }
+  var den = take*sxx - sx*sx;
+  if(Math.abs(den) < 1e-9) return "insufficient trend";
+  var slope = (take*sxy - sx*sy)/den, icpt = (sy - slope*sx)/take;
+  var cur = icpt + slope*(take*4/24);
+  if(slope <= 0.002) return "no clear trend";
+  if(cur >= thr) return "at or past threshold";
+  var days = (thr - cur)/slope;
+  if(days > 400) return "> 400 d";
+  return "~" + Math.round(days) + " d";
+}
+
+/* ---------------- render ---------------- */
+function render(){
+  var day = Math.floor(simHours/24), hr = Math.floor(simHours%24);
+  document.getElementById("clock").textContent = "Day " + day + " · " + String(hr).padStart(2,"0") + ":00";
+
+  var box = document.getElementById("assets");
+  box.innerHTML = "";
+  assets.forEach(function(a,i){
+    var cls = a.status === "FAULT" ? "trip" : (a.status === "ALERT" ? "warn" : "");
+    var d = document.createElement("div");
+    d.className = "asset" + (i===sel ? " sel" : "");
+    d.innerHTML = '<span class="lamp ' + cls + '"></span><span class="nm">' + a.name +
+                  '</span><span class="vl ' + cls + '">' + a.idx.toFixed(2) + "</span>";
+    d.onclick = function(){ sel = i; render(); };
+    box.appendChild(d);
+  });
+
+  var a = assets[sel];
+  document.getElementById("selName").textContent = a.name;
+  document.getElementById("roIdx").textContent = a.idx.toFixed(2);
+  document.getElementById("roKurt").textContent = a.kurt.toFixed(2);
+  document.getElementById("roRms").innerHTML = a.rms.toFixed(2) + '<span class="u"> g</span>';
+  var st = document.getElementById("roSt");
+  st.textContent = a.status;
+  st.className = "v " + (a.status==="FAULT" ? "trip" : a.status==="ALERT" ? "warn" : "good");
+  document.getElementById("roIdx").className = "v " + (a.idx>=thr ? "trip" : a.idx>=thr*0.55 ? "warn" : "good");
+
+  document.getElementById("roTP").textContent = tp;
+  document.getElementById("roFP").textContent = fp;
+  var days = Math.max(1, simHours/24);
+  document.getElementById("roFPR").innerHTML = (fp/days*30).toFixed(1) + '<span class="u">/30d</span>';
+  document.getElementById("roLead").textContent =
+    firstDetectDay === null ? "—" : Math.max(0, Math.round(FAULT_START + FAULT_SPAN - firstDetectDay)) + " d";
+  document.getElementById("roRUL").textContent = projection();
+
+  drawTrend(); drawEnv();
+}
+
+/* ---------------- controls ---------------- */
+thr = 4.0; noise = 20; running = true; speedIdx = 0;
+
+document.getElementById("sThr").addEventListener("input", function(){
+  thr = +this.value; document.getElementById("vThr").textContent = thr.toFixed(1); render();
+});
+document.getElementById("sNoise").addEventListener("input", function(){
+  noise = +this.value; document.getElementById("vNoise").textContent = noise + " %";
+});
+document.getElementById("bRun").onclick = function(){
+  running = !running; this.textContent = running ? "Pause" : "Run";
+  this.className = running ? "on" : "";
+};
+document.getElementById("bSpeed").onclick = function(){
+  speedIdx = (speedIdx+1) % SPEEDS.length;
+  this.textContent = "Speed " + SPEEDS[speedIdx] + "×";
+};
+document.getElementById("bReset").onclick = reset;
+window.addEventListener("resize", function(){ drawTrend(); drawEnv(); });
+
+/* ---------------- loop ---------------- */
+var lastMs = 0, acc = 0;
+function loop(ms){
+  var dt = lastMs ? Math.min(0.1, (ms-lastMs)/1000) : 0.016;
+  lastMs = ms;
+  if(running){
+    step(dt * 6 * SPEEDS[speedIdx]);      // 6 simulated hours per real second at 1x
+    acc += dt;
+    if(acc > 0.12){ acc = 0; render(); }
+  }
+  requestAnimationFrame(loop);
+}
+reset();
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
