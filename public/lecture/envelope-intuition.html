@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envelope Analysis — the intuition, first</title>
+<style>
+  :root{
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#A8A49A;
+    --text:#111318; --dim:#2E3036;
+    --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0; --green:#2E7A2A; --blue:#215F9E;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--panel);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.5;padding:16px}
+  .silk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  header{border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:16px}
+  h1{font-size:20px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em}
+  header p{margin:0;color:var(--dim);font-size:14px;max-width:64ch}
+
+  .grid{display:grid;grid-template-columns:1.35fr .65fr;gap:16px;align-items:start}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;padding:14px}
+  .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);margin:0 0 10px;font-weight:400;display:flex;justify-content:space-between}
+  .card h2 .rhs{color:var(--amber);font-weight:600;letter-spacing:.1em}
+
+  .bearing-row{display:grid;grid-template-columns:220px 1fr;gap:14px;align-items:center}
+  @media (max-width:600px){.bearing-row{grid-template-columns:1fr}}
+  svg.bearing{display:block;width:100%;height:auto;background:#FFFFFF;border:1px solid var(--rule);border-radius:2px}
+  .impact-badge{background:#FFFFFF;border:1px solid var(--rule);border-radius:2px;padding:10px 12px;text-align:center}
+  .impact-badge .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+  .impact-badge .v{font-family:var(--mono);font-size:32px;color:var(--amber);margin-top:4px}
+  .impact-badge .u{font-family:var(--mono);font-size:12px;color:var(--dim);margin-top:2px}
+
+  canvas.wave{display:block;width:100%;height:280px;background:#FFFFFF;border:1px solid var(--rule);border-radius:2px;margin-top:12px}
+
+  .stage-num{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--amber);margin-bottom:6px}
+  .stage-title{font-size:20px;font-weight:600;margin:0 0 12px;letter-spacing:-.01em;line-height:1.2}
+  .stage-body{color:var(--text);font-size:14.5px;line-height:1.6}
+  .stage-body p{margin:0 0 12px}
+  .stage-body em{color:var(--teal);font-style:normal;font-weight:500}
+  .stage-body strong{color:var(--amber);font-weight:600}
+  .stage-body .callout{background:#FFFFFF;border-left:3px solid var(--amber);padding:12px 14px;margin:12px 0;font-size:14px}
+  .stage-body .callout strong{color:var(--text)}
+
+  .step-nav{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:16px;padding-top:12px;border-top:1px solid var(--rule)}
+  .step-nav button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:10px 16px;border-radius:2px;cursor:pointer;min-width:90px}
+  .step-nav button:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+  .step-nav button:disabled{opacity:.35;cursor:not-allowed}
+  .step-dots{display:flex;gap:5px}
+  .step-dots .dot{width:10px;height:10px;border-radius:50%;background:var(--panel3);border:1px solid var(--rule);cursor:pointer}
+  .step-dots .dot.on{background:var(--amber);border-color:var(--amber)}
+  .step-dots .dot.done{background:var(--teal);border-color:var(--teal)}
+
+  .footer-link{margin-top:20px;padding-top:14px;border-top:1px dashed var(--rule);font-size:13px;color:var(--dim)}
+  .footer-link a{color:var(--teal);text-decoration:none;font-weight:500}
+  .footer-link a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<header>
+  <p class="silk">Guest lecture · Part 2 · §2.4 · the intuition</p>
+  <h1>How does a rhythm hide inside a wiggle?</h1>
+  <p>Before we do any math: a bearing defect writes a <em>rhythm</em>, but the microphone hears a <em>wiggle</em>. This is how to get the rhythm back — in five pictures, no equations required.</p>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <h2><span id="scene-title">The bearing</span><span class="rhs" id="scene-badge">SCENE 1</span></h2>
+
+    <div class="bearing-row">
+      <svg class="bearing" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" id="brg">
+        <!-- outer race -->
+        <circle cx="110" cy="110" r="95" fill="none" stroke="#2E3036" stroke-width="10"/>
+        <!-- inner race -->
+        <circle cx="110" cy="110" r="42" fill="#F5F5F4" stroke="#2E3036" stroke-width="8"/>
+        <!-- balls (rotate) -->
+        <g id="balls"></g>
+        <!-- defect on outer race at 12 o'clock -->
+        <g id="defect">
+          <circle cx="110" cy="20" r="5" fill="#A62A1F"/>
+          <circle id="defect-halo" cx="110" cy="20" r="10" fill="none" stroke="#A62A1F" stroke-width="2" opacity="0"/>
+        </g>
+        <!-- shaft mark to show rotation -->
+        <line x1="110" y1="110" x2="110" y2="80" stroke="#2E3036" stroke-width="2" id="shaft-mark"/>
+        <text x="110" y="215" text-anchor="middle" font-family="Courier New" font-size="9" fill="#2E3036" letter-spacing="1.5">BEARING · TOP-DOWN</text>
+      </svg>
+      <div class="impact-badge">
+        <div class="k">Impacts counted</div>
+        <div class="v" id="impact-count">0</div>
+        <div class="u">in <span id="window-lbl">100</span> ms</div>
+      </div>
+    </div>
+
+    <canvas class="wave" id="wave" width="1400" height="560"></canvas>
+    <div id="wave-caption" style="font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.1em;margin-top:6px;text-transform:uppercase">what the sensor records — 100 ms window</div>
+  </div>
+
+  <div class="card" id="right"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---- state ---- */
+var stage = 0;
+var running = true;   // bearing animates
+var showEnvelope = false;
+var showImpactMarks = false;
+var showFFTpanel = false;
+var impactAnimSpeed = 0.30;   // 1.0 = real time; slow down bearing so students can see it
+
+/* ---- signal (real physics) ---- */
+var FS = 20480;
+var N  = 2048;                // 100 ms record
+var BPFO = 107.4;
+var RES_F = 3000, RES_TAU = 0.0009;
+var signal = new Float64Array(N);
+var envelope = new Float64Array(N);
+var impactSampleIdx = [];
+
+function synth(){
+  for(var i=0;i<N;i++) signal[i] = 0;
+  impactSampleIdx = [];
+  var period = 1 / BPFO;
+  var t0 = 0.001;
+  for(var k=0; t0 + k*period < N/FS; k++){
+    var tk = t0 + k * period + (Math.random()-0.5) * 0.02 * period;
+    var i0 = Math.round(tk * FS);
+    impactSampleIdx.push(i0);
+    for(var j=0;j<900 && i0+j<N;j++){
+      var dt = j / FS;
+      signal[i0+j] += 0.6 * Math.exp(-dt/RES_TAU) * Math.sin(2*Math.PI * RES_F * dt);
+    }
+  }
+  // small noise
+  for(var i=0;i<N;i++) signal[i] += 0.02 * (Math.random()*2-1);
+  // envelope via a simple magnitude tracker (peak-holding IIR) — same shape as Hilbert magnitude,
+  // computed here in a way beginners can defend: "the largest |signal| in a short window, smoothed"
+  var alpha = 0.06;   // low-pass on |signal|
+  var y = 0;
+  for(var i=0;i<N;i++){
+    var target = Math.abs(signal[i]);
+    y = y + alpha * (target - y);
+    envelope[i] = y;
+  }
+  // scale envelope to match peaks visually
+  var peak=0; for(var i=0;i<N;i++) if(envelope[i]>peak) peak = envelope[i];
+  var sigPeak=0; for(var i=0;i<N;i++) if(Math.abs(signal[i])>sigPeak) sigPeak = Math.abs(signal[i]);
+  if(peak>0){
+    var scale = sigPeak / peak;
+    for(var i=0;i<N;i++) envelope[i] *= scale;
+  }
+}
+synth();
+
+/* ---- FFT for the payoff at the end ---- */
+function fft(re, im, inverse){
+  var n = re.length, i, j, k, m, step, ang, wr, wi, ur, ui, vr, vi;
+  for(i=1,j=0;i<n;i++){ var bit=n>>1; for(;j&bit;bit>>=1) j^=bit; j^=bit;
+    if(i<j){var tr=re[i];re[i]=re[j];re[j]=tr;var ti=im[i];im[i]=im[j];im[j]=ti;} }
+  for(step=2;step<=n;step<<=1){
+    ang = (inverse?2:-2)*Math.PI/step;
+    for(i=0;i<n;i+=step) for(k=0;k<step/2;k++){
+      wr=Math.cos(ang*k); wi=Math.sin(ang*k); m=i+k;
+      ur=re[m]; ui=im[m];
+      vr=re[m+step/2]*wr - im[m+step/2]*wi;
+      vi=re[m+step/2]*wi + im[m+step/2]*wr;
+      re[m]=ur+vr; im[m]=ui+vi; re[m+step/2]=ur-vr; im[m+step/2]=ui-vi;
+    }
+  }
+  if(inverse) for(i=0;i<n;i++){ re[i]/=n; im[i]/=n; }
+}
+var envSpec = null;
+function computeEnvSpec(){
+  var re = new Float64Array(N), im = new Float64Array(N);
+  var mean = 0; for(var i=0;i<N;i++) mean += envelope[i]; mean /= N;
+  for(var i=0;i<N;i++) re[i] = envelope[i] - mean;
+  fft(re, im, false);
+  var mag = new Float64Array(N/2);
+  for(var i=0;i<N/2;i++) mag[i] = Math.sqrt(re[i]*re[i]+im[i]*im[i]) * 2/N;
+  envSpec = mag;
+}
+computeEnvSpec();
+
+/* ---- canvas drawing ---- */
+var ctx = document.getElementById("wave").getContext("2d");
+function css(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+function drawWave(){
+  var W = ctx.canvas.width, H = ctx.canvas.height;
+  ctx.clearRect(0,0,W,H);
+  var padL = 60, padR = 30, padT = 30, padB = 40;
+  var iw = W - padL - padR, ih = H - padT - padB;
+
+  // frame + axis
+  ctx.strokeStyle = "#D6D3CC"; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+ih);
+  ctx.lineTo(padL+iw, padT+ih); ctx.stroke();
+  ctx.font = "16px 'Courier New'"; ctx.fillStyle = css("--dim");
+  ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for(var g=0;g<=5;g++){
+    var x = padL + iw*g/5;
+    ctx.fillText((g*20).toFixed(0)+" ms", x, padT+ih+8);
+  }
+  ctx.textAlign = "right"; ctx.textBaseline = "middle";
+  ctx.fillText("loud", padL-8, padT+8);
+  ctx.fillText("0", padL-8, padT+ih/2);
+  ctx.fillText("loud", padL-8, padT+ih-8);
+
+  var mid = padT + ih/2;
+  var yScale = ih/2 / 1.0;   // signal amplitude ±1
+
+  // signal (bursts)
+  if(showFFTpanel){
+    // in stage 5 we replace the waveform with the envelope spectrum
+    drawEnvSpec(padL, padT, iw, ih);
+    return;
+  }
+  ctx.strokeStyle = css("--blue"); ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(var i=0;i<N;i++){
+    var x = padL + iw * i/N;
+    var y = mid - signal[i] * yScale;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.stroke();
+
+  // impact markers
+  if(showImpactMarks){
+    ctx.strokeStyle = css("--red"); ctx.lineWidth = 1.5; ctx.setLineDash([3,4]);
+    for(var k=0;k<impactSampleIdx.length;k++){
+      var x = padL + iw * impactSampleIdx[k]/N;
+      ctx.beginPath(); ctx.moveTo(x, padT); ctx.lineTo(x, padT+ih); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    ctx.fillStyle = css("--red"); ctx.font = "16px 'Courier New'";
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText("↑ ball hits defect", padL+8, padT+8);
+  }
+
+  // envelope (upper + lower mirrored for symmetry)
+  if(showEnvelope){
+    ctx.strokeStyle = css("--amber"); ctx.lineWidth = 4;
+    ctx.beginPath();
+    for(var i=0;i<N;i++){
+      var x = padL + iw * i/N;
+      var y = mid - envelope[i] * yScale;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    ctx.beginPath();
+    for(var i=0;i<N;i++){
+      var x = padL + iw * i/N;
+      var y = mid + envelope[i] * yScale;
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+    // label
+    ctx.fillStyle = css("--amber"); ctx.font = "16px 'Courier New'";
+    ctx.textAlign = "left"; ctx.textBaseline = "top";
+    ctx.fillText("← the envelope: the loudness at every moment", padL+8, padT+ih-24);
+  }
+}
+
+function drawEnvSpec(padL, padT, iw, ih){
+  ctx.strokeStyle = "#D6D3CC"; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(padL, padT); ctx.lineTo(padL, padT+ih);
+  ctx.lineTo(padL+iw, padT+ih); ctx.stroke();
+  var binHz = FS/N;
+  // range: 0 to 500 Hz
+  var xMax = 500;
+  var yMax = 0;
+  for(var i=0;i<envSpec.length;i++){ var f = i*binHz; if(f<=xMax && envSpec[i]>yMax) yMax=envSpec[i]; }
+  yMax *= 1.15;
+  // grid + labels
+  ctx.font = "16px 'Courier New'"; ctx.fillStyle = css("--dim"); ctx.textAlign = "center"; ctx.textBaseline = "top";
+  for(var g=0;g<=5;g++){
+    var x = padL + iw*g/5;
+    ctx.fillText((g*100).toFixed(0)+" Hz", x, padT+ih+8);
+  }
+  // bars
+  ctx.strokeStyle = css("--green"); ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  for(var i=0;i<envSpec.length;i++){
+    var f = i*binHz;
+    if(f>xMax) break;
+    var x = padL + iw * f/xMax;
+    var y = padT + ih - ih * envSpec[i]/yMax;
+    ctx.moveTo(x, padT+ih);
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  // annotate BPFO
+  var xB = padL + iw * BPFO/xMax;
+  ctx.strokeStyle = css("--red"); ctx.setLineDash([4,4]); ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(xB, padT); ctx.lineTo(xB, padT+ih); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = css("--red"); ctx.font = "bold 22px 'Courier New'"; ctx.textAlign = "center"; ctx.textBaseline = "top";
+  ctx.fillText("107 Hz", xB, padT+8);
+  ctx.font = "16px 'Courier New'"; ctx.fillStyle = css("--dim");
+  ctx.fillText("← the defect rate", xB, padT+34);
+}
+
+/* ---- bearing animation ---- */
+var NBALLS = 9;
+var ballsG = document.getElementById("balls");
+function buildBalls(){
+  ballsG.innerHTML = "";
+  for(var i=0;i<NBALLS;i++){
+    var c = document.createElementNS("http://www.w3.org/2000/svg","circle");
+    c.setAttribute("r","10"); c.setAttribute("fill","#525459"); c.setAttribute("stroke","#1D1F23"); c.setAttribute("stroke-width","2");
+    ballsG.appendChild(c);
+  }
+}
+buildBalls();
+
+var cageAngle = -Math.PI/2;
+var shaftAngle = -Math.PI/2;
+var impactCount = 0;
+var lastMs = 0;
+var wasNear = new Array(NBALLS).fill(false);
+
+function loop(ms){
+  var dt = lastMs ? Math.min(0.1, (ms-lastMs)/1000) : 0.016;
+  lastMs = ms;
+  if(running){
+    // slow rotation for visual: cage at 1 Hz (real would be 11.9 Hz)
+    cageAngle += 2*Math.PI * 1.0 * impactAnimSpeed * dt;
+    shaftAngle += 2*Math.PI * 2.5 * impactAnimSpeed * dt;
+    for(var i=0;i<NBALLS;i++){
+      var a = cageAngle + i * 2*Math.PI / NBALLS;
+      var x = 110 + 68 * Math.cos(a);
+      var y = 110 + 68 * Math.sin(a);
+      ballsG.children[i].setAttribute("cx", x.toFixed(2));
+      ballsG.children[i].setAttribute("cy", y.toFixed(2));
+      // detect ball near defect at (-π/2)
+      var da = Math.atan2(Math.sin(a + Math.PI/2), Math.cos(a + Math.PI/2));
+      var near = Math.abs(da) < 0.15;
+      if(near && !wasNear[i]){
+        impactCount++;
+        // pulse the halo
+        var halo = document.getElementById("defect-halo");
+        halo.setAttribute("r","10"); halo.style.opacity = 1;
+        halo.style.transition = "none";
+        setTimeout(function(){ halo.style.transition = "r 0.35s ease-out, opacity 0.35s ease-out"; halo.setAttribute("r","22"); halo.style.opacity = 0; }, 10);
+        // flash the ball red briefly
+        var el = ballsG.children[i];
+        el.setAttribute("fill", "#A62A1F");
+        (function(el){ setTimeout(function(){ el.setAttribute("fill","#525459"); }, 200); })(el);
+      }
+      wasNear[i] = near;
+    }
+    var shaftD = (shaftAngle + Math.PI/2) * 180 / Math.PI;
+    document.getElementById("shaft-mark").setAttribute("transform","rotate("+shaftD.toFixed(2)+" 110 110)");
+    document.getElementById("impact-count").textContent = impactCount;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ---- scenes ---- */
+var scenes = [
+  {
+    badge:"SCENE 1 / 5",
+    title:"Every defect is a tiny hammer",
+    body:`
+      <p>A rolling-element bearing turns because the balls roll between the races. Watch the animation.</p>
+      <p>Now suppose the outer race — the ring fixed to the housing — has a small pit at twelve o'clock. Every time a ball rolls over that pit, it is <em>a tiny hammer strike</em> against the housing.</p>
+      <p>You do not hear one strike per rotation. You hear one strike per ball, per rotation. For nine balls that adds up fast — roughly a hundred strikes per second on a normal motor.</p>
+      <div class="callout"><strong>The problem:</strong> we want to <em>count</em> those strikes. But the microphone hears a mess.</div>`,
+    envelope: false, impacts: false, fft: false, animSpeed: 0.15, wavCap: "the microphone recording — a mess of ringing"
+  },
+  {
+    badge:"SCENE 2 / 5",
+    title:"Each strike is a burst of ringing",
+    body:`
+      <p>Each hammer strike is very short — a fraction of a millisecond. But the housing it hit is like a bell. It <em>rings</em> after every strike, at about three kilohertz, and slowly fades away.</p>
+      <p>Look at the waveform below. Those bursts you see are individual strikes. The wiggle <em>inside</em> each burst is the housing ringing.</p>
+      <p>The red ticks mark exactly when a ball hit the defect. See how each tick lines up with the start of a burst?</p>
+      <div class="callout"><strong>What we want:</strong> the pattern of ticks. What we have: a wiggle that rings at 3 kHz. Those are not the same thing.</div>`,
+    envelope: false, impacts: true, fft: false, animSpeed: 0.30, wavCap: "one burst of ringing per ball impact"
+  },
+  {
+    badge:"SCENE 3 / 5",
+    title:"Draw a line over the loudness",
+    body:`
+      <p>Here is the trick. Forget the wiggle. Ask a simpler question: <em>how loud is the signal, right now?</em></p>
+      <p>Trace a line along the top of the peaks. Then another along the bottom. Those two lines are the <strong>envelope</strong> — literally, the outline of the loudness.</p>
+      <p>The envelope rises fast when a ball hits, then slowly fades as the housing rings out. Rise, fade, rise, fade — one bump per strike.</p>
+      <div class="callout"><strong>What just happened:</strong> we ignored the pitch and kept the pattern. The envelope hides nothing that matters and shows everything we want.</div>`,
+    envelope: true, impacts: true, fft: false, animSpeed: 0.30, wavCap: "the envelope traces the loudness over time"
+  },
+  {
+    badge:"SCENE 4 / 5",
+    title:"Count the bumps",
+    body:`
+      <p>Look at just the envelope now. Every bump = one strike. Count them.</p>
+      <p>In this 100-millisecond window there are about <strong>ten bumps</strong>. Ten strikes in one tenth of a second — that means <strong>a hundred strikes per second</strong>.</p>
+      <p>A hundred and seven, actually — which is exactly what bearing geometry predicts (BPFO = 107 Hz for this bearing). We derived that number from ball count and pitch diameter in the last demo. Now we are <em>measuring</em> it.</p>
+      <div class="callout"><strong>The point:</strong> the physics said 107 Hz. The envelope shows 107 Hz. Theory meets measurement. Nothing else needed.</div>`,
+    envelope: true, impacts: false, fft: false, animSpeed: 0.30, wavCap: "each bump = one bearing impact"
+  },
+  {
+    badge:"SCENE 5 / 5",
+    title:"Let the computer count",
+    body:`
+      <p>Counting bumps by eye works for ten. Not for ten million per hour of monitoring.</p>
+      <p>An FFT is just <em>an automatic bump-counter</em>. Feed it the envelope; the tallest bar tells you how often the pattern repeats.</p>
+      <p>Below is exactly that — the FFT of the envelope you just saw. One tall red line at <strong>107 Hz</strong>. The machine has counted the bumps and told you the answer.</p>
+      <div class="callout"><strong>That is the whole trick.</strong> Wiggle → envelope → count. Everything else in condition monitoring is variations on this theme.</div>
+      <div class="footer-link">Want the actual math? → <a href="/lecture/envelope-analysis.html">envelope-analysis.html</a> walks through the Hilbert-transform derivation stage by stage.</div>`,
+    envelope: false, impacts: false, fft: true, animSpeed: 0.30, wavCap: "FFT of the envelope — the peak is the defect frequency"
+  }
+];
+
+function render(){
+  var s = scenes[stage];
+  showEnvelope = s.envelope;
+  showImpactMarks = s.impacts;
+  showFFTpanel = s.fft;
+  impactAnimSpeed = s.animSpeed;
+  document.getElementById("scene-title").textContent = s.title;
+  document.getElementById("scene-badge").textContent = s.badge;
+  document.getElementById("wave-caption").textContent = s.wavCap;
+  drawWave();
+
+  var right = document.getElementById("right");
+  var html = '<div class="stage-num">'+s.badge+'</div>';
+  html += '<h2 class="stage-title" style="color:var(--text)">'+s.title+'</h2>';
+  html += '<div class="stage-body">'+s.body+'</div>';
+  html += '<div class="step-nav">';
+  html += '<button id="prev" '+(stage===0?"disabled":"")+'>← Prev</button>';
+  html += '<div class="step-dots">';
+  for(var j=0;j<scenes.length;j++){
+    var cls = "dot" + (j===stage?" on":(j<stage?" done":""));
+    html += '<div class="'+cls+'" data-j="'+j+'"></div>';
+  }
+  html += '</div>';
+  html += '<button id="next" '+(stage===scenes.length-1?"disabled":"")+'>Next →</button>';
+  html += '</div>';
+  right.innerHTML = html;
+
+  document.getElementById("prev").onclick = function(){ if(stage>0){ stage--; render(); }};
+  document.getElementById("next").onclick = function(){ if(stage<scenes.length-1){ stage++; render(); }};
+  var dots = right.querySelectorAll(".step-dots .dot");
+  for(var k=0;k<dots.length;k++){
+    (function(el){ el.onclick = function(){ stage=+el.getAttribute("data-j"); render(); }; })(dots[k]);
+  }
+}
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "ArrowRight" || e.key === " "){ if(stage < scenes.length-1){ stage++; render(); e.preventDefault(); } }
+  else if(e.key === "ArrowLeft"){ if(stage > 0){ stage--; render(); e.preventDefault(); } }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

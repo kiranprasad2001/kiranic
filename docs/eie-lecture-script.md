@@ -319,11 +319,18 @@ OPC UA and MQTT Sparkplug as genuinely new — because for this cohort they are.
 ## 2.4 Envelope analysis: the actual technique
 
 `[Slide: the four-step pipeline. This is the money slide.
-Companion webapp: kiranic.com/lecture/envelope-analysis.html — a 7-stage
-guided walkthrough that runs each transformation live on the same waveform.
-If the room seems lost during the derivation, switch tabs; stage 7 lands
-the payoff (the BPFO peak) even if the words haven't yet. Arrow keys
-advance stages.]`
+
+Two companion webapps for this section. Use the first for a mixed room and
+switch to the second only for a technical follow-up.
+
+  1. kiranic.com/lecture/envelope-intuition.html — five plain-English scenes,
+     no equations. Animated bearing, waveform with the envelope drawn on top,
+     ends on the 107 Hz peak. Meant for students who have not done DSP.
+  2. kiranic.com/lecture/envelope-analysis.html — the seven-stage technical
+     walkthrough. Show this to anyone who asks "but how do you actually
+     compute the envelope?" — it derives the Hilbert transform live.
+
+Arrow keys advance scenes in both.]`
 
 > This is amplitude modulation. The defect is the modulating signal. The structural
 > resonance is the carrier.
