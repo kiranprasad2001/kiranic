@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Envelope Analysis — from raw signal to defect frequency, live</title>
+<style>
+  :root{
+    --panel:#FFFFFF; --panel2:#F5F5F4; --panel3:#E9E7E1; --rule:#A8A49A;
+    --text:#111318; --dim:#2E3036;
+    --amber:#B87209; --teal:#0E7A70; --red:#A62A1F; --violet:#5D4EA0; --green:#2E7A2A; --blue:#215F9E;
+    --mono:"Courier New",Courier,monospace;
+    --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--panel);color:var(--text);font-family:var(--ui);font-size:14px;line-height:1.5;padding:16px}
+  .silk{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
+
+  header{border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:16px;
+    display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between}
+  h1{font-size:19px;font-weight:600;margin:0 0 3px;letter-spacing:-.01em}
+  header p{margin:0;color:var(--dim);font-size:13px;max-width:66ch}
+
+  .tabs{display:flex;gap:2px;background:var(--panel3);border:1px solid var(--rule);border-radius:3px;padding:2px}
+  .tabs button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:transparent;color:var(--dim);border:0;padding:8px 14px;border-radius:2px;cursor:pointer}
+  .tabs button.on{background:var(--panel);color:var(--amber)}
+
+  .grid{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;align-items:start}
+  @media (max-width:960px){.grid{grid-template-columns:1fr}}
+
+  .card{background:var(--panel2);border:1px solid var(--rule);border-radius:3px;padding:14px}
+  .card h2{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--dim);margin:0 0 10px;font-weight:400;display:flex;justify-content:space-between}
+  .card h2 .rhs{color:var(--amber);font-weight:600;letter-spacing:.1em}
+
+  canvas.plot{display:block;width:100%;height:340px;background:#FFFFFF;border:1px solid var(--rule);border-radius:2px}
+  canvas.inset{display:block;width:100%;height:120px;background:#FFFFFF;border:1px solid var(--rule);border-radius:2px;margin-top:10px}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--dim);
+    letter-spacing:.05em;margin-top:8px;text-transform:uppercase}
+  .legend .sw{display:inline-block;width:14px;height:3px;margin-right:4px;vertical-align:middle}
+
+  /* stage panel */
+  .stage-num{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--amber);margin-bottom:6px}
+  .stage-title{font-size:18px;font-weight:600;margin:0 0 10px;letter-spacing:-.01em}
+  .stage-body{color:var(--text);font-size:13.5px;line-height:1.55}
+  .stage-body p{margin:0 0 10px}
+  .stage-body em{color:var(--teal);font-style:normal}
+  .stage-body strong{color:var(--amber);font-weight:600}
+  .stage-body code{font-family:var(--mono);background:var(--panel3);padding:1px 5px;border-radius:2px;font-size:12.5px}
+
+  .formula-block{background:#FFFFFF;border:1px solid var(--rule);border-radius:2px;padding:12px 14px;margin:12px 0;
+    font-family:var(--mono);font-size:13px;line-height:1.65;color:var(--text)}
+  .formula-block .lbl{color:var(--amber);font-size:11px;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+  .formula-block .note{color:var(--dim);font-family:var(--ui);font-size:12px;margin-top:6px;font-style:italic}
+
+  .step-nav{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule)}
+  .step-nav button{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--panel3);color:var(--text);border:1px solid var(--rule);padding:9px 14px;border-radius:2px;cursor:pointer;min-width:82px}
+  .step-nav button:hover:not(:disabled){border-color:var(--amber);color:var(--amber)}
+  .step-nav button:disabled{opacity:.35;cursor:not-allowed}
+  .step-dots{display:flex;gap:5px}
+  .step-dots .dot{width:8px;height:8px;border-radius:50%;background:var(--panel3);border:1px solid var(--rule);cursor:pointer}
+  .step-dots .dot.on{background:var(--amber);border-color:var(--amber)}
+  .step-dots .dot.done{background:var(--teal);border-color:var(--teal)}
+
+  /* explore */
+  .ctl label{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:11px;
+    letter-spacing:.06em;color:var(--dim);text-transform:uppercase;margin:12px 0 4px}
+  .ctl label .vl{color:var(--amber);font-family:var(--mono);font-size:13px;letter-spacing:0}
+  .ctl input[type="range"]{width:100%;accent-color:var(--amber)}
+
+  /* frequency readouts */
+  .chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+  .chip{background:#FFFFFF;border:1px solid var(--rule);border-radius:2px;padding:8px 10px}
+  .chip .k{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+  .chip .v{font-family:var(--mono);font-size:15px;color:var(--text);margin-top:2px}
+  .chip .u{font-family:var(--mono);font-size:10px;color:var(--dim);margin-left:2px}
+  .chip.hi .v{color:var(--amber);font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <p class="silk">Guest lecture · Part 2 · §2.4</p>
+    <h1>Envelope Analysis — from raw signal to defect frequency, live</h1>
+    <p>The same trick that pulls a voice out of an AM radio signal, applied to a bearing spall. Watch each of the four steps happen on the same waveform. By stage 7 the fault frequency — invisible at stage 2 — is a clean peak.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button id="tab-guided" class="on" role="tab">Guided walkthrough</button>
+    <button id="tab-explore" role="tab">Explore</button>
+  </div>
+</header>
+
+<div class="grid">
+  <div class="card">
+    <h2><span id="plot-title">Signal</span><span class="rhs" id="plot-domain">TIME</span></h2>
+    <canvas class="plot" id="plot" width="1600" height="680"></canvas>
+    <div class="legend" id="legend"></div>
+    <canvas class="inset" id="inset" width="1600" height="240" style="display:none"></canvas>
+    <div class="chips">
+      <div class="chip"><div class="k">Sample rate</div><div class="v">20 480<span class="u"> Hz</span></div></div>
+      <div class="chip"><div class="k">Record</div><div class="v">200<span class="u"> ms</span></div></div>
+      <div class="chip"><div class="k">Shaft f_r</div><div class="v">30.0<span class="u"> Hz</span></div></div>
+      <div class="chip hi"><div class="k">Target BPFO</div><div class="v">107.4<span class="u"> Hz</span></div></div>
+    </div>
+  </div>
+
+  <div class="card" id="right"></div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============ constants ============ */
+var FS = 20480;                   // Hz
+var N  = 4096;                    // FFT size — 200 ms record
+var FR = 30;                      // shaft Hz
+var BPFO = 107.4;                 // defect Hz
+var RES_F = 3000;                 // housing resonance Hz
+var RES_TAU = 0.0009;             // ring decay
+var BP_LO = 2400, BP_HI = 4000;   // envelope band-pass
+
+/* ============ FFT ============ */
+function fft(re, im, inverse){
+  var n = re.length, i, j, k, m, step, ang, wr, wi, ur, ui, vr, vi;
+  for(i = 1, j = 0; i < n; i++){
+    var bit = n >> 1;
+    for(; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if(i < j){
+      var tr = re[i]; re[i] = re[j]; re[j] = tr;
+      var ti = im[i]; im[i] = im[j]; im[j] = ti;
+    }
+  }
+  for(step = 2; step <= n; step <<= 1){
+    ang = (inverse ? 2 : -2) * Math.PI / step;
+    for(i = 0; i < n; i += step){
+      for(k = 0; k < step / 2; k++){
+        wr = Math.cos(ang * k); wi = Math.sin(ang * k);
+        m = i + k;
+        ur = re[m]; ui = im[m];
+        vr = re[m + step / 2] * wr - im[m + step / 2] * wi;
+        vi = re[m + step / 2] * wi + im[m + step / 2] * wr;
+        re[m] = ur + vr; im[m] = ui + vi;
+        re[m + step / 2] = ur - vr; im[m + step / 2] = ui - vi;
+      }
+    }
+  }
+  if(inverse) for(i = 0; i < n; i++){ re[i] /= n; im[i] /= n; }
+}
+
+/* ============ signal ============ */
+var params = { sev: 45, noise: 8 };   // 0..100
+
+function synth(){
+  var sig = new Float64Array(N);
+  // shaft carrier: 30 Hz fundamental + harmonics (large amplitude)
+  for(var i = 0; i < N; i++){
+    var t = i / FS;
+    sig[i]  = 0.90 * Math.sin(2*Math.PI * FR * t);
+    sig[i] += 0.30 * Math.sin(2*Math.PI * 2*FR * t + 0.7);
+    sig[i] += 0.20 * Math.sin(2*Math.PI * 3*FR * t + 1.5);
+  }
+  // defect impacts at BPFO — each impact rings the resonance
+  var period = 1 / BPFO;                         // s
+  var sevF = params.sev / 100;
+  var amp = 0.02 + 0.18 * sevF;                  // small compared to shaft
+  var slipJitter = 0.02;
+  var t0 = 0.001;
+  for(var k = 0; t0 + k * period < N/FS; k++){
+    var tk = t0 + k * period + (Math.random()-0.5) * slipJitter * period;
+    var i0 = Math.round(tk * FS);
+    for(var j = 0; j < 900; j++){
+      var ii = i0 + j;
+      if(ii >= N) break;
+      var dt = j / FS;
+      sig[ii] += amp * Math.exp(-dt / RES_TAU) * Math.sin(2*Math.PI * RES_F * dt);
+    }
+  }
+  // white noise
+  var nsig = params.noise / 100 * 0.3;
+  for(var i = 0; i < N; i++) sig[i] += nsig * (Math.random()*2-1);
+  return sig;
+}
+
+/* Band-pass by zeroing out FFT bins outside [BP_LO, BP_HI] */
+function bandpassFFT(sig){
+  var re = new Float64Array(N), im = new Float64Array(N);
+  for(var i = 0; i < N; i++) re[i] = sig[i];
+  fft(re, im, false);
+  var loBin = Math.round(BP_LO * N / FS);
+  var hiBin = Math.round(BP_HI * N / FS);
+  for(var i = 0; i < N; i++){
+    var pos = i < N/2;
+    var freqBin = pos ? i : (N - i);
+    if(freqBin < loBin || freqBin > hiBin){ re[i] = 0; im[i] = 0; }
+  }
+  return { re:re, im:im };
+}
+
+/* Zero negatives, double positives — Hilbert */
+function hilbert(re, im){
+  var r2 = new Float64Array(re), i2 = new Float64Array(im);
+  for(var i = 0; i < N; i++){
+    if(i === 0 || i === N/2){ /* keep DC and Nyquist */ }
+    else if(i < N/2){ r2[i] *= 2; i2[i] *= 2; }
+    else { r2[i] = 0; i2[i] = 0; }
+  }
+  return { re:r2, im:i2 };
+}
+
+function ifft(re, im){
+  var r = new Float64Array(re), i = new Float64Array(im);
+  fft(r, i, true);
+  return { re:r, im:i };
+}
+
+function magnitudeSpectrum(sig){
+  var re = new Float64Array(N), im = new Float64Array(N);
+  for(var i = 0; i < N; i++) re[i] = sig[i];
+  fft(re, im, false);
+  var mag = new Float64Array(N/2);
+  for(var i = 0; i < N/2; i++) mag[i] = Math.sqrt(re[i]*re[i] + im[i]*im[i]) * 2 / N;
+  return mag;
+}
+
+function magnitudeSpectrumComplex(re, im){
+  var mag = new Float64Array(N/2);
+  for(var i = 0; i < N/2; i++) mag[i] = Math.sqrt(re[i]*re[i] + im[i]*im[i]) * 2 / N;
+  return mag;
+}
+
+/* ============ current computed views (cached per stage change) ============ */
+var raw, bp, an, env, envSpec;
+function recompute(){
+  raw = synth();
+  bp = bandpassFFT(raw);                            // frequency domain
+  var bpTime = ifft(bp.re.slice(), bp.im.slice()); // time-domain filtered signal (real part only for display)
+  var bpFreqPositive = { re: new Float64Array(bp.re), im: new Float64Array(bp.im) };
+  var h = hilbert(bp.re, bp.im);                    // still frequency domain
+  var anTime = ifft(h.re, h.im);                    // complex analytic signal in time
+  an = { re: anTime.re, im: anTime.im, bpTime: bpTime.re, bpFreq: bpFreqPositive };
+  env = new Float64Array(N);
+  for(var i = 0; i < N; i++) env[i] = Math.sqrt(anTime.re[i]*anTime.re[i] + anTime.im[i]*anTime.im[i]);
+  // envelope spectrum: FFT of (envelope - DC)
+  var mean = 0; for(var i = 0; i < N; i++) mean += env[i]; mean /= N;
+  var envAC = new Float64Array(N);
+  for(var i = 0; i < N; i++) envAC[i] = env[i] - mean;
+  envSpec = magnitudeSpectrum(envAC);
+}
+
+/* ============ plotting ============ */
+var ctx = document.getElementById("plot").getContext("2d");
+var insetCtx = document.getElementById("inset").getContext("2d");
+var insetEl = document.getElementById("inset");
+
+function css(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+function beginPlot(c, title, ylabel){
+  c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+  return {
+    w: c.canvas.width, h: c.canvas.height,
+    padL: 90, padR: 30, padT: 26, padB: 46
+  };
+}
+
+function drawFrame(c, o, xLabel, yLabel, xMin, xMax, yMin, yMax, xTicks, xFmt, yTicks, yFmt){
+  var iw = o.w - o.padL - o.padR, ih = o.h - o.padT - o.padB;
+  c.strokeStyle = "#D6D3CC"; c.lineWidth = 1;
+  c.font = "18px 'Courier New'";
+  c.fillStyle = css("--dim");
+  // horizontal grid
+  for(var g = 0; g <= yTicks; g++){
+    var y = o.padT + ih * g / yTicks;
+    c.beginPath(); c.moveTo(o.padL, y); c.lineTo(o.padL + iw, y); c.stroke();
+    var val = yMax - (yMax - yMin) * g / yTicks;
+    c.textAlign = "right"; c.textBaseline = "middle";
+    c.fillText(yFmt(val), o.padL - 8, y);
+  }
+  // vertical grid
+  for(var g = 0; g <= xTicks; g++){
+    var x = o.padL + iw * g / xTicks;
+    c.beginPath(); c.moveTo(x, o.padT); c.lineTo(x, o.padT + ih); c.stroke();
+    var val = xMin + (xMax - xMin) * g / xTicks;
+    c.textAlign = "center"; c.textBaseline = "top";
+    c.fillText(xFmt(val), x, o.padT + ih + 6);
+  }
+  // axis labels
+  c.font = "16px 'Courier New'"; c.fillStyle = css("--dim");
+  c.textAlign = "left"; c.textBaseline = "top";
+  c.fillText(xLabel, o.padL, o.padT + ih + 24);
+  c.textAlign = "right";
+  c.fillText(yLabel, o.padL + iw, o.padT + ih + 24);
+}
+
+function xy(o, xMin, xMax, yMin, yMax){
+  var iw = o.w - o.padL - o.padR, ih = o.h - o.padT - o.padB;
+  return {
+    x: function(v){ return o.padL + iw * (v - xMin) / (xMax - xMin); },
+    y: function(v){ return o.padT + ih - ih * (v - yMin) / (yMax - yMin); }
+  };
+}
+
+function drawSeries(c, o, xMin, xMax, yMin, yMax, data, tData, colorCss, width){
+  var m = xy(o, xMin, xMax, yMin, yMax);
+  c.strokeStyle = css(colorCss); c.lineWidth = width || 2;
+  c.beginPath();
+  var first = true;
+  for(var i = 0; i < data.length; i++){
+    var tx = tData ? tData[i] : i / FS;
+    if(tx < xMin || tx > xMax) continue;
+    var xp = m.x(tx), yp = m.y(data[i]);
+    if(first){ c.moveTo(xp, yp); first = false; } else c.lineTo(xp, yp);
+  }
+  c.stroke();
+}
+
+/* Bar-style spectrum drawing */
+function drawSpectrum(c, o, xMin, xMax, yMax, mag, binHz, colorCss){
+  var m = xy(o, xMin, xMax, 0, yMax);
+  c.strokeStyle = css(colorCss); c.lineWidth = 1;
+  c.beginPath();
+  for(var i = 0; i < mag.length; i++){
+    var f = i * binHz;
+    if(f < xMin || f > xMax) continue;
+    var xp = m.x(f);
+    c.moveTo(xp, m.y(0));
+    c.lineTo(xp, m.y(mag[i]));
+  }
+  c.stroke();
+}
+
+function drawBand(c, o, xMin, xMax, yMin, yMax, lo, hi, fill){
+  var m = xy(o, xMin, xMax, yMin, yMax);
+  c.fillStyle = fill;
+  c.fillRect(m.x(lo), o.padT, m.x(hi) - m.x(lo), o.h - o.padT - o.padB);
+}
+
+function drawMarker(c, o, xMin, xMax, yMin, yMax, x, colorCss, label){
+  var m = xy(o, xMin, xMax, yMin, yMax);
+  c.strokeStyle = css(colorCss); c.setLineDash([4, 4]); c.lineWidth = 1.5;
+  c.beginPath(); c.moveTo(m.x(x), o.padT); c.lineTo(m.x(x), o.h - o.padB); c.stroke();
+  c.setLineDash([]);
+  if(label){
+    c.fillStyle = css(colorCss); c.font = "16px 'Courier New'"; c.textAlign = "center"; c.textBaseline = "top";
+    c.fillText(label, m.x(x), o.padT + 4);
+  }
+}
+
+/* ============ stages ============ */
+var stages = [
+  {
+    num: "STAGE 1 / 7",
+    title: "The raw signal",
+    body: `<p>An accelerometer bolted to a bearing housing. Sample rate 20.48 kHz. Two hundred milliseconds of data. Shaft turning at 30 Hz.</p>
+      <p>The trace you see is dominated by <em>shaft imbalance and its harmonics</em>. There is a fault in this signal. The fault is a bearing defect ringing the housing every 9.3 ms — that is a <strong>1/BPFO</strong> gap.</p>
+      <p>Try to find the fault. You cannot see it. That is the problem this section solves.</p>`,
+    domain: "TIME",
+    plotTitle: "Raw accelerometer signal",
+    legend: [{color:"--amber", label:"raw signal (g)"}],
+    draw: function(){
+      var o = beginPlot(ctx);
+      drawFrame(ctx, o, "time (ms)", "acceleration (g)", 0, 100, -1.4, 1.4,
+        5, function(v){ return v.toFixed(0); }, 4, function(v){ return v.toFixed(1); });
+      drawSeries(ctx, o, 0, 0.1, -1.4, 1.4, raw, null, "--amber", 1.5);
+      insetEl.style.display = "none";
+    }
+  },
+  {
+    num: "STAGE 2 / 7",
+    title: "The raw spectrum — where the fault hides",
+    body: `<p>Take an FFT of the raw signal. Frequency axis 0 to 5 kHz.</p>
+      <p>The <em>shaft peaks</em> at 30, 60, 90 Hz are huge. Look far to the right, in the <strong>2.4–4.0 kHz band</strong> — there is a small lift. That is the housing resonance being excited by the defect impacts.</p>
+      <p>The fault energy is not at 107 Hz. It is smeared across a high-frequency band, because a very short impact is broadband. The <em>rate</em> of the impacts carries the diagnosis, not their frequency.</p>`,
+    domain: "FREQUENCY",
+    plotTitle: "Raw magnitude spectrum",
+    legend: [
+      {color:"--amber", label:"spectrum magnitude"},
+      {color:"--violet", label:"resonance band (2.4–4.0 kHz)"}
+    ],
+    draw: function(){
+      var o = beginPlot(ctx);
+      var mag = magnitudeSpectrum(raw);
+      var binHz = FS / N;
+      drawFrame(ctx, o, "frequency (kHz)", "magnitude", 0, 5000, 0, 0.4,
+        5, function(v){ return (v/1000).toFixed(1); }, 4, function(v){ return v.toFixed(2); });
+      // resonance band shading
+      drawBand(ctx, o, 0, 5000, 0, 0.4, BP_LO, BP_HI, "rgba(93,78,160,0.10)");
+      drawSpectrum(ctx, o, 0, 5000, 0.4, mag, binHz, "--amber");
+      drawMarker(ctx, o, 0, 5000, 0, 0.4, 30, "--dim", "SHAFT 30 Hz");
+      drawMarker(ctx, o, 0, 5000, 0, 0.4, BPFO, "--red", "BPFO 107 Hz");
+      insetEl.style.display = "none";
+    }
+  },
+  {
+    num: "STAGE 3 / 7",
+    title: "Band-pass the resonance",
+    body: `<p>Delete everything outside the resonance band by zeroing those FFT bins. Inverse-FFT what remains. What comes back is the filtered signal in time.</p>
+      <p>The shaft has vanished. What is left is <em>bursts of ringing</em>, each around 3 kHz, one every ~9.3 ms — 1/BPFO. The impact <em>rate</em> is now visible; the impact <em>content</em> is still 3 kHz.</p>
+      <p>You cannot read the rate off an FFT of this signal, because the FFT would just show you a peak at 3 kHz. You need something that follows the amplitude, not the oscillation.</p>`,
+    domain: "TIME",
+    plotTitle: "Filtered signal — band-pass 2.4–4.0 kHz",
+    legend: [{color:"--blue", label:"band-passed signal"}, {color:"--red", label:"BPFO period spacing"}],
+    draw: function(){
+      var o = beginPlot(ctx);
+      drawFrame(ctx, o, "time (ms)", "acceleration (g)", 0, 100, -0.25, 0.25,
+        5, function(v){ return v.toFixed(0); }, 4, function(v){ return v.toFixed(2); });
+      // BPFO tick marks
+      var m = xy(o, 0, 0.1, -0.25, 0.25);
+      ctx.strokeStyle = css("--red"); ctx.setLineDash([2,3]); ctx.lineWidth = 1;
+      for(var k = 0; k * (1/BPFO) < 0.1; k++){
+        var x = m.x(0.001 + k / BPFO);
+        ctx.beginPath(); ctx.moveTo(x, o.padT); ctx.lineTo(x, o.h - o.padB); ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      drawSeries(ctx, o, 0, 0.1, -0.25, 0.25, an.bpTime, null, "--blue", 1.5);
+      insetEl.style.display = "none";
+    }
+  },
+  {
+    num: "STAGE 4 / 7",
+    title: "Delete negative frequencies",
+    body: `<p>Here is the trick. Take the FFT of the filtered signal. For a real signal, the spectrum is <em>symmetric</em> — negative frequencies mirror positive ones and carry no new information.</p>
+      <p>Zero every negative bin. Double every positive bin to keep the energy right.</p>
+      <p>That single operation is the <strong>Hilbert transform</strong>. What comes back when you inverse-FFT is complex-valued. That complex signal is the <em>analytic signal</em>, and it is the whole point of what comes next.</p>`,
+    domain: "FREQUENCY",
+    plotTitle: "FFT of filtered signal — before vs after zeroing negatives",
+    legend: [
+      {color:"--dim", label:"original spectrum (positive + negative)"},
+      {color:"--teal", label:"analytic — negatives zeroed, positives doubled"}
+    ],
+    draw: function(){
+      var o = beginPlot(ctx);
+      // display as full [−FS/2, +FS/2]
+      var bp2 = an.bpFreq;
+      // Compute magnitude for the full spectrum, mapping bin i>N/2 to negative freq
+      var mag = new Float64Array(N);
+      for(var i = 0; i < N; i++) mag[i] = Math.sqrt(bp2.re[i]*bp2.re[i] + bp2.im[i]*bp2.im[i]) * 2 / N;
+      drawFrame(ctx, o, "frequency (kHz)", "magnitude", -5000, 5000, 0, 0.06,
+        4, function(v){ return (v/1000).toFixed(1); }, 3, function(v){ return v.toFixed(3); });
+      // draw original — full spectrum
+      ctx.strokeStyle = css("--dim"); ctx.lineWidth = 1;
+      var m = xy(o, -5000, 5000, 0, 0.06);
+      ctx.beginPath();
+      for(var i = 0; i < N; i++){
+        var f = i < N/2 ? (i * FS / N) : ((i - N) * FS / N);
+        if(f < -5000 || f > 5000) continue;
+        ctx.moveTo(m.x(f), m.y(0));
+        ctx.lineTo(m.x(f), m.y(mag[i]));
+      }
+      ctx.stroke();
+      // draw doubled positive
+      ctx.strokeStyle = css("--teal"); ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for(var i = 1; i < N/2; i++){
+        var f = i * FS / N;
+        if(f > 5000) continue;
+        ctx.moveTo(m.x(f), m.y(0));
+        ctx.lineTo(m.x(f), m.y(mag[i] * 2));
+      }
+      ctx.stroke();
+      // gray-out negative half
+      ctx.fillStyle = "rgba(168,164,154,0.20)";
+      ctx.fillRect(o.padL, o.padT, m.x(0) - o.padL, o.h - o.padT - o.padB);
+      ctx.fillStyle = css("--dim"); ctx.font = "16px 'Courier New'"; ctx.textAlign = "center";
+      ctx.fillText("DELETED", (o.padL + m.x(0)) / 2, o.padT + 20);
+      insetEl.style.display = "none";
+    }
+  },
+  {
+    num: "STAGE 5 / 7",
+    title: "The analytic signal — real + imaginary",
+    body: `<p>Inverse-FFT the one-sided spectrum. What comes back is complex-valued. The <em>real</em> part is the original filtered signal. The <em>imaginary</em> part is a 90-degree phase-shifted copy.</p>
+      <p>Both oscillate at the same 3 kHz. They are in <em>quadrature</em> — like sine and cosine.</p>
+      <p>Zoomed in on one impact you can see them offset by a quarter cycle. Neither of them alone is the envelope. Both of them together are.</p>`,
+    domain: "TIME (zoomed)",
+    plotTitle: "One burst, zoomed — real and imaginary parts of the analytic signal",
+    legend: [
+      {color:"--blue", label:"real part (= band-passed signal)"},
+      {color:"--amber", label:"imaginary part (90° phase-shifted)"}
+    ],
+    draw: function(){
+      var o = beginPlot(ctx);
+      drawFrame(ctx, o, "time (ms)", "amplitude", 5, 12, -0.18, 0.18,
+        7, function(v){ return v.toFixed(0); }, 4, function(v){ return v.toFixed(2); });
+      drawSeries(ctx, o, 0.005, 0.012, -0.18, 0.18, an.re, null, "--blue", 2);
+      drawSeries(ctx, o, 0.005, 0.012, -0.18, 0.18, an.im, null, "--amber", 2);
+      // inset: sin/cos → 1
+      insetEl.style.display = "block";
+      drawSinCosAnalogy();
+    }
+  },
+  {
+    num: "STAGE 6 / 7",
+    title: "Take the magnitude — the envelope appears",
+    body: `<p>Compute <code>√(re² + im²)</code> at every sample. That is the magnitude of the analytic signal, and it is the <em>envelope</em>.</p>
+      <p>The 3 kHz oscillation cancels — same reason <code>sin²(t) + cos²(t) = 1</code>. What survives is the <em>shape</em> that was modulating the carrier: those clean pulses, one per bearing impact, at BPFO spacing.</p>
+      <p>This is the reveal. The impact rate is now something a normal FFT can see.</p>`,
+    domain: "TIME",
+    plotTitle: "The envelope — magnitude of the analytic signal",
+    legend: [
+      {color:"--dim", label:"real (dimmed)"},
+      {color:"--amber", label:"imag (dimmed)"},
+      {color:"--green", label:"envelope = √(re² + im²)"}
+    ],
+    draw: function(){
+      var o = beginPlot(ctx);
+      drawFrame(ctx, o, "time (ms)", "amplitude", 0, 100, 0, 0.22,
+        5, function(v){ return v.toFixed(0); }, 4, function(v){ return v.toFixed(2); });
+      // draw re / im dimmed
+      ctx.globalAlpha = 0.30;
+      drawSeries(ctx, o, 0, 0.1, 0, 0.22, an.re.map(Math.abs), null, "--blue", 1);
+      ctx.globalAlpha = 0.30;
+      drawSeries(ctx, o, 0, 0.1, 0, 0.22, an.im.map(Math.abs), null, "--amber", 1);
+      ctx.globalAlpha = 1;
+      drawSeries(ctx, o, 0, 0.1, 0, 0.22, env, null, "--green", 2.5);
+      insetEl.style.display = "block";
+      drawSinCosAnalogy();
+    }
+  },
+  {
+    num: "STAGE 7 / 7",
+    title: "FFT the envelope — the defect frequency emerges",
+    body: `<p>Remove the DC component (the average) from the envelope and take an FFT.</p>
+      <p>There it is. A clean peak at <strong>107.4 Hz</strong>, and harmonics at 214.8 and 322.2. Exactly where our bearing geometry said the fault would announce itself, back in stage 1.</p>
+      <p>Same accelerometer signal we started with. Same measurement. The only difference is that we processed it in a way the physics demanded.</p>`,
+    domain: "FREQUENCY",
+    plotTitle: "Envelope spectrum — the defect frequency",
+    legend: [{color:"--green", label:"envelope spectrum"}, {color:"--red", label:"BPFO markers"}],
+    draw: function(){
+      var o = beginPlot(ctx);
+      drawFrame(ctx, o, "frequency (Hz)", "magnitude", 0, 500, 0, 0.010,
+        5, function(v){ return v.toFixed(0); }, 4, function(v){ return v.toFixed(3); });
+      var binHz = FS / N;
+      drawSpectrum(ctx, o, 0, 500, 0.010, envSpec, binHz, "--green");
+      drawMarker(ctx, o, 0, 500, 0, 0.010, BPFO,   "--red", "BPFO");
+      drawMarker(ctx, o, 0, 500, 0, 0.010, 2*BPFO, "--red", "2×");
+      drawMarker(ctx, o, 0, 500, 0, 0.010, 3*BPFO, "--red", "3×");
+      drawMarker(ctx, o, 0, 500, 0, 0.010, 4*BPFO, "--red", "4×");
+      insetEl.style.display = "none";
+    }
+  }
+];
+
+/* ============ sin/cos analogy inset ============ */
+function drawSinCosAnalogy(){
+  var c = insetCtx;
+  c.clearRect(0, 0, c.canvas.width, c.canvas.height);
+  var W = c.canvas.width, H = c.canvas.height;
+  c.font = "18px 'Courier New'"; c.fillStyle = css("--dim");
+  c.textAlign = "left"; c.textBaseline = "top";
+  c.fillText("WHY THE OSCILLATION CANCELS  ·  sin²(t) + cos²(t) = 1", 20, 12);
+
+  var padL = 20, padR = 20, padT = 50, padB = 20;
+  var iw = W - padL - padR, ih = H - padT - padB;
+  var mid = padT + ih / 2;
+  // baseline
+  c.strokeStyle = "#D6D3CC"; c.lineWidth = 1;
+  c.beginPath(); c.moveTo(padL, mid); c.lineTo(W - padR, mid); c.stroke();
+  // sin
+  c.strokeStyle = css("--blue"); c.lineWidth = 2;
+  c.beginPath();
+  for(var i = 0; i <= iw; i++){
+    var t = i / iw * 4 * Math.PI;
+    var y = mid - Math.sin(t) * ih * 0.4;
+    if(i === 0) c.moveTo(padL + i, y); else c.lineTo(padL + i, y);
+  }
+  c.stroke();
+  // cos
+  c.strokeStyle = css("--amber"); c.lineWidth = 2;
+  c.beginPath();
+  for(var i = 0; i <= iw; i++){
+    var t = i / iw * 4 * Math.PI;
+    var y = mid - Math.cos(t) * ih * 0.4;
+    if(i === 0) c.moveTo(padL + i, y); else c.lineTo(padL + i, y);
+  }
+  c.stroke();
+  // magnitude = 1
+  c.strokeStyle = css("--green"); c.lineWidth = 3;
+  c.beginPath();
+  var y1 = mid - 1 * ih * 0.4;
+  c.moveTo(padL, y1); c.lineTo(W - padR, y1);
+  c.stroke();
+  // legend labels on the right
+  c.font = "16px 'Courier New'"; c.textAlign = "left"; c.textBaseline = "middle";
+  c.fillStyle = css("--blue"); c.fillText("sin(t)",  W - padR - 90, mid + 25);
+  c.fillStyle = css("--amber"); c.fillText("cos(t)", W - padR - 90, mid - 25);
+  c.fillStyle = css("--green"); c.fillText("√(sin²+cos²) = 1", W - padR - 200, y1 - 12);
+}
+
+/* ============ render right panel ============ */
+var mode = "guided", stage = 0;
+
+function render(){
+  var right = document.getElementById("right");
+  if(mode === "guided"){
+    var s = stages[stage];
+    document.getElementById("plot-title").textContent = s.plotTitle;
+    document.getElementById("plot-domain").textContent = s.domain;
+    // legend
+    var leg = document.getElementById("legend");
+    leg.innerHTML = "";
+    s.legend.forEach(function(l){
+      var span = document.createElement("span");
+      span.innerHTML = '<i class="sw" style="background:'+css(l.color)+'"></i>'+l.label;
+      leg.appendChild(span);
+    });
+    // draw
+    s.draw();
+
+    var html = '<div class="stage-num">'+s.num+'</div>';
+    html += '<h2 class="stage-title" style="color:var(--text)">'+s.title+'</h2>';
+    html += '<div class="stage-body">'+s.body+'</div>';
+
+    html += '<div class="step-nav">';
+    html += '<button id="prev" '+(stage===0?"disabled":"")+'>← Prev</button>';
+    html += '<div class="step-dots">';
+    for(var j=0;j<stages.length;j++){
+      var cls = "dot" + (j===stage?" on":(j<stage?" done":""));
+      html += '<div class="'+cls+'" data-j="'+j+'"></div>';
+    }
+    html += '</div>';
+    html += '<button id="next" '+(stage===stages.length-1?"disabled":"")+'>Next →</button>';
+    html += '</div>';
+    right.innerHTML = html;
+
+    document.getElementById("prev").onclick = function(){ if(stage>0){ stage--; render(); }};
+    document.getElementById("next").onclick = function(){ if(stage<stages.length-1){ stage++; render(); }};
+    var dots = right.querySelectorAll(".step-dots .dot");
+    for(var k=0;k<dots.length;k++){
+      (function(el){ el.onclick = function(){ stage=+el.getAttribute("data-j"); render(); }; })(dots[k]);
+    }
+  } else {
+    // Explore: change signal params, jump to any stage
+    var html = '<div class="stage-num">EXPLORE</div>';
+    html += '<h2 class="stage-title" style="color:var(--text)">Change the signal, watch every step react</h2>';
+    html += '<div class="stage-body"><p>Move the sliders below. The signal is re-synthesised, every intermediate is recomputed, and the current plot updates. Use the stage buttons to jump between views.</p></div>';
+    html += '<div class="ctl">';
+    html += '<label><span>Defect severity</span><span class="vl" id="v-sev">'+params.sev+' %</span></label>';
+    html += '<input id="s-sev" type="range" min="0" max="100" step="1" value="'+params.sev+'">';
+    html += '<label><span>Background noise</span><span class="vl" id="v-nse">'+params.noise+' %</span></label>';
+    html += '<input id="s-nse" type="range" min="0" max="60" step="1" value="'+params.noise+'">';
+    html += '</div>';
+    html += '<div class="step-nav" style="flex-wrap:wrap;gap:6px">';
+    for(var j=0;j<stages.length;j++){
+      html += '<button data-j="'+j+'" class="'+(j===stage?"":"")+'" style="min-width:0;padding:8px 10px">'+(j+1)+'. '+stages[j].title.split(" — ")[0].split(" ").slice(0,3).join(" ")+'</button>';
+    }
+    html += '</div>';
+    right.innerHTML = html;
+    document.getElementById("s-sev").addEventListener("input", function(){ params.sev = +this.value; document.getElementById("v-sev").textContent = params.sev+" %"; recompute(); stages[stage].draw(); });
+    document.getElementById("s-nse").addEventListener("input", function(){ params.noise = +this.value; document.getElementById("v-nse").textContent = params.noise+" %"; recompute(); stages[stage].draw(); });
+    var btns = right.querySelectorAll(".step-nav button");
+    for(var k=0;k<btns.length;k++){
+      (function(el){ el.onclick = function(){ stage=+el.getAttribute("data-j"); render(); }; })(btns[k]);
+    }
+    // ensure plot reflects current stage
+    var s = stages[stage];
+    document.getElementById("plot-title").textContent = s.plotTitle;
+    document.getElementById("plot-domain").textContent = s.domain;
+    var leg = document.getElementById("legend");
+    leg.innerHTML = "";
+    s.legend.forEach(function(l){
+      var span = document.createElement("span");
+      span.innerHTML = '<i class="sw" style="background:'+css(l.color)+'"></i>'+l.label;
+      leg.appendChild(span);
+    });
+    s.draw();
+  }
+}
+
+/* ============ init ============ */
+recompute();
+render();
+
+document.getElementById("tab-guided").addEventListener("click", function(){
+  if(mode === "guided") return;
+  mode = "guided"; this.classList.add("on"); document.getElementById("tab-explore").classList.remove("on"); render();
+});
+document.getElementById("tab-explore").addEventListener("click", function(){
+  if(mode === "explore") return;
+  mode = "explore"; this.classList.add("on"); document.getElementById("tab-guided").classList.remove("on"); render();
+});
+
+document.addEventListener("keydown", function(e){
+  if(mode !== "guided") return;
+  if(e.key === "ArrowRight" || e.key === " "){ if(stage < stages.length-1){ stage++; render(); e.preventDefault(); } }
+  else if(e.key === "ArrowLeft"){ if(stage > 0){ stage--; render(); e.preventDefault(); } }
+});
+})();
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@ import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 
 const title = "AI and Digital Twins in Instrumentation";
-const description = "Four simulators and a room game from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
+const description = "Five simulators and a room game from a guest lecture on AI and digital twins in instrumentation — bearing kinematics from first principles, envelope-analysis fault detection, and a running physics twin of four motors, one of them failing.";
 
 const demos = [
     {
@@ -16,6 +16,18 @@ const demos = [
             "Watch the cage rotate at ~40% of shaft speed — the constraint is visible, not stated",
             "Turn on the outer spall and count impacts as balls pass 12 o'clock. Compare to n × FTF",
             "Presets for SKF 6205, SKF 6308, NU 220 — see how BPFO changes with ball count and geometry",
+        ],
+        accent: "teal",
+    },
+    {
+        name: "Envelope Analysis",
+        href: "/lecture/envelope-analysis.html",
+        tag: "the four-minute derivation, live",
+        blurb: "The pedagogical companion to §2.4. A seven-stage walkthrough that runs the actual signal-processing pipeline on the same synthetic waveform — raw signal → FFT → band-pass → delete negatives → analytic signal → magnitude (the envelope) → envelope FFT. Every intermediate is computed live, not pre-rendered.",
+        points: [
+            "Watch the fault appear: invisible in stage 2 (raw FFT), a clean peak at 107.4 Hz by stage 7",
+            "Inset shows the sin²+cos²=1 identity at exactly the stage where students need to see why the oscillation cancels",
+            "Explore tab lets students drive severity and noise sliders and watch every stage react",
         ],
         accent: "teal",
     },

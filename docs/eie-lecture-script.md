@@ -318,7 +318,12 @@ OPC UA and MQTT Sparkplug as genuinely new — because for this cohort they are.
 
 ## 2.4 Envelope analysis: the actual technique
 
-`[Slide: the four-step pipeline. This is the money slide.]`
+`[Slide: the four-step pipeline. This is the money slide.
+Companion webapp: kiranic.com/lecture/envelope-analysis.html — a 7-stage
+guided walkthrough that runs each transformation live on the same waveform.
+If the room seems lost during the derivation, switch tabs; stage 7 lands
+the payoff (the BPFO peak) even if the words haven't yet. Arrow keys
+advance stages.]`
 
 > This is amplitude modulation. The defect is the modulating signal. The structural
 > resonance is the carrier.
